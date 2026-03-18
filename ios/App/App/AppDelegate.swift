@@ -17,7 +17,9 @@ private struct LUTab: Identifiable, Equatable {
     let id: String; let icon: String; let label: String
 }
 
-// MARK: - Liquid Glass Tab Bar ────────────────────────────────────────────────
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MARK: - Liquid Glass Tab Bar
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 @available(iOS 15.0, *)
 private struct LiquidGlassTabBar: View {
     @Binding var active: String
@@ -33,16 +35,18 @@ private struct LiquidGlassTabBar: View {
     ]
     var onSelect: (String) -> Void
 
-    // Bubble follows drag; otherwise shows persisted active tab
     private var shown: String {
         draggedIndex.map { tabs[$0].id } ?? active
     }
 
     var body: some View {
         GeometryReader { geo in
-            let tabW = geo.size.width / CGFloat(tabs.count)
-            barView()
-                // ── 3. Drag-to-slide gesture ─────────────────────────────
+            let totalW  = geo.size.width
+            let tabW    = totalW / CGFloat(tabs.count)
+            let innerPad: CGFloat = 10
+            let bubbleW = (totalW - innerPad * 2) / CGFloat(tabs.count) - 8
+
+            barView(bubbleW: bubbleW)
                 .simultaneousGesture(
                     DragGesture(minimumDistance: 8)
                         .onChanged { v in
@@ -61,34 +65,34 @@ private struct LiquidGlassTabBar: View {
                         }
                 )
         }
-        // ── 4. Position closer to bottom (reduced height) ─────────────────
         .frame(height: 58)
         .padding(.horizontal, 16)
     }
 
+    // MARK: Bar container (iOS 26 vs fallback)
     @ViewBuilder
-    private func barView() -> some View {
+    private func barView(bubbleW: CGFloat) -> some View {
         if #available(iOS 26.0, *) {
-            // ── iOS 26: real Liquid Glass ─────────────────────────────────
             GlassEffectContainer {
-                buttons()
+                buttons(bubbleW: bubbleW)
                     .padding(.horizontal, 10)
                     .padding(.vertical, 3)
                     .glassEffect(in: Capsule())
             }
         } else {
-            // ── iOS 15-25: material fallback ──────────────────────────────
-            buttons()
+            buttons(bubbleW: bubbleW)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .background { fallbackBg }
         }
     }
 
+    // MARK: Tab buttons
     @ViewBuilder
-    private func buttons() -> some View {
+    private func buttons(bubbleW: CGFloat) -> some View {
         HStack(spacing: 0) {
             ForEach(tabs) { tab in
+                let isActive = shown == tab.id
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.76)) {
                         active = tab.id
@@ -97,8 +101,11 @@ private struct LiquidGlassTabBar: View {
                     onSelect(tab.id)
                 } label: {
                     ZStack {
-                        if shown == tab.id { bubble }  // sliding indicator
-                        label(tab)
+                        if isActive {
+                            glassBubble(width: bubbleW)
+                                .matchedGeometryEffect(id: "bubble", in: ns)
+                        }
+                        tabLabel(tab, isActive: isActive)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
@@ -108,40 +115,72 @@ private struct LiquidGlassTabBar: View {
         }
     }
 
-    // Sliding bubble
+    // ── 2. WhatsApp-style glass bubble with specular highlight ──────────
     @ViewBuilder
-    private var bubble: some View {
+    private func glassBubble(width: CGFloat) -> some View {
         if #available(iOS 26.0, *) {
             Color.clear
                 .glassEffect(in: Capsule())
-                .frame(width: 60, height: 42)
-                .matchedGeometryEffect(id: "bubble", in: ns)
+                .frame(width: width, height: 44)
         } else {
-            // ── 8. Dark mode bubble ───────────────────────────────────────
-            Capsule()
-                .fill(scheme == .dark
-                      ? Color.white.opacity(0.18)
-                      : Color.white.opacity(0.75))
-                .overlay(Capsule().stroke(Color.white.opacity(0.45), lineWidth: 0.5))
-                .shadow(color: .black.opacity(0.08), radius: 8, y: 2)
-                .frame(width: 60, height: 42)
-                .matchedGeometryEffect(id: "bubble", in: ns)
+            ZStack {
+                // Base translucent fill
+                Capsule()
+                    .fill(scheme == .dark
+                          ? Color.white.opacity(0.14)
+                          : Color.white.opacity(0.88))
+                    .background(.thinMaterial, in: Capsule())
+
+                // Specular highlight at top (like light catching a glass lens)
+                LinearGradient(
+                    stops: [
+                        .init(color: .white.opacity(scheme == .dark ? 0.30 : 0.70), location: 0),
+                        .init(color: .white.opacity(scheme == .dark ? 0.06 : 0.18), location: 0.35),
+                        .init(color: .clear, location: 0.65),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .clipShape(Capsule())
+
+                // Edge rim highlight (refraction at glass boundary)
+                Capsule()
+                    .stroke(
+                        LinearGradient(
+                            colors: [
+                                .white.opacity(scheme == .dark ? 0.45 : 0.90),
+                                .white.opacity(scheme == .dark ? 0.08 : 0.25),
+                                .white.opacity(scheme == .dark ? 0.25 : 0.55),
+                            ],
+                            startPoint: .topLeading,
+                            endPoint: .bottomTrailing
+                        ),
+                        lineWidth: 0.8
+                    )
+            }
+            .frame(width: width, height: 44)
+            // Top white glow (light catching the top of the bubble)
+            .shadow(color: .white.opacity(scheme == .dark ? 0.12 : 0.45), radius: 4, y: -1)
+            // Bottom depth shadow
+            .shadow(color: .black.opacity(scheme == .dark ? 0.28 : 0.12), radius: 10, y: 3)
         }
     }
 
-    // Tab icon + label
+    // Tab icon + label (slightly scales when active)
     @ViewBuilder
-    private func label(_ tab: LUTab) -> some View {
+    private func tabLabel(_ tab: LUTab, isActive: Bool) -> some View {
         VStack(spacing: 3) {
             Image(systemName: tab.icon)
-                .font(.system(size: 20, weight: .medium))
+                .font(.system(size: isActive ? 22 : 20, weight: .medium))
             Text(tab.label)
-                .font(.system(size: 10, weight: .semibold))
+                .font(.system(size: 10, weight: isActive ? .bold : .semibold))
         }
-        .foregroundStyle(shown == tab.id ? Color.primary : Color.secondary)
+        .foregroundStyle(isActive ? Color.primary : Color.secondary)
+        .scaleEffect(isActive ? 1.04 : 1.0)
+        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isActive)
     }
 
-    // ── 8. Dark/light glass background (iOS 15-25 fallback) ──────────────
+    // Dark/light glass bar background (iOS 15-25)
     @ViewBuilder
     private var fallbackBg: some View {
         Capsule()
@@ -165,29 +204,26 @@ private struct LiquidGlassTabBar: View {
     private func clamp(_ v: Int, in r: Range<Int>) -> Int { min(max(v, r.lowerBound), r.upperBound - 1) }
 }
 
-// MARK: - Tab Bar Host ─────────────────────────────────────────────────────────
+// MARK: - Tab Bar Host
 @available(iOS 15.0, *)
 private struct TabBarHost: View {
     @State private var active = "dashboard"
     var onSelect: (String) -> Void
-
     var body: some View {
         VStack(spacing: 0) {
             Spacer(minLength: 0)
             LiquidGlassTabBar(active: $active, onSelect: onSelect)
-                // ── 4. Minimal gap above home indicator ───────────────────
                 .padding(.bottom, 4)
         }
         .background(Color.clear)
     }
 }
 
-// MARK: - Floating Glass Back Button (item 9) ─────────────────────────────────
+// MARK: - Floating Glass Back Button (item 9)
 @available(iOS 15.0, *)
 private struct GlassBackButton: View {
     var onTap: () -> Void
     @Environment(\.colorScheme) private var scheme
-
     var body: some View {
         Button(action: onTap) {
             Image(systemName: "chevron.left")
@@ -198,7 +234,6 @@ private struct GlassBackButton: View {
         }
         .buttonStyle(.plain)
     }
-
     @ViewBuilder
     private var backBg: some View {
         if #available(iOS 26.0, *) {
@@ -213,7 +248,9 @@ private struct GlassBackButton: View {
     }
 }
 
-// MARK: - AppDelegate ─────────────────────────────────────────────────────────
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MARK: - AppDelegate
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
 
@@ -224,11 +261,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
     private var tabBarVC: UIViewController?
     private var backButtonVC: UIViewController?
     private var tabBarHeightConstraint: NSLayoutConstraint?
-
-    // ── 5. Scroll-collapse state ──────────────────────────────────────────
     private var isCollapsed = false
+    private var messageHandlerAdded = false
 
-    // ── 9. Detail-panel back-button state ────────────────────────────────
     private var isPanelOpen = false {
         didSet { animateBackButton(visible: isPanelOpen) }
     }
@@ -250,7 +285,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 if attempt < 15 { self.scheduleMount(attempt: attempt + 1) }
                 return
             }
-            self.rootVC  = rootVC
+            self.rootVC = rootVC
             self.capacitorWebView = wv
             self.injectEnhancements(into: wv)
             self.mountTabBar(on: rootVC)
@@ -258,50 +293,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         }
     }
 
-    // MARK: CSS + JS injections ────────────────────────────────────────────
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+    // MARK: CSS + JS injections
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     private func injectEnhancements(into wv: WKWebView) {
-        // Register message handler (weak proxy avoids retain cycle)
-        wv.configuration.userContentController.add(WeakMsgHandler(self), name: "nativeUI")
+        if !messageHandlerAdded {
+            wv.configuration.userContentController.add(WeakMsgHandler(self), name: "nativeUI")
+            messageHandlerAdded = true
+        }
 
         let js = """
         (function() {
-            // Guard: run only once per page
             if (window.__lu_init) return;
             window.__lu_init = true;
 
-            // ── CSS injections ─────────────────────────────────────────────
+            // ── CSS ─────────────────────────────────────────────────────────
             var s = document.createElement('style');
             s.id = 'lu-ni';
             s.textContent = `
-                /* 1. Hide web bottom nav */
+                /* Hide web bottom nav */
                 .bottom-nav { display: none !important; }
 
-                /* Extra scroll padding for native tab bar */
+                /* Content padding for native tab bar */
                 #mainContent { padding-bottom: calc(env(safe-area-inset-bottom) + 88px) !important; }
 
-                /* 7. Hide topbar title text; show glass action buttons */
-                .topbar-title { display: none !important; }
-                .topbar-glass-btn { display: flex !important; }
+                /* 1. Hide ENTIRE topbar — buttons will be moved to body */
+                .topbar { display: none !important; }
+
+                /* Override the detail-panel topbar-padding (was topbar 56px + safe) */
                 @media (max-width: 768px) {
-                    #saveBtn, #resetBtn { display: none !important; }
+                    #detailPanel { padding-top: calc(env(safe-area-inset-top) + 12px) !important; }
                 }
 
-                /* 2. Subtle gradient fade at the bottom of the scroll area */
-                .content { position: relative; }
-                #mainContent::after {
-                    content: '';
-                    position: sticky;
-                    bottom: 0;
-                    left: 0; right: 0;
-                    display: block;
-                    height: 36px;
-                    margin-top: -36px;
-                    background: linear-gradient(to top, var(--bg) 20%, transparent);
-                    pointer-events: none;
-                    z-index: 10;
-                }
-
-                /* 10. Confirm button style (added by JS below) */
+                /* 10. Confirm button styles */
                 .nota-confirm-btn {
                     background: rgba(0,70,173,0.12) !important;
                     color: #0046AD !important;
@@ -318,21 +342,71 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
             `;
             (document.head || document.documentElement).appendChild(s);
 
-            // ── 10. Add ✓ confirm button to nota-widget elements ───────────
+            // ── 1. Float glass buttons out of hidden topbar ─────────────────
+            function floatButtons() {
+                var sv = document.getElementById('glassSaveBtn');
+                var rs = document.getElementById('glassResetBtn');
+                if (!sv || !rs || sv.dataset.f) return;
+                sv.dataset.f = rs.dataset.f = '1';
+                document.body.appendChild(rs);
+                document.body.appendChild(sv);
+                var t = 'calc(env(safe-area-inset-top) + 10px)';
+                sv.style.cssText += ';position:fixed;top:'+t+';right:16px;z-index:600;display:flex';
+                rs.style.cssText += ';position:fixed;top:'+t+';right:62px;z-index:600';
+            }
+            document.readyState === 'loading'
+                ? document.addEventListener('DOMContentLoaded', floatButtons)
+                : floatButtons();
+
+            // ── 2. Top gradient (iOS Settings-style transparent status area) ─
+            function addGradients() {
+                if (document.getElementById('lu-top-fade')) return;
+                var topF = document.createElement('div');
+                topF.id = 'lu-top-fade';
+                topF.style.cssText = [
+                    'position:fixed','top:0','left:0','right:0',
+                    'height:calc(env(safe-area-inset-top) + 40px)',
+                    'background:linear-gradient(to bottom, var(--bg) 55%, transparent)',
+                    'pointer-events:none','z-index:500'
+                ].join(';');
+                document.body.appendChild(topF);
+
+                // 3. Bottom gradient (just above tab bar)
+                var botF = document.createElement('div');
+                botF.id = 'lu-bottom-fade';
+                botF.style.cssText = [
+                    'position:fixed','left:0','right:0',
+                    'bottom:calc(env(safe-area-inset-bottom) + 60px)',
+                    'height:48px',
+                    'background:linear-gradient(to bottom, transparent, var(--bg))',
+                    'pointer-events:none','z-index:100'
+                ].join(';');
+                document.body.appendChild(botF);
+            }
+            document.readyState === 'loading'
+                ? document.addEventListener('DOMContentLoaded', addGradients)
+                : addGradients();
+
+            // ── 4/10. Add ✓ confirm button — uses Enter simulation ─────────
+            // Works for both regular (saveNota) AND elective (saveElecNota)
+            // because it dispatches Enter on the input's own onkeydown handler.
             function addConfirm(widget) {
                 if (widget.dataset.lu) return;
                 widget.dataset.lu = '1';
                 var inp = widget.querySelector('.nota-inp');
                 if (!inp) return;
-                var rawId = inp.id.replace('ni-', '');
                 var btn = document.createElement('button');
                 btn.type = 'button';
                 btn.className = 'nota-btn nota-confirm-btn';
                 btn.setAttribute('tabindex', '-1');
-                btn.textContent = '✓';
+                btn.textContent = '\\u2713';
                 btn.addEventListener('pointerdown', function(e) {
                     e.preventDefault(); e.stopPropagation();
-                    if (typeof saveNota === 'function') saveNota(parseInt(rawId, 10));
+                    // Simulate Enter → triggers whatever save fn is in onkeydown
+                    inp.dispatchEvent(new KeyboardEvent('keydown', {
+                        key: 'Enter', code: 'Enter', keyCode: 13, which: 13,
+                        bubbles: true, cancelable: true
+                    }));
                 });
                 widget.appendChild(btn);
             }
@@ -342,7 +416,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
             mo.observe(document.documentElement, { childList: true, subtree: true });
             document.querySelectorAll('.nota-widget').forEach(addConfirm);
 
-            // ── 9. Intercept panel open / close → notify native ────────────
+            // ── 9. Panel open / close → native back button ──────────────────
             function patchPanel() {
                 if (window.__lu_panel) return;
                 if (typeof mobileOpenPanel !== 'function') {
@@ -364,7 +438,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 ? document.addEventListener('DOMContentLoaded', patchPanel)
                 : patchPanel();
 
-            // ── 5. Scroll events → native tab-bar collapse ────────────────
+            // ── 5. Scroll → native tab-bar collapse ─────────────────────────
             function setupScroll() {
                 var mc = document.getElementById('mainContent');
                 if (!mc) { setTimeout(setupScroll, 300); return; }
@@ -382,7 +456,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 ? document.addEventListener('DOMContentLoaded', setupScroll)
                 : setupScroll();
 
-            // ── 8. Dark mode sync → native UI ─────────────────────────────
+            // ── 8. Dark mode sync → native UI ───────────────────────────────
             function patchDark() {
                 if (window.__lu_dark) return;
                 if (typeof toggleDark !== 'function') { setTimeout(patchDark, 250); return; }
@@ -392,7 +466,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                     _td.apply(this, arguments);
                     window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'darkMode', on: on });
                 };
-                // Sync initial state from saved data
                 try {
                     var saved = localStorage.getItem('leanup_v4');
                     if (saved) {
@@ -410,29 +483,23 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         """
 
         wv.evaluateJavaScript(js)
-        // Re-inject 1.5 s later in case page was still loading
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
             wv.evaluateJavaScript(js)
         }
     }
 
-    // MARK: Mount tab bar ─────────────────────────────────────────────────
+    // MARK: Mount tab bar
     private func mountTabBar(on rootVC: UIViewController) {
         guard tabBarVC == nil, #available(iOS 15.0, *) else { return }
-
         let host = UIHostingController(
-            rootView: TabBarHost { [weak self] tabId in
-                self?.handleTab(tabId)
-            }
+            rootView: TabBarHost { [weak self] tabId in self?.handleTab(tabId) }
         )
         configure(overlayVC: host)
-
         rootVC.addChild(host)
         rootVC.view.addSubview(host.view)
         host.didMove(toParent: rootVC)
 
         host.view.translatesAutoresizingMaskIntoConstraints = false
-        // ── 4. Only covers bottom area → touches above pass to WebView ──
         let hc = host.view.heightAnchor.constraint(equalToConstant: 105)
         NSLayoutConstraint.activate([
             host.view.leadingAnchor.constraint(equalTo: rootVC.view.leadingAnchor),
@@ -444,10 +511,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         tabBarVC = host
     }
 
-    // MARK: Mount back button (item 9) ────────────────────────────────────
+    // MARK: Mount back button
     private func mountBackButton(on rootVC: UIViewController) {
         guard backButtonVC == nil, #available(iOS 15.0, *) else { return }
-
         let host = UIHostingController(
             rootView: GlassBackButton {
                 self.capacitorWebView?.evaluateJavaScript("mobileClosePanelOrBack()")
@@ -478,7 +544,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         overlayVC.view.isOpaque = false
     }
 
-    // MARK: Back button animation ─────────────────────────────────────────
+    // MARK: Back button animation
     private func animateBackButton(visible: Bool) {
         guard let bvc = backButtonVC else { return }
         DispatchQueue.main.async {
@@ -494,7 +560,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         }
     }
 
-    // MARK: WKScriptMessageHandler ────────────────────────────────────────
+    // MARK: WKScriptMessageHandler
     func userContentController(
         _ userContentController: WKUserContentController,
         didReceive message: WKScriptMessage
@@ -506,38 +572,30 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             switch event {
-
-            // ── 5. Scroll → collapse / expand tab bar ─────────────────────
             case "scroll":
                 let delta = body["delta"] as? CGFloat ?? 0
                 let top   = body["top"]   as? CGFloat ?? 0
                 self.handleScroll(delta: delta, scrollTop: top)
-
-            // ── 9. Detail panel open / close ──────────────────────────────
             case "panelOpen":  self.isPanelOpen = true
             case "panelClose": self.isPanelOpen = false
-
-            // ── 8. Dark mode sync ──────────────────────────────────────────
             case "darkMode":
                 let on = body["on"] as? Bool ?? false
-                // Override the entire app's colour scheme so SwiftUI matches
                 self.window?.overrideUserInterfaceStyle = on ? .dark : .light
-
             default: break
             }
         }
     }
 
-    // MARK: 5. Scroll collapse ────────────────────────────────────────────
+    // MARK: Scroll collapse
     private func handleScroll(delta: CGFloat, scrollTop: CGFloat) {
         let shouldCollapse = delta > 0 && scrollTop > 60
         let shouldExpand   = delta < 0 || scrollTop < 20
         if shouldCollapse && !isCollapsed {
             isCollapsed = true
-            setTabBarHeight(56)        // compact: just icons
+            setTabBarHeight(56)
         } else if shouldExpand && isCollapsed {
             isCollapsed = false
-            setTabBarHeight(105)       // full height
+            setTabBarHeight(105)
         }
     }
 
@@ -552,27 +610,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         }
     }
 
-    // MARK: Tab navigation ────────────────────────────────────────────────
+    // MARK: Tab navigation
     private func handleTab(_ id: String) {
-        if id == "more" {
-            // ── 6. Más: native action sheet ───────────────────────────────
-            showMoreSheet()
-        } else {
-            webGo(id)
-        }
+        if id == "more" { showMoreSheet() } else { webGo(id) }
     }
 
-    // ── 6. Native sheet for Más ───────────────────────────────────────────
     private func showMoreSheet() {
         guard let rootVC else { return }
         let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        sheet.addAction(.init(title: "Salida Laboral", style: .default) { [weak self] _ in
-            self?.webGo("salida") })
-        sheet.addAction(.init(title: "Portafolio", style: .default) { [weak self] _ in
-            self?.webGo("portafolio") })
-        sheet.addAction(.init(title: "Configuración", style: .default) { [weak self] _ in
-            self?.webGo("config") })
-        sheet.addAction(.init(title: "Cancelar", style: .cancel))
+        sheet.addAction(.init(title: "Salida Laboral",  style: .default) { [weak self] _ in self?.webGo("salida") })
+        sheet.addAction(.init(title: "Portafolio",      style: .default) { [weak self] _ in self?.webGo("portafolio") })
+        sheet.addAction(.init(title: "Configuración",   style: .default) { [weak self] _ in self?.webGo("config") })
+        sheet.addAction(.init(title: "Cancelar",        style: .cancel))
         rootVC.present(sheet, animated: true)
     }
 
@@ -590,7 +639,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         capacitorWebView?.evaluateJavaScript(js)
     }
 
-    // MARK: Helpers ───────────────────────────────────────────────────────
+    // MARK: Helpers
     private func firstWebView(in view: UIView) -> WKWebView? {
         if let wv = view as? WKWebView { return wv }
         for sub in view.subviews {
@@ -599,10 +648,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
         return nil
     }
 
-    // MARK: Capacitor URL / Activity handling ─────────────────────────────
+    // MARK: Capacitor URL / Activity handling
     func application(
-        _ app: UIApplication,
-        open url: URL,
+        _ app: UIApplication, open url: URL,
         options: [UIApplication.OpenURLOptionsKey: Any] = [:]
     ) -> Bool {
         ApplicationDelegateProxy.shared.application(app, open: url, options: options)
