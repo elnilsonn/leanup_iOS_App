@@ -24,10 +24,16 @@ private struct LUTab: Identifiable, Equatable {
 private struct LiquidGlassTabBar: View {
     @Binding var active: String
     @Namespace private var ns
+
+    // Gesture state — single unified recognizer handles tap AND swipe
     @State private var draggedIndex: Int? = nil
     @State private var pressingTab: String? = nil
+    @State private var gestureStartX: CGFloat? = nil
+    @State private var isDragging = false
+
     @Environment(\.colorScheme) private var scheme
 
+    private let dragThreshold: CGFloat = 8  // pt before a touch becomes a drag
     private let tabs: [LUTab] = [
         LUTab(id: "dashboard",   icon: "house.fill",            label: "Inicio"),
         LUTab(id: "malla",       icon: "list.bullet.clipboard", label: "Malla"),
@@ -40,6 +46,7 @@ private struct LiquidGlassTabBar: View {
         draggedIndex.map { tabs[$0].id } ?? active
     }
 
+    // MARK: Body
     var body: some View {
         GeometryReader { geo in
             let totalW  = geo.size.width
@@ -48,118 +55,154 @@ private struct LiquidGlassTabBar: View {
             let bubbleW = (totalW - innerPad * 2) / CGFloat(tabs.count) - 8
 
             barView(bubbleW: bubbleW)
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 8)
-                        .onChanged { v in
-                            let idx = clamp(Int(v.location.x / tabW), in: 0..<tabs.count)
-                            withAnimation(.spring(response: 0.18, dampingFraction: 0.75)) {
-                                draggedIndex = idx
-                            }
-                        }
-                        .onEnded { v in
-                            let idx = clamp(Int(v.location.x / tabW), in: 0..<tabs.count)
-                            withAnimation(.spring(response: 0.35, dampingFraction: 0.76)) {
-                                active = tabs[idx].id
-                                draggedIndex = nil
-                            }
-                            onSelect(tabs[idx].id)
-                        }
+                // highPriorityGesture: takes over from any child Button taps
+                // so we have one clean unified recognizer for the whole bar.
+                .highPriorityGesture(
+                    DragGesture(minimumDistance: 0, coordinateSpace: .local)
+                        .onChanged { v in onDragChanged(v, tabW: tabW) }
+                        .onEnded   { v in onDragEnded(v, tabW: tabW)   }
                 )
         }
         .frame(height: 58)
         .padding(.horizontal, 16)
     }
 
+    // MARK: Unified drag/tap handler — onChanged
+    private func onDragChanged(_ v: DragGesture.Value, tabW: CGFloat) {
+        // Record where the touch started
+        if gestureStartX == nil { gestureStartX = v.location.x }
+
+        let dx = v.location.x - (gestureStartX ?? v.location.x)
+
+        // Promote to drag once threshold is exceeded
+        if !isDragging && abs(dx) > dragThreshold {
+            isDragging = true
+            withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
+                pressingTab = nil   // clear press highlight when drag begins
+            }
+        }
+
+        let idx = clamp(Int(v.location.x / tabW), in: 0..<tabs.count)
+
+        if isDragging {
+            // Dragging — show destination preview with haptic tick each step
+            if draggedIndex != idx {
+                withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                    draggedIndex = idx
+                }
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
+        } else {
+            // Still a press — highlight the touched tab
+            let tabId = tabs[idx].id
+            if pressingTab != tabId {
+                withAnimation(.spring(response: 0.15, dampingFraction: 0.65)) {
+                    pressingTab = tabId
+                }
+            }
+        }
+    }
+
+    // MARK: Unified drag/tap handler — onEnded
+    private func onDragEnded(_ v: DragGesture.Value, tabW: CGFloat) {
+        let startX = gestureStartX ?? v.location.x
+        let dx     = abs(v.location.x - startX)
+
+        // Reset tracking state
+        gestureStartX = nil
+        isDragging    = false
+        withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
+            draggedIndex = nil
+            pressingTab  = nil
+        }
+
+        if dx < dragThreshold {
+            // It was a tap — use the START position (finger didn't move)
+            let idx = clamp(Int(startX / tabW), in: 0..<tabs.count)
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
+                active = tabs[idx].id
+            }
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            onSelect(tabs[idx].id)
+        } else {
+            // It was a swipe — snap to wherever the finger stopped
+            let idx = clamp(Int(v.location.x / tabW), in: 0..<tabs.count)
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
+                active = tabs[idx].id
+            }
+            onSelect(tabs[idx].id)
+        }
+    }
+
     // MARK: Bar container (iOS 26 vs fallback)
     @ViewBuilder
     private func barView(bubbleW: CGFloat) -> some View {
         if #available(iOS 26.0, *) {
-            // Single glass layer for the bar — bubble is a non-glass highlight
-            // (rule: never nest glass inside glass)
-            buttons(bubbleW: bubbleW)
+            // Single glass surface for the whole bar.
+            // The active-tab bubble must NOT be glass (no nested glass).
+            tabCells(bubbleW: bubbleW)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .glassEffect(in: Capsule())
         } else {
-            buttons(bubbleW: bubbleW)
+            tabCells(bubbleW: bubbleW)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .background { fallbackBg }
         }
     }
 
-    // MARK: Tab buttons
+    // MARK: Tab cells — plain ZStack rows; gesture lives at bar level
     @ViewBuilder
-    private func buttons(bubbleW: CGFloat) -> some View {
+    private func tabCells(bubbleW: CGFloat) -> some View {
         HStack(spacing: 0) {
             ForEach(tabs) { tab in
-                let isActive = shown == tab.id
+                let isActive   = shown == tab.id
                 let isPressing = pressingTab == tab.id
-                Button {
-                    withAnimation(.spring(response: 0.35, dampingFraction: 0.76)) {
-                        active = tab.id
-                        draggedIndex = nil
-                        pressingTab = nil
+
+                ZStack {
+                    if isActive {
+                        activeTabBubble(width: bubbleW)
+                            .matchedGeometryEffect(id: "bubble", in: ns)
+                            .scaleEffect(isPressing ? 1.16 : 1.0)
+                            .animation(
+                                isPressing
+                                    ? .spring(response: 0.15, dampingFraction: 0.6)
+                                    : .spring(response: 0.3,  dampingFraction: 0.82),
+                                value: isPressing
+                            )
                     }
-                    onSelect(tab.id)
-                } label: {
-                    ZStack {
-                        if isActive {
-                            glassBubble(width: bubbleW)
-                                .matchedGeometryEffect(id: "bubble", in: ns)
-                                .scaleEffect(isPressing ? 1.20 : 1.0)
-                        }
-                        tabLabel(tab, isActive: isActive)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 52)
-                    .scaleEffect(isPressing ? 1.12 : 1.0)
-                    .animation(
-                        isPressing
-                            ? .spring(response: 0.12, dampingFraction: 0.50)
-                            : .spring(response: 0.38, dampingFraction: 0.72),
-                        value: isPressing
-                    )
+                    tabLabel(tab, isActive: isActive, isPressing: isPressing)
                 }
-                .buttonStyle(.plain)
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { _ in
-                            if pressingTab != tab.id {
-                                withAnimation(.spring(response: 0.10, dampingFraction: 0.48)) {
-                                    pressingTab = tab.id
-                                }
-                            }
-                        }
-                        .onEnded { _ in
-                            withAnimation(.spring(response: 0.38, dampingFraction: 0.72)) {
-                                pressingTab = nil
-                            }
-                        }
-                )
+                .frame(maxWidth: .infinity)
+                .frame(height: 52)
+                .contentShape(Rectangle())
+                // Accessibility: screen readers can still activate each tab
+                .accessibilityLabel(tab.label)
+                .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
+                .accessibilityAction { onSelect(tab.id) }
             }
         }
     }
 
-    // ── Active tab bubble (non-glass on iOS 26 to avoid nested glass) ──
+    // MARK: Active-tab highlight bubble
     @ViewBuilder
-    private func glassBubble(width: CGFloat) -> some View {
+    private func activeTabBubble(width: CGFloat) -> some View {
         if #available(iOS 26.0, *) {
-            // Subtle highlight — the bar itself is already glass,
-            // so this must NOT be glass (no nested glass layers)
+            // Simple filled highlight inside the glass bar — NOT glass itself
+            // (rule: never nest glass inside glass)
             Capsule()
                 .fill(.primary.opacity(scheme == .dark ? 0.18 : 0.10))
                 .frame(width: width, height: 44)
         } else {
             ZStack {
-                // Base translucent fill
                 Capsule()
                     .fill(scheme == .dark
                           ? Color.white.opacity(0.14)
                           : Color.white.opacity(0.88))
                     .background(.thinMaterial, in: Capsule())
 
-                // Specular highlight at top (like light catching a glass lens)
+                // Specular top highlight
                 LinearGradient(
                     stops: [
                         .init(color: .white.opacity(scheme == .dark ? 0.30 : 0.70), location: 0),
@@ -171,7 +214,7 @@ private struct LiquidGlassTabBar: View {
                 )
                 .clipShape(Capsule())
 
-                // Edge rim highlight (refraction at glass boundary)
+                // Rim highlight
                 Capsule()
                     .stroke(
                         LinearGradient(
@@ -187,16 +230,14 @@ private struct LiquidGlassTabBar: View {
                     )
             }
             .frame(width: width, height: 44)
-            // Top white glow (light catching the top of the bubble)
             .shadow(color: .white.opacity(scheme == .dark ? 0.12 : 0.45), radius: 4, y: -1)
-            // Bottom depth shadow
             .shadow(color: .black.opacity(scheme == .dark ? 0.28 : 0.12), radius: 10, y: 3)
         }
     }
 
-    // Tab icon + label (slightly scales when active)
+    // MARK: Tab icon + label
     @ViewBuilder
-    private func tabLabel(_ tab: LUTab, isActive: Bool) -> some View {
+    private func tabLabel(_ tab: LUTab, isActive: Bool, isPressing: Bool) -> some View {
         VStack(spacing: 3) {
             Image(systemName: tab.icon)
                 .font(.system(size: isActive ? 22 : 20, weight: .medium))
@@ -204,11 +245,13 @@ private struct LiquidGlassTabBar: View {
                 .font(.system(size: 10, weight: isActive ? .bold : .semibold))
         }
         .foregroundStyle(isActive ? Color.primary : Color.secondary)
-        .scaleEffect(isActive ? 1.04 : 1.0)
-        .animation(.spring(response: 0.25, dampingFraction: 0.7), value: isActive)
+        // Combine scale effects: press overrides active-scale
+        .scaleEffect(isPressing ? 1.06 : (isActive ? 1.04 : 1.0))
+        .animation(.spring(response: 0.25, dampingFraction: 0.75), value: isActive)
+        .animation(.spring(response: 0.15, dampingFraction: 0.65), value: isPressing)
     }
 
-    // Dark/light glass bar background (iOS 15-25)
+    // MARK: Fallback glass bar background (iOS 15–25)
     @ViewBuilder
     private var fallbackBg: some View {
         Capsule()
@@ -568,7 +611,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 ? document.addEventListener('DOMContentLoaded', addGradients)
                 : addGradients();
 
-            // ── 3. Patch saveData/resetChanges to drive new native buttons ──
+            // ── 3. Patch saveData/resetChanges to drive native buttons ──────
             function patchSaveReset() {
                 if (window.__lu_sr_patched) return;
                 if (typeof saveData !== 'function' || typeof resetChanges !== 'function') {
@@ -577,32 +620,75 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 window.__lu_sr_patched = true;
                 var _save  = window.saveData;
                 var _reset = window.resetChanges;
+
                 window.saveData = function() {
                     _save.apply(this, arguments);
-                    // Mark save button with success flash, disable reset
                     var sv = document.getElementById('lu-save-btn');
                     var rs = document.getElementById('lu-reset-btn');
-                    if (sv) { sv.style.opacity='0.7'; setTimeout(function(){ sv.style.opacity=''; }, 1200); }
+                    // Green success flash on save button
+                    if (sv) {
+                        var isDark = document.body.classList.contains('dark');
+                        sv.style.background = 'rgba(0,168,107,0.22)';
+                        var svgEl = sv.querySelector('svg');
+                        if (svgEl) svgEl.setAttribute('stroke', '#00a86b');
+                        setTimeout(function() {
+                            updateBtnStyle(sv, isDark, '16px');
+                            if (svgEl) svgEl.setAttribute('stroke', isDark ? '#009DC4' : '#0046AD');
+                        }, 1500);
+                    }
                     if (rs) { rs.style.opacity='0.4'; rs.style.pointerEvents='none'; }
                 };
+
                 window.resetChanges = function() {
                     _reset.apply(this, arguments);
                     var rs = document.getElementById('lu-reset-btn');
                     if (rs) { rs.style.opacity='0.4'; rs.style.pointerEvents='none'; }
                 };
-                // markDirty enables the reset button — wrap it too
-                if (typeof markDirty === 'function') {
-                    var _dirty = window.markDirty;
-                    window.markDirty = function() {
-                        _dirty.apply(this, arguments);
-                        var rs = document.getElementById('lu-reset-btn');
-                        if (rs) { rs.style.opacity='1'; rs.style.pointerEvents='auto'; }
-                    };
-                }
             }
             document.readyState === 'loading'
                 ? document.addEventListener('DOMContentLoaded', patchSaveReset)
                 : patchSaveReset();
+
+            // ── 3b. Patch markUnsaved to enable lu-reset-btn ────────────────
+            // The HTML uses markUnsaved() (NOT markDirty) — patch the right fn.
+            function patchMarkUnsaved() {
+                if (window.__lu_mu_patched) return;
+                if (typeof markUnsaved !== 'function') { setTimeout(patchMarkUnsaved, 250); return; }
+                window.__lu_mu_patched = true;
+                var _mu = window.markUnsaved;
+                window.markUnsaved = function() {
+                    _mu.apply(this, arguments);
+                    var rs = document.getElementById('lu-reset-btn');
+                    if (rs) { rs.style.opacity='1'; rs.style.pointerEvents='auto'; }
+                };
+            }
+            document.readyState === 'loading'
+                ? document.addEventListener('DOMContentLoaded', patchMarkUnsaved)
+                : patchMarkUnsaved();
+
+            // ── 3c. Auto-save on background — prevents data loss ─────────────
+            // Mobile apps must preserve state when the user switches apps.
+            // This saves silently to localStorage without changing the UI state.
+            function autoSave() {
+                try {
+                    if (typeof materias === 'undefined') return;
+                    var notas = {};
+                    materias.forEach(function(m) { if (m.nota !== null) notas[m.id] = m.nota; });
+                    localStorage.setItem('leanup_v4', JSON.stringify({
+                        notas: notas,
+                        electivosSeleccionados: typeof electivosSeleccionados !== 'undefined'
+                            ? electivosSeleccionados : {},
+                        electivosNotas: typeof electivosNotas !== 'undefined'
+                            ? electivosNotas : {},
+                        username: typeof username !== 'undefined' ? username : '',
+                        darkMode: typeof darkMode !== 'undefined' ? darkMode : false
+                    }));
+                } catch(e) {}
+            }
+            document.addEventListener('visibilitychange', function() {
+                if (document.visibilityState === 'hidden') autoSave();
+            });
+            window.addEventListener('pagehide', autoSave, { capture: true });
 
             // ── 4/10. Add ✓ confirm button — uses Enter simulation ─────────
             // Works for both regular (saveNota) AND elective (saveElecNota)
