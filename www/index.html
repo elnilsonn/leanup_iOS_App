@@ -1,0 +1,2135 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>LeanUp · UNAD</title>
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#001B50">
+<meta name="application-name" content="LeanUp">
+<meta name="description" content="Tu guía de carrera para Marketing y Negocios Digitales en la UNAD">
+<!-- iOS PWA -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LeanUp">
+<!-- PWA Manifest (inline) -->
+<link rel="manifest" href="data:application/manifest+json,{
+  %22name%22:%22LeanUp%20%C2%B7%20UNAD%22,
+  %22short_name%22:%22LeanUp%22,
+  %22description%22:%22Tu%20gu%C3%ADa%20de%20carrera%20UNAD%22,
+  %22start_url%22:%22.%22,
+  %22display%22:%22standalone%22,
+  %22background_color%22:%22%23001B50%22,
+  %22theme_color%22:%22%23001B50%22,
+  %22orientation%22:%22portrait%22,
+  %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'%3E%3Crect%20width='512'%20height='512'%20rx='80'%20fill='%23001B50'/%3E%3Ctext%20x='80'%20y='340'%20font-family='Arial'%20font-weight='900'%20font-size='220'%20fill='white'%3EL%3C/text%3E%3Ctext%20x='230'%20y='340'%20font-family='Arial'%20font-weight='900'%20font-size='220'%20fill='%23FFB81C'%3EU%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]
+}">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --unad-navy:#001B50;--unad-blue:#0046AD;--unad-cyan:#009DC4;--unad-gold:#FFB81C;
+  --bg:#F0F4FA;--bg2:#FFFFFF;--bg3:#EEF3FB;--bg4:#DDE6F5;
+  --text:#0D1B3E;--text2:#4A5C7A;--text3:#8A9BBF;
+  --border:#D4DEF0;--border2:#B8CCE8;
+  --success:#00A86B;--warning:#E07800;--danger:#C92B2B;
+  --shadow:0 1px 4px rgba(0,32,96,0.07);
+}
+body.dark{
+  --bg:#0d1420;--bg2:#131e30;--bg3:#1a2840;--bg4:#213250;
+  --text:#dde5f5;--text2:#7a90b5;--text3:#4a5f80;
+  --border:#1e3050;--border2:#2a4068;--shadow:0 1px 4px rgba(0,0,0,0.3);
+}
+body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;overflow:hidden;font-size:14px;transition:background 0.2s,color 0.2s}
+/* SIDEBAR */
+.sidebar{width:232px;background:var(--unad-navy);display:flex;flex-direction:column;flex-shrink:0;height:100vh}
+.logo-area{padding:22px 20px 18px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.logo-mark{font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.5px}
+.logo-up{color:var(--unad-gold)}
+.logo-sub{font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;letter-spacing:0.5px;text-transform:uppercase}
+.nav{padding:10px 8px;flex:1;overflow-y:auto}
+.nav-sect{font-size:9px;color:rgba(255,255,255,0.22);padding:10px 10px 4px;letter-spacing:1.5px;font-weight:600;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.45);transition:all 0.15s;margin-bottom:2px;font-size:13px;border-left:2px solid transparent}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.8)}
+.nav-item.active{background:rgba(255,184,28,0.1);color:var(--unad-cyan);font-weight:500;border-left-color:var(--unad-gold)}
+.nav-icon{width:15px;height:15px;flex-shrink:0;opacity:0.5}
+.nav-item.active .nav-icon{opacity:1;color:var(--unad-gold)}
+.sidebar-footer{padding:14px 18px;border-top:1px solid rgba(255,255,255,0.07)}
+.prog-lbl{font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:5px}
+.prog-bar{height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--unad-gold),#FFD97A);border-radius:2px;transition:width 0.5s}
+.prog-sub{font-size:10px;color:rgba(255,255,255,0.22);margin-top:4px}
+.unad-badge{margin-top:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:7px;padding:8px 12px}
+.unad-lbl{font-size:11px;font-weight:700;color:rgba(255,255,255,0.4);letter-spacing:1px}
+.unad-snies{font-size:9px;color:rgba(255,255,255,0.2);margin-top:1px}
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;height:100vh}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:0 24px;height:54px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:var(--shadow)}
+.topbar-title{font-size:15px;font-weight:600;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.btn{padding:7px 14px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:600;font-family:'Sora',sans-serif;transition:all 0.15s;border:1px solid transparent;display:inline-flex;align-items:center;gap:6px}
+.btn-save{background:var(--unad-blue);color:#fff;border-color:var(--unad-blue);position:relative}
+.btn-save:hover{background:#003A91}
+.btn-save.saved{background:var(--success);border-color:var(--success)}
+.btn-save.unsaved::after{content:'';width:8px;height:8px;background:var(--unad-gold);border-radius:50%;position:absolute;top:-3px;right:-3px;border:2px solid var(--bg2)}
+.btn-reset{background:transparent;color:var(--text2);border-color:var(--border2)}
+.btn-reset:hover{background:var(--bg3);color:var(--danger);border-color:var(--danger)}
+.content{flex:1;overflow-y:auto;padding:24px}
+.view{display:none}
+.view.active{display:block}
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:var(--shadow)}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px}
+.stat-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:16px;box-shadow:var(--shadow)}
+.stat-num{font-size:26px;font-weight:700;font-family:'IBM Plex Mono',monospace;margin-bottom:3px}
+.c1{color:var(--unad-blue)}.c2{color:var(--unad-cyan)}.c3{color:var(--text)}.c4{color:var(--unad-gold)}
+.stat-lbl{font-size:10px;color:var(--text3);font-weight:600;letter-spacing:0.6px;text-transform:uppercase}
+.sect-title{font-size:11px;font-weight:600;color:var(--text3);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.sect-title .gold-dot{width:6px;height:6px;border-radius:50%;background:var(--unad-gold);flex-shrink:0}
+.h2{font-size:20px;font-weight:700;color:var(--text);margin-bottom:3px}
+.sub{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.5}
+/* TAGS */
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.tag-teorica{background:rgba(0,70,173,0.08);color:#0046AD;border:1px solid rgba(0,70,173,0.2)}
+.tag-practica{background:rgba(0,157,196,0.1);color:#007DA0;border:1px solid rgba(0,157,196,0.25)}
+.tag-lectura{background:rgba(224,120,0,0.08);color:#C06800;border:1px solid rgba(224,120,0,0.2)}
+.tag-numeros{background:rgba(120,60,180,0.08);color:#7030A0;border:1px solid rgba(120,60,180,0.2)}
+.tag-aprobada{background:rgba(0,168,107,0.1);color:#007A4D;border:1px solid rgba(0,168,107,0.25)}
+.tag-reprobada{background:rgba(201,43,43,0.08);color:#C92B2B;border:1px solid rgba(201,43,43,0.22)}
+.tag-cursando{background:rgba(0,70,173,0.1);color:#0046AD;border:1px solid rgba(0,70,173,0.25)}
+.tag-pendiente{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.tag-electiva{background:rgba(255,184,28,0.12);color:#8A5F00;border:1px solid rgba(255,184,28,0.35)}
+/* SEARCH */
+.search-wrap{position:relative;margin-bottom:14px}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.search-inp{width:100%;padding:9px 14px 9px 36px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color 0.12s}
+.search-inp:focus{border-color:var(--unad-blue);box-shadow:0 0 0 2px rgba(0,70,173,0.1)}
+.search-inp::placeholder{color:var(--text3)}
+/* MALLA */
+.malla-grid{display:grid;grid-template-columns:1fr 310px;gap:18px;align-items:start}
+.sem-block{margin-bottom:18px}
+.sem-label{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sem-cred{font-size:10px;color:var(--unad-blue);font-family:'IBM Plex Mono';font-weight:500;padding:1px 6px;background:rgba(0,70,173,0.08);border-radius:4px}
+.sem-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.mat-row{background:var(--bg2);border:1px solid var(--border);border-left:3px solid transparent;border-radius:9px;padding:12px 14px;display:flex;align-items:center;gap:12px;margin-bottom:5px;cursor:pointer;transition:all 0.12s}
+.mat-row:hover{border-color:var(--border2);border-left-color:var(--unad-cyan);background:rgba(0,157,196,0.03)}
+.mat-row.selected{border-color:var(--unad-blue);border-left-color:var(--unad-gold);background:rgba(0,70,173,0.04);box-shadow:0 0 0 2px rgba(0,70,173,0.18)}
+.mat-nombre{font-weight:600;font-size:13px;color:var(--text);margin-bottom:2px}
+.mat-desc{font-size:11px;color:var(--text2);margin-bottom:3px;line-height:1.4}
+.mat-meta{font-size:9px;color:var(--text3);font-family:'IBM Plex Mono';margin-bottom:4px}
+.nota-badge{width:36px;height:36px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;font-family:'IBM Plex Mono',monospace;flex-shrink:0}
+.n-a{background:rgba(0,168,107,0.12);color:#007A4D}
+.n-b{background:rgba(0,70,173,0.1);color:var(--unad-blue)}
+.n-c{background:rgba(224,120,0,0.1);color:#C06800}
+.n-f{background:rgba(201,43,43,0.1);color:var(--danger)}
+.n-empty{background:var(--bg3);color:var(--text3);font-size:10px}
+/* NOTA WIDGET */
+.nota-widget{display:flex;align-items:center;gap:8px;margin-top:6px}
+.nota-btn{width:34px;height:34px;border-radius:8px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:20px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.12s;user-select:none;line-height:1}
+.nota-btn:hover{border-color:var(--unad-blue);color:var(--unad-blue);background:rgba(0,70,173,0.07)}
+.nota-btn:active{transform:scale(0.93)}
+.nota-inp{width:70px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 10px;color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;text-align:center;outline:none;transition:border-color 0.12s;-moz-appearance:textfield}
+.nota-inp::-webkit-inner-spin-button,.nota-inp::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.nota-inp:focus{border-color:var(--unad-blue);box-shadow:0 0 0 2px rgba(0,70,173,0.1)}
+.nota-hint{font-size:10px;color:var(--text3);margin-top:5px;transition:color 0.15s}
+@keyframes shake{0%{transform:translateX(0)}15%{transform:translateX(-5px)}30%{transform:translateX(5px)}45%{transform:translateX(-4px)}60%{transform:translateX(4px)}75%{transform:translateX(-2px)}90%{transform:translateX(2px)}100%{transform:translateX(0)}}
+.nota-hint.shake{animation:shake 0.4s cubic-bezier(0.36,0.07,0.19,0.97) both}
+/* ELECTIVOS */
+.elec-block{background:rgba(255,184,28,0.04);border:1px dashed rgba(255,184,28,0.4);border-radius:9px;padding:12px 14px;margin-bottom:5px}
+.elec-title{font-size:10px;font-weight:700;color:#8A5F00;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.elec-title::before{content:'◆';font-size:8px;color:var(--unad-gold)}
+.elec-opt{display:flex;align-items:center;gap:9px;padding:5px 0;border-bottom:1px solid rgba(0,0,0,0.05);cursor:pointer;transition:background 0.1s;border-radius:4px}
+.elec-opt:last-child{border-bottom:none}
+.elec-opt:hover .elec-name{color:var(--text)}
+.elec-name{font-size:12px;color:var(--text2);flex:1;transition:color 0.12s}
+.elec-name.chosen{color:var(--text);font-weight:600}
+.elec-cr{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono'}
+.radio{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+.radio.on{border-color:var(--unad-gold);background:rgba(255,184,28,0.15)}
+.radio.on::after{content:'';width:5px;height:5px;border-radius:50%;background:var(--unad-gold)}
+/* DETAIL PANEL */
+.detail-panel{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--unad-gold);border-radius:12px;padding:20px;box-shadow:var(--shadow)}
+.panel-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1.4}
+.panel-meta{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono';margin-bottom:10px}
+.panel-sect{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.panel-sect-title{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px}
+.info-box{background:var(--bg3);border-radius:7px;padding:11px 13px;font-size:12px;color:var(--text2);line-height:1.65;border-left:3px solid var(--unad-cyan)}
+.info-box.gold{border-left-color:var(--unad-gold)}
+.chip{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-size:11px;color:var(--text2)}
+.chip-list{display:flex;flex-wrap:wrap;gap:5px}
+.empty-panel{text-align:center;padding:36px 20px;color:var(--text3)}
+.small-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Sora',sans-serif;transition:all 0.12s;margin-top:6px}
+.small-btn:hover{border-color:var(--unad-blue);color:var(--unad-blue)}
+.change-btn{background:rgba(255,184,28,0.1);border:1px solid rgba(255,184,28,0.35);color:#8A5F00;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Sora',sans-serif;transition:all 0.12s;margin-top:6px}
+.change-btn:hover{background:rgba(255,184,28,0.2)}
+/* PROGRESS */
+.prog-row{margin-bottom:10px}
+.prog-meta{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-bottom:4px}
+.bar{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--unad-blue),var(--unad-cyan));transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
+.bar-fill.done{background:linear-gradient(90deg,var(--unad-gold),#FFD97A)}
+.bar-fill.warn{background:linear-gradient(90deg,var(--warning),#FFB81C)}
+.bar-fill.low{background:linear-gradient(90deg,var(--danger),#E05050)}
+/* PERIODO ACCORDION */
+.per-group{margin-bottom:14px}
+.per-header{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--unad-gold);border-radius:9px;padding:11px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:13px;color:var(--text);user-select:none;transition:border-color 0.18s cubic-bezier(0.4,0,0.2,1)}
+.per-header:hover{border-color:var(--unad-blue)}
+.per-arrow{color:var(--text3);font-size:11px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1)}
+.per-arrow.closed{transform:rotate(-90deg)}
+.per-body{padding:6px 0 0;overflow:hidden;max-height:5000px;opacity:1;transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.25s cubic-bezier(0.4,0,0.2,1)}
+/* TIMELINE */
+.tl-wrap{position:relative;padding-left:0}
+.tl-item{position:relative;display:flex;gap:16px;margin-bottom:0}
+.tl-item:last-child .tl-line{display:none}
+.tl-left{display:flex;flex-direction:column;align-items:center;flex-shrink:0;width:32px}
+.tl-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0;border:2px solid;position:relative;z-index:1}
+.tl-dot.done{background:rgba(0,168,107,0.12);border-color:var(--success);color:var(--success)}
+.tl-dot.now{background:rgba(0,70,173,0.12);border-color:var(--unad-blue);color:var(--unad-blue);box-shadow:0 0 0 4px rgba(0,70,173,0.1)}
+.tl-dot.future{background:var(--bg3);border-color:var(--border2);color:var(--text3)}
+.tl-line{width:2px;flex:1;min-height:20px;margin:3px 0}
+.tl-line.done{background:var(--success)}
+.tl-line.now{background:linear-gradient(to bottom,var(--unad-blue),var(--border2))}
+.tl-line.future{background:var(--border)}
+.tl-body{flex:1;padding-bottom:22px}
+.tl-badge{display:inline-flex;align-items:center;gap:4px;font-size:9px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;padding:2px 8px;border-radius:10px;margin-bottom:5px}
+.tl-badge.done{background:rgba(0,168,107,0.1);color:var(--success)}
+.tl-badge.now{background:rgba(0,70,173,0.1);color:var(--unad-blue)}
+.tl-badge.future{background:var(--bg3);color:var(--text3)}
+.tl-rank{font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1.3}
+.tl-desc{font-size:11px;color:var(--text2);margin-bottom:5px;line-height:1.5}
+.tl-creds{font-size:10px;color:var(--text3);font-family:'IBM Plex Mono';margin-bottom:6px}
+.tl-skills{display:flex;flex-wrap:wrap;gap:4px}
+.tl-skill{background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--text2)}
+/* LINKEDIN / SALIDA / PORTAFOLIO CARDS */
+.li-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;transition:border-color 0.12s}
+.li-card:hover{border-color:var(--unad-blue)}
+.li-mat{font-size:10px;color:var(--unad-blue);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px}
+.li-mat.elec{color:#8A5F00}
+.li-text{font-size:12px;color:var(--text);line-height:1.65;border-left:2px solid var(--unad-cyan);padding-left:10px;margin:5px 0}
+.copy-btn{background:var(--bg3);border:1px solid var(--border);color:var(--text2);padding:4px 11px;border-radius:6px;cursor:pointer;font-size:11px;font-family:'Sora',sans-serif;transition:all 0.12s}
+.copy-btn:hover{border-color:var(--unad-blue);color:var(--unad-blue)}
+.sal-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:7px;display:flex;gap:12px;transition:border-color 0.12s}
+.sal-card:hover{border-color:var(--unad-cyan)}
+.sal-roles{background:rgba(0,70,173,0.05);border:1px solid rgba(0,70,173,0.12);border-radius:7px;padding:7px 11px;margin-top:6px}
+.sal-roles-lbl{font-size:9px;color:var(--unad-blue);font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2px}
+.por-card{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:7px}
+.por-mat{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:4px}
+.por-mat.oblig{color:var(--unad-blue)}
+.por-mat.elec{color:#8A5F00}
+/* CONFIG */
+.cfg-card{background:var(--bg2);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.cfg-lbl{font-size:11px;color:var(--text3);font-weight:600;letter-spacing:0.8px;text-transform:uppercase;margin-bottom:8px}
+.cfg-inp{padding:9px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:8px;font-family:'Sora',sans-serif;font-size:13px;color:var(--text);outline:none;width:280px;max-width:100%;transition:border-color 0.12s}
+.cfg-inp:focus{border-color:var(--unad-blue)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.tgl-lbl{font-size:13px;color:var(--text)}
+.tgl-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.switch{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.slider-tgl{position:absolute;cursor:pointer;inset:0;background:var(--bg4);border-radius:24px;border:1px solid var(--border2);transition:0.2s}
+.slider-tgl::before{content:'';position:absolute;height:16px;width:16px;left:3px;bottom:3px;background:var(--text3);border-radius:50%;transition:0.2s}
+input:checked+.slider-tgl{background:var(--unad-blue);border-color:var(--unad-blue)}
+input:checked+.slider-tgl::before{transform:translateX(20px);background:#fff}
+.contact-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:9px;text-decoration:none;font-size:13px;font-weight:600;font-family:'Sora',sans-serif;transition:all 0.15s;border:1px solid transparent;margin-right:10px;margin-top:8px}
+.c-wa{background:rgba(37,211,102,0.1);color:#1a9a47;border-color:rgba(37,211,102,0.3)}
+.c-wa:hover{background:rgba(37,211,102,0.18)}
+.c-mail{background:rgba(0,70,173,0.08);color:var(--unad-blue);border-color:rgba(0,70,173,0.2)}
+.c-mail:hover{background:rgba(0,70,173,0.14)}
+.about-box{background:var(--bg3);border-radius:10px;padding:18px;border-left:3px solid var(--unad-gold)}
+.about-version{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px}
+.about-version span{color:var(--unad-gold)}
+/* ── iOS-STYLE ANIMATIONS ── */
+*{-webkit-tap-highlight-color:transparent}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{opacity:0;transform:scale(0.96)}to{opacity:1;transform:scale(1)}}
+@keyframes slideInRight{from{opacity:0;transform:translateX(12px)}to{opacity:1;transform:translateX(0)}}
+.view.active{animation:fadeSlideIn 0.28s cubic-bezier(0.4,0,0.2,1) both}
+.detail-panel{animation:slideInRight 0.22s cubic-bezier(0.4,0,0.2,1) both}
+.malla-acc-body{animation:fadeSlideIn 0.2s cubic-bezier(0.4,0,0.2,1) both}
+.per-body{animation:fadeSlideIn 0.2s cubic-bezier(0.4,0,0.2,1) both}
+.mat-row{transition:border-color 0.18s cubic-bezier(0.4,0,0.2,1),background 0.18s cubic-bezier(0.4,0,0.2,1),transform 0.12s cubic-bezier(0.4,0,0.2,1),box-shadow 0.18s cubic-bezier(0.4,0,0.2,1)}
+.mat-row:hover{transform:translateX(2px)}
+.mat-row:active{transform:scale(0.99)}
+.mat-row.selected{transform:translateX(2px)}
+.malla-acc-header{transition:background 0.18s cubic-bezier(0.4,0,0.2,1),border-color 0.18s cubic-bezier(0.4,0,0.2,1)}
+.malla-acc-header:active{transform:scale(0.995)}
+.per-header{transition:background 0.18s cubic-bezier(0.4,0,0.2,1),border-color 0.18s cubic-bezier(0.4,0,0.2,1)}
+.per-header:active{transform:scale(0.995)}
+.malla-acc-arrow,.per-arrow{transition:transform 0.24s cubic-bezier(0.4,0,0.2,1)}
+.nav-item{transition:background 0.16s cubic-bezier(0.4,0,0.2,1),color 0.16s cubic-bezier(0.4,0,0.2,1),border-color 0.16s cubic-bezier(0.4,0,0.2,1)}
+.btn{transition:background 0.16s cubic-bezier(0.4,0,0.2,1),color 0.16s cubic-bezier(0.4,0,0.2,1),border-color 0.16s cubic-bezier(0.4,0,0.2,1),opacity 0.16s cubic-bezier(0.4,0,0.2,1),transform 0.1s cubic-bezier(0.4,0,0.2,1)}
+.btn:active{transform:scale(0.96)}
+.nota-badge{transition:background 0.2s cubic-bezier(0.4,0,0.2,1),color 0.2s cubic-bezier(0.4,0,0.2,1)}
+.tag{transition:background 0.15s cubic-bezier(0.4,0,0.2,1)}
+.radio{transition:border-color 0.16s cubic-bezier(0.4,0,0.2,1),background 0.16s cubic-bezier(0.4,0,0.2,1)}
+.nota-btn{transition:background 0.15s cubic-bezier(0.4,0,0.2,1),border-color 0.15s cubic-bezier(0.4,0,0.2,1),color 0.15s cubic-bezier(0.4,0,0.2,1),transform 0.1s cubic-bezier(0.4,0,0.2,1)}
+.nota-btn:active{transform:scale(0.88)}
+.copy-btn,.small-btn,.change-btn{transition:background 0.15s cubic-bezier(0.4,0,0.2,1),border-color 0.15s cubic-bezier(0.4,0,0.2,1),color 0.15s cubic-bezier(0.4,0,0.2,1)}
+.copy-btn:active,.small-btn:active,.change-btn:active{transform:scale(0.96)}
+.cfg-gear-btn{transition:background 0.18s cubic-bezier(0.4,0,0.2,1),border-color 0.18s cubic-bezier(0.4,0,0.2,1)}
+.cfg-gear-btn:active{transform:scale(0.9)}
+.cfg-gear-btn svg{transition:color 0.18s cubic-bezier(0.4,0,0.2,1)}
+.prog-fill{transition:width 0.6s cubic-bezier(0.4,0,0.2,1)}
+.tl-dot{transition:background 0.3s cubic-bezier(0.4,0,0.2,1),border-color 0.3s cubic-bezier(0.4,0,0.2,1),box-shadow 0.3s cubic-bezier(0.4,0,0.2,1)}
+.tl-item{animation:fadeSlideIn 0.25s cubic-bezier(0.4,0,0.2,1) both}
+.tl-item:nth-child(1){animation-delay:0s}
+.tl-item:nth-child(2){animation-delay:0.04s}
+.tl-item:nth-child(3){animation-delay:0.08s}
+.tl-item:nth-child(4){animation-delay:0.12s}
+.tl-item:nth-child(5){animation-delay:0.16s}
+.stat-card{animation:scaleIn 0.22s cubic-bezier(0.4,0,0.2,1) both}
+.stat-card:nth-child(1){animation-delay:0s}
+.stat-card:nth-child(2){animation-delay:0.04s}
+.stat-card:nth-child(3){animation-delay:0.08s}
+.stat-card:nth-child(4){animation-delay:0.12s}
+.li-card,.sal-card,.por-card{animation:fadeSlideIn 0.18s cubic-bezier(0.4,0,0.2,1) both}
+.li-card{transition:border-color 0.18s cubic-bezier(0.4,0,0.2,1)}
+.sal-card{transition:border-color 0.18s cubic-bezier(0.4,0,0.2,1)}
+.search-inp{transition:border-color 0.18s cubic-bezier(0.4,0,0.2,1),box-shadow 0.18s cubic-bezier(0.4,0,0.2,1)}
+.elec-opt{transition:background 0.14s cubic-bezier(0.4,0,0.2,1)}
+.elec-opt:active{transform:scale(0.99)}
+.elec-block{animation:fadeSlideIn 0.2s cubic-bezier(0.4,0,0.2,1) both}
+/* mobile back button — hidden by default everywhere */
+.mobile-back{display:none}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── LIQUID GLASS (mobile only) ── */
+@supports(backdrop-filter:blur(1px)){
+  @media(max-width:768px){
+
+    /* Topbar glass */
+    .topbar{
+      background:rgba(240,244,250,0.72)!important;
+      backdrop-filter:saturate(180%) blur(20px);
+      -webkit-backdrop-filter:saturate(180%) blur(20px);
+      border-bottom:1px solid rgba(255,255,255,0.45)!important;
+      box-shadow:0 1px 0 rgba(0,0,0,0.06),inset 0 1px 0 rgba(255,255,255,0.6)!important;
+    }
+    body.dark .topbar{
+      background:rgba(13,20,32,0.72)!important;
+      border-bottom:1px solid rgba(255,255,255,0.08)!important;
+      box-shadow:0 1px 0 rgba(0,0,0,0.3)!important;
+    }
+
+    /* Bottom nav glass */
+    .bottom-nav{
+      background:rgba(0,27,80,0.78)!important;
+      backdrop-filter:saturate(200%) blur(24px);
+      -webkit-backdrop-filter:saturate(200%) blur(24px);
+      border-top:1px solid rgba(255,255,255,0.14)!important;
+      box-shadow:0 -1px 0 rgba(0,0,0,0.1),inset 0 1px 0 rgba(255,255,255,0.1)!important;
+    }
+
+    /* Accordion headers glass */
+    .malla-acc-header{
+      background:rgba(238,243,251,0.65)!important;
+      backdrop-filter:blur(16px) saturate(160%);
+      -webkit-backdrop-filter:blur(16px) saturate(160%);
+      border:1px solid rgba(255,255,255,0.5)!important;
+      border-left:3px solid var(--unad-gold)!important;
+      box-shadow:0 2px 8px rgba(0,46,173,0.05),inset 0 1px 0 rgba(255,255,255,0.65)!important;
+    }
+    .per-header{
+      background:rgba(238,243,251,0.65)!important;
+      backdrop-filter:blur(16px) saturate(160%);
+      -webkit-backdrop-filter:blur(16px) saturate(160%);
+      border:1px solid rgba(255,255,255,0.5)!important;
+      border-left:3px solid var(--unad-gold)!important;
+      box-shadow:0 2px 8px rgba(0,46,173,0.05),inset 0 1px 0 rgba(255,255,255,0.65)!important;
+    }
+    body.dark .malla-acc-header,body.dark .per-header{
+      background:rgba(26,40,64,0.65)!important;
+      border:1px solid rgba(255,255,255,0.07)!important;
+      border-left:3px solid var(--unad-gold)!important;
+      box-shadow:none!important;
+    }
+
+    /* Detail panel glass */
+    #detailPanel.mobile-open{
+      background:rgba(240,244,250,0.85)!important;
+      backdrop-filter:blur(28px) saturate(180%);
+      -webkit-backdrop-filter:blur(28px) saturate(180%);
+    }
+    body.dark #detailPanel.mobile-open{
+      background:rgba(13,20,32,0.85)!important;
+    }
+    #detailPanel.mobile-open .detail-panel{
+      background:transparent!important;
+      box-shadow:none!important;
+      border:none!important;
+    }
+    #detailPanel.mobile-open .info-box{
+      background:rgba(255,255,255,0.5)!important;
+      backdrop-filter:blur(8px);
+      -webkit-backdrop-filter:blur(8px);
+      border:1px solid rgba(255,255,255,0.55)!important;
+    }
+    body.dark #detailPanel.mobile-open .info-box{
+      background:rgba(255,255,255,0.05)!important;
+      border:1px solid rgba(255,255,255,0.08)!important;
+    }
+  }
+}
+
+/* DETAIL PANEL */
+@media(min-width:769px){
+  #detailPanel{position:sticky;top:24px;align-self:start}
+}
+@media(max-width:768px){
+  #detailPanel{
+    display:none;
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    z-index:900;
+    background:var(--bg);
+    overflow-y:scroll;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    padding:0;
+    margin:0;
+  }
+  #detailPanel .detail-panel{
+    border-radius:0;
+    border:none;
+    border-left:none;
+    box-shadow:none;
+    margin:0;
+    /* Top: safe area + topbar (50px). Bottom: bottom-nav (56px) + safe area */
+    padding-top:calc(env(safe-area-inset-top) + 56px);
+    padding-bottom:calc(env(safe-area-inset-bottom) + 64px);
+    padding-left:16px;
+    padding-right:16px;
+    min-height:0;
+  }
+}
+.cfg-gear-btn{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:8px;cursor:pointer;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);transition:all 0.15s}
+.cfg-gear-btn:hover{background:rgba(255,184,28,0.15);border-color:rgba(255,184,28,0.4)}
+.cfg-gear-btn.active{background:rgba(255,184,28,0.18);border-color:var(--unad-gold)}
+.cfg-gear-btn svg{width:16px;height:16px;color:rgba(255,255,255,0.4);transition:color 0.15s}
+.cfg-gear-btn:hover svg,.cfg-gear-btn.active svg{color:var(--unad-gold)}
+/* MALLA ACCORDION */
+.malla-acc{margin-bottom:10px}
+.malla-acc-header{background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--unad-gold);border-radius:9px;padding:11px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:13px;color:var(--text);user-select:none;transition:border-color 0.18s cubic-bezier(0.4,0,0.2,1)}
+.malla-acc-header:hover{border-color:var(--unad-blue)}
+.malla-acc-arrow{color:var(--text3);font-size:11px;transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1)}
+.malla-acc-arrow.closed{transform:rotate(-90deg)}
+.malla-acc-body{padding:8px 3px 4px;overflow:hidden;max-height:5000px;opacity:1;transition:max-height 0.38s cubic-bezier(0.4,0,0.2,1),opacity 0.25s cubic-bezier(0.4,0,0.2,1)}
+
+/* ── BOTTOM NAV (mobile only) ── */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--unad-navy);border-top:1px solid rgba(255,255,255,0.08);z-index:1000;padding-bottom:env(safe-area-inset-bottom)}
+.bottom-nav-inner{display:flex;align-items:stretch;height:56px}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:rgba(255,255,255,0.4);transition:color 0.18s;border:none;background:none;font-family:'Sora',sans-serif;padding:0;position:relative}
+.bn-item.active{color:var(--unad-cyan)}
+.bn-item.active .bn-icon{color:var(--unad-gold)}
+.bn-icon{width:20px;height:20px;flex-shrink:0}
+.bn-label{font-size:9px;font-weight:500;letter-spacing:0.2px;line-height:1}
+.bn-more{position:relative}
+.bn-more-menu{display:none;position:absolute;bottom:62px;right:0;background:var(--unad-navy);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:6px;min-width:180px;box-shadow:0 -8px 32px rgba(0,0,0,0.4)}
+.bn-more-menu.open{display:block;animation:fadeSlideIn 0.2s cubic-bezier(0.4,0,0.2,1) both}
+.bn-more-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:13px;font-weight:500;transition:background 0.15s}
+.bn-more-item:hover,.bn-more-item.active{background:rgba(255,184,28,0.1);color:var(--unad-cyan)}
+.bn-more-item svg{width:16px;height:16px;flex-shrink:0;opacity:0.6}
+.bn-more-item.active svg{opacity:1;color:var(--unad-gold)}
+
+/* ── MOBILE RESPONSIVE ── */
+@media(max-width:768px){
+  /* 5. Anti-zoom: todos los inputs font-size mínimo 16px */
+  input,select,textarea{font-size:16px!important}
+  .nota-inp{font-size:16px!important;width:80px}
+  .search-inp{font-size:16px!important}
+  .cfg-inp{font-size:16px!important}
+
+  /* 2. Disable double-tap zoom en todos los elementos interactivos */
+  *{touch-action:manipulation}
+
+  /* 3. Safe area — topbar respeta el notch */
+  body{overflow:hidden}
+  .sidebar{display:none}
+  .main{
+    height:100vh;height:100dvh;
+    display:flex;flex-direction:column;
+    padding-top:env(safe-area-inset-top);
+  }
+  .topbar{
+    padding:0 14px;
+    height:50px;
+    flex-shrink:0;
+  }
+  .topbar-title{font-size:14px}
+  .btn{padding:6px 10px;font-size:11px}
+  .btn-reset{display:none}
+
+  /* 1. Scroll — content ocupa el espacio restante y hace scroll */
+  .content{
+    flex:1;
+    overflow-y:auto;
+    overflow-x:hidden;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-y:contain;
+    padding:16px 14px;
+    padding-bottom:calc(56px + env(safe-area-inset-bottom) + 16px);
+  }
+
+  /* Bottom nav */
+  .bottom-nav{display:block}
+
+  /* Dashboard mobile */
+  .grid-4{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+  .grid-2{grid-template-columns:1fr;gap:12px;margin-bottom:14px}
+  .stat-num{font-size:22px}
+  .h2{font-size:17px}
+  .sub{font-size:12px;margin-bottom:16px}
+  .card{padding:14px}
+  .stat-card{padding:12px}
+
+  /* Malla mobile — columna única */
+  .malla-grid{display:block}
+  #detailPanel{display:none}
+
+  /* Mat row touch */
+  .mat-row{padding:12px 12px;min-height:60px}
+  .mat-nombre{font-size:13px}
+  .mat-desc{font-size:11px}
+
+  /* 4. Electivas — área de toque más grande */
+  .elec-block{padding:14px}
+  .elec-opt{
+    padding:10px 4px;
+    min-height:44px;
+    cursor:pointer;
+    -webkit-tap-highlight-color:rgba(255,184,28,0.15);
+  }
+  .elec-name{font-size:13px}
+  .radio{width:18px;height:18px;flex-shrink:0}
+  .radio.on::after{width:8px;height:8px}
+
+  /* Panel detalle — full screen overlay sin espacios */
+  body.panel-open{overflow:hidden}
+  #detailPanel.mobile-open{
+    display:block;
+  }
+
+  /* Timeline mobile */
+  .tl-item{gap:12px}
+
+  /* Nota widget más grande para dedos */
+  .nota-btn{width:40px;height:40px;font-size:22px}
+  .nota-widget{gap:10px;margin-top:8px}
+
+  /* Per-header y malla-header touch area */
+  .per-header{min-height:48px;padding:12px 16px}
+  .malla-acc-header{min-height:48px;padding:12px 16px}
+
+  .search-wrap{margin-bottom:12px}
+
+  /* Botón atrás — visible solo con panel abierto */
+  body.panel-open .mobile-back{display:flex!important}
+}
+@media(min-width:769px){
+  .bottom-nav{display:none!important}
+}
+</style>
+</head>
+<body>
+<nav class="sidebar">
+  <div class="logo-area">
+    <div class="logo-mark">Lean<span class="logo-up">Up</span></div>
+    <div class="logo-sub">Marketing y Negocios Digitales</div>
+  </div>
+  <div class="nav">
+    <div class="nav-sect">Principal</div>
+    <div class="nav-item active" onclick="showView('dashboard',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      Dashboard
+    </div>
+    <div class="nav-item" onclick="showView('malla',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Malla Curricular
+    </div>
+    <div class="nav-sect">Mi Carrera</div>
+    <div class="nav-item" onclick="showView('profesional',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Perfil Profesional
+    </div>
+    <div class="nav-item" onclick="showView('salida',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+      Salida Laboral
+    </div>
+    <div class="nav-item" onclick="showView('portafolio',this)">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+      Portafolio
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="prog-lbl">Progreso de carrera</div>
+    <div class="prog-bar"><div class="prog-fill" id="sidebarProg" style="width:0%"></div></div>
+    <div class="prog-sub" id="sidebarLabel">0% completado</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+      <div class="unad-badge" style="margin-top:0;flex:1"><div class="unad-lbl">UNAD</div><div class="unad-snies">SNIES 116376</div></div>
+      <div class="cfg-gear-btn" id="gearBtn" onclick="showViewGear()" title="Configuración" style="margin-left:8px;flex-shrink:0">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2.5" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2.5" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="2.5" fill="currentColor" stroke="none"/></svg>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="main">
+  <div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="mobile-back" id="mobileBackBtn" onclick="mobileClosePanelOrBack()" style="background:none;border:none;cursor:pointer;padding:4px;color:var(--unad-blue)">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+    </div>
+    <div class="topbar-right">
+      <button class="btn btn-reset" id="resetBtn" onclick="resetChanges()" title="Reiniciar cambios no guardados" style="opacity:0.4;pointer-events:none">↩ Reiniciar</button>
+      <button class="btn btn-save" id="saveBtn" onclick="saveData()">💾 Guardar</button>
+    </div>
+  </div>
+  <div class="content" id="mainContent">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="h2">Hola, <span id="greetName" onclick="focusNameEdit()" title="Cambiar nombre" style="cursor:pointer;border-bottom:2px dashed var(--unad-gold);padding-bottom:1px">Usuario</span> 👋</div>
+      <div class="sub">Marketing y Negocios Digitales · UNAD · Virtual · 8 periodos · 144 créditos</div>
+      <div class="grid-4">
+        <div class="stat-card"><div class="stat-num c1" id="dPct">0%</div><div class="stat-lbl">Completado</div></div>
+        <div class="stat-card"><div class="stat-num c2" id="dProm">—</div><div class="stat-lbl">Promedio</div></div>
+        <div class="stat-card"><div class="stat-num c3" id="dApro">0</div><div class="stat-lbl">Materias aprobadas</div></div>
+        <div class="stat-card"><div class="stat-num c4" id="dCred">0</div><div class="stat-lbl">Créditos acumulados</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><div class="sect-title"><span class="gold-dot"></span>Progreso por periodo</div><div id="dBars"></div></div>
+        <div class="card">
+          <div class="sect-title"><span class="gold-dot"></span>Información del programa</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+            <div style="background:var(--bg3);border-radius:8px;padding:12px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Total créditos</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono';color:var(--unad-blue)">144</div></div>
+            <div style="background:var(--bg3);border-radius:8px;padding:12px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Periodos</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono';color:var(--unad-blue)">8</div></div>
+            <div style="background:rgba(255,184,28,0.07);border:1px solid rgba(255,184,28,0.25);border-radius:8px;padding:12px;grid-column:1/-1">
+              <div style="font-size:10px;color:#8A5F00;font-weight:600;margin-bottom:3px;letter-spacing:0.5px;text-transform:uppercase">Universidad</div>
+              <div style="font-size:12px;font-weight:600;color:var(--text)">UNAD · Universidad Nacional Abierta y a Distancia</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:2px">Modalidad virtual · SNIES 116376 · Res. 010006 de 2023</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MALLA -->
+    <div class="view" id="view-malla">
+      <div class="h2">Malla Curricular</div>
+      <div class="sub">Haz clic en una materia o electiva para ver su guía · Selecciona electivos · Ingresa tus notas</div>
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input class="search-inp" id="mallaSearch" type="text" placeholder="Buscar materia por nombre o descripción..." oninput="renderMalla()">
+      </div>
+      <div class="malla-grid">
+        <div id="mallaList"></div>
+      </div>
+    </div>
+
+    <!-- PERFIL PROFESIONAL -->
+    <div class="view" id="view-profesional">
+      <div class="h2">Perfil Profesional</div>
+      <div class="sub">Tu evolución académica y textos para LinkedIn — agrupados por periodo · Incluye electivos seleccionados</div>
+      <div class="grid-2">
+        <div class="card"><div class="sect-title"><span class="gold-dot"></span>Timeline de evolución</div><div id="timelineEl"></div></div>
+        <div class="card">
+          <div class="sect-title"><span class="gold-dot"></span>Traductor de LinkedIn</div>
+          <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" id="liSearch" type="text" placeholder="Buscar materia para LinkedIn..." oninput="renderLinkedin()"></div>
+          <div id="linkedinCards"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SALIDA LABORAL -->
+    <div class="view" id="view-salida">
+      <div class="h2">Diccionario de Salida Laboral</div>
+      <div class="sub">¿En qué trabajo real usarás cada materia? — agrupado por periodo · Incluye electivos seleccionados</div>
+      <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" id="salidaSearch" type="text" placeholder="Buscar materia o rol laboral..." oninput="renderSalida()"></div>
+      <div id="salidaList"></div>
+    </div>
+
+    <!-- PORTAFOLIO -->
+    <div class="view" id="view-portafolio">
+      <div class="h2">Generador de Portafolio</div>
+      <div class="sub">Proyectos reales que puedes construir con lo aprendido — por periodo · Incluye electivos seleccionados</div>
+      <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" id="portaSearch" type="text" placeholder="Buscar materia o tipo de proyecto..." oninput="renderPortafolio()"></div>
+      <div id="portafolioList"></div>
+    </div>
+
+    <!-- CONFIGURACIÓN -->
+    <div class="view" id="view-config">
+      <div class="h2">Configuración</div>
+      <div class="sub">Personaliza LeanUp a tu gusto</div>
+      <div class="cfg-card">
+        <div class="sect-title"><span class="gold-dot"></span>Perfil de usuario</div>
+        <div class="cfg-lbl">Tu nombre</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <input class="cfg-inp" id="cfgName" type="text" placeholder="Escribe tu nombre..." oninput="previewName()">
+          <button class="btn btn-save" onclick="saveUsername()" style="padding:8px 16px">Guardar nombre</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">Este nombre aparecerá en el saludo del Dashboard</div>
+      </div>
+      <div class="cfg-card">
+        <div class="sect-title"><span class="gold-dot"></span>Apariencia</div>
+        <div class="toggle-row">
+          <div><div class="tgl-lbl">Modo oscuro</div><div class="tgl-sub">Cambia la interfaz a colores oscuros</div></div>
+          <label class="switch"><input type="checkbox" id="darkToggle" onchange="toggleDark(this.checked)"><span class="slider-tgl"></span></label>
+        </div>
+      </div>
+      <div class="cfg-card">
+        <div class="sect-title"><span class="gold-dot"></span>Acerca de LeanUp</div>
+        <div class="about-box">
+          <div class="about-version">Lean<span>Up</span></div>
+          <div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.6">
+            Aplicación de gestión académica para estudiantes de Marketing y Negocios Digitales en la UNAD.<br>
+            Desarrollada por <strong style="color:var(--text)">Nilson Leandro Solís Asprilla</strong> como herramienta personal de seguimiento y planificación de carrera.
+          </div>
+          <div style="margin-top:14px;font-size:11px;color:var(--text3)">Versión 1.0 · 2025</div>
+        </div>
+        <div style="margin-top:16px">
+          <div class="cfg-lbl">Contacto</div>
+          <a class="contact-btn c-wa" href="https://wa.me/34645568327" target="_blank">💬 WhatsApp</a>
+          <a class="contact-btn c-mail" href="https://mail.google.com/mail/?view=cm&to=nsolisasprilla@icloud.com&su=Contacto%20desde%20LeanUp" target="_blank">✉️ Correo electrónico</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- DETAIL PANEL — overlay en móvil, columna en desktop -->
+<div id="detailPanel">
+  <div class="detail-panel">
+    <div class="empty-panel">
+      <div style="font-size:32px;opacity:0.15;margin-bottom:10px">📋</div>
+      <div style="font-size:13px;line-height:1.6">Selecciona una materia<br>para ver su guía completa</div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bottom-nav">
+  <div class="bottom-nav-inner">
+    <button class="bn-item active" id="bn-dashboard" onclick="showView('dashboard',null);setBottomNav('dashboard')">
+      <svg class="bn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <span class="bn-label">Inicio</span>
+    </button>
+    <button class="bn-item" id="bn-malla" onclick="showView('malla',null);setBottomNav('malla')">
+      <svg class="bn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      <span class="bn-label">Malla</span>
+    </button>
+    <button class="bn-item" id="bn-profesional" onclick="showView('profesional',null);setBottomNav('profesional')">
+      <svg class="bn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span class="bn-label">Perfil</span>
+    </button>
+    <button class="bn-item bn-more" id="bn-more" onclick="toggleMoreMenu()">
+      <svg class="bn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="5" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="19" cy="12" r="1.5" fill="currentColor"/></svg>
+      <span class="bn-label">Más</span>
+      <div class="bn-more-menu" id="moreMenu">
+        <div class="bn-more-item" id="bnm-salida" onclick="showView('salida',null);setBottomNav('salida');closeMoreMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+          Salida Laboral
+        </div>
+        <div class="bn-more-item" id="bnm-portafolio" onclick="showView('portafolio',null);setBottomNav('portafolio');closeMoreMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>
+          Portafolio
+        </div>
+        <div class="bn-more-item" id="bnm-config" onclick="showViewGear();setBottomNav('config');closeMoreMenu()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="9" cy="6" r="2.5" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="2.5" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="2.5" fill="currentColor" stroke="none"/></svg>
+          Configuración
+        </div>
+      </div>
+    </button>
+  </div>
+</nav>
+
+<script>
+const SAVE_KEY='leanup_v4';
+const TOTAL=144;
+
+/* ── DATA ── */
+const materias=[
+  {id:1,per:1,cod:"102968000",nombre:"Fundamentos de Mercadeo",cr:3,tipo:["Teórica"],dif:1,nota:null,
+   d:"Aprenderás qué es el marketing, cómo funciona y por qué las empresas lo necesitan para sobrevivir",
+   ab:"Es entender por qué la gente compra cosas y cómo las empresas convencen al cliente de que su producto es el mejor",
+   sal:"Community Manager, Asesor Comercial, Analista de Marketing",
+   sk:["Marketing fundamentals","Análisis de mercado","Segmentación","Mix de marketing"],
+   li:"Fundamentos de marketing estratégico: segmentación de audiencias, análisis del consumidor y diseño del mix de marketing para marcas competitivas",
+   po:"Análisis estratégico de marketing de una marca colombiana real: diagnóstico de situación, análisis DOFA, evaluación del mix de marketing y plan de recomendaciones accionables",prompt:"Hola, soy estudiante de Fundamentos de Mercadeo en la UNAD Colombia y tengo que hacer un análisis estratégico de marketing de una marca colombiana real. Quiero que me lleves paso a paso para aprenderlo bien, no que me lo hagas tú. Empieza por explicarme brevemente qué es un análisis estratégico de marketing y por qué es útil en el mundo real. Luego pregúntame qué marca quiero analizar y espera mi respuesta antes de continuar."},
+  {id:2,per:1,cod:"105001",nombre:"Fundamentos de Economía",cr:3,tipo:["Teórica","Números"],dif:2,nota:null,
+   d:"Aprenderás las reglas básicas de cómo funciona la economía: oferta, demanda, precios y mercados",
+   ab:"Es entender por qué cuando algo escasea sube de precio y por qué hay empleos en unos países y no en otros",
+   sal:"Analista de mercados, Consultor de negocios, Estratega comercial",
+   sk:["Análisis económico","Oferta y demanda","Entorno de mercados"],
+   li:"Interpretación del entorno económico para anticipar oportunidades de mercado y ajustar estrategias de precio, demanda y posicionamiento",
+   po:"Informe económico: cómo variables macroeconómicas (inflación, tasa de cambio, ingreso disponible) impactan el mercado y la estrategia de marketing de un producto de consumo masivo",prompt:"Hola, soy estudiante de Fundamentos de Economía en la UNAD Colombia y tengo que hacer un informe sobre cómo variables económicas afectan el mercado de un producto de consumo masivo. Quiero que me guíes paso a paso para entenderlo bien, no que me lo hagas tú. Primero explícame en palabras sencillas qué es una variable macroeconómica y dame 2-3 ejemplos concretos de Colombia. Luego pregúntame qué producto quiero analizar y espera mi respuesta."},
+  {id:3,per:1,cod:"80017",nombre:"Cátedra Unadista",cr:2,tipo:["Teórica"],dif:1,nota:null,
+   d:"Aprenderás cómo funciona la UNAD, su metodología online y cómo ser un buen estudiante a distancia",
+   ab:"Es la clase donde te explican cómo funciona esta universidad por internet y cómo organizarte bien",
+   sal:"Trabajo remoto, Gestión autónoma, Freelance digital",
+   sk:["Autogestión","Aprendizaje autónomo","Entornos virtuales"],
+   li:"Gestión del aprendizaje autónomo y productividad en entornos 100% remotos — base para el trabajo independiente y el freelancing digital",
+   po:"Sistema personal de productividad para estudiar y trabajar en remoto: rutinas, herramientas digitales, gestión del tiempo y estrategias de aprendizaje autónomo documentadas",prompt:"Hola, soy estudiante de la UNAD Colombia en modalidad 100% virtual y tengo que crear un sistema personal de productividad para estudiar en remoto. Quiero que me ayudes a construirlo paso a paso, aprendiendo en el proceso. Para empezar: explícame brevemente qué diferencia hay entre estudiar en remoto y estudiar de forma presencial en términos de gestión del tiempo. Luego pregúntame cómo es mi rutina actual y qué me cuesta más del estudio virtual, y espera mi respuesta."},
+  {id:4,per:1,cod:"40003",nombre:"Competencias Comunicativas",cr:3,tipo:["Teórica","Lectura"],dif:1,nota:null,
+   d:"Aprenderás a comunicarte bien: redactar, hablar en público y entender textos complejos",
+   ab:"Te enseñan a escribir correos sin errores, a no trabarse cuando hablas en público y a entender lo que lees",
+   sal:"Copywriter, Community Manager, Relacionista Público",
+   sk:["Redacción profesional","Comunicación oral","Escritura persuasiva"],
+   li:"Comunicación profesional de alto impacto: redacción persuasiva, presentaciones orales y escritura orientada a resultados en entornos corporativos y digitales",
+   po:"Kit de comunicación profesional: propuesta comercial, email de ventas y comunicado de prensa — tres piezas reales para una misma marca con copywriting efectivo",prompt:"Hola, soy estudiante de Competencias Comunicativas en la UNAD Colombia y tengo que crear un kit de comunicación profesional con 3 piezas para una misma marca. Quiero aprender a hacerlo bien contigo, paso a paso. Empieza explicándome cuál es la diferencia entre una propuesta comercial, un email de ventas y un comunicado de prensa — para qué sirve cada uno. Luego pregúntame qué tipo de marca o negocio quiero usar y espera mi respuesta antes de continuar."},
+  {id:5,per:1,cod:"200610",nombre:"Herramientas Digitales para la Gestión del Conocimiento",cr:4,tipo:["Práctica"],dif:1,nota:null,
+   d:"Aprenderás a usar herramientas digitales como Google Drive, Office y plataformas colaborativas",
+   ab:"Es aprender a usar el computador y las herramientas de internet para trabajar de forma organizada",
+   sal:"Trabajo remoto, Gestión de proyectos digitales, cualquier cargo moderno",
+   sk:["Google Workspace","Microsoft Office","Gestión documental","Colaboración remota"],
+   li:"Dominio de Google Workspace y herramientas de colaboración remota — gestión de proyectos digitales, documentación y trabajo asíncrono con equipos distribuidos",
+   po:"Manual operativo de trabajo remoto para equipo de marketing: flujos en Google Workspace, gestión de proyectos, comunicación asíncrona y buenas prácticas documentadas",prompt:"Hola, soy estudiante de Herramientas Digitales en la UNAD Colombia y tengo que crear un manual operativo de trabajo remoto para un equipo de marketing usando Google Workspace. Quiero aprenderlo contigo paso a paso. Para arrancar: explícame qué es un flujo de trabajo y por qué es importante tenerlo documentado en un equipo remoto. Luego pregúntame si ya uso alguna de las herramientas de Google Workspace y con qué familiaridad, y espera mi respuesta."},
+  {id:6,per:1,cod:"200611",nombre:"Pensamiento Lógico Matemático",cr:3,tipo:["Números"],dif:3,nota:null,
+   d:"Desarrollarás la capacidad de razonar de forma lógica y resolver problemas matemáticos básicos",
+   ab:"Es aprender a pensar con orden y resolver problemas de matemáticas sin perderte",
+   sal:"Analista de datos, Media Buyer, Especialista en métricas",
+   sk:["Razonamiento lógico","Resolución de problemas","Excel básico"],
+   li:"Pensamiento analítico y cuantitativo para interpretar datos, detectar patrones y tomar decisiones de negocio basadas en evidencia",
+   po:"Dashboard de métricas en Google Sheets para negocio local colombiano: ventas, costos, clientes y KPIs visualizados con gráficos y fórmulas listas para usar",prompt:"Hola, soy estudiante de Pensamiento Lógico Matemático en la UNAD Colombia y tengo que diseñar un dashboard de métricas en Google Sheets para un negocio local. Quiero que me enseñes a hacerlo paso a paso. Empieza explicándome qué es un dashboard de métricas y para qué le sirve a un negocio pequeño en la práctica. Luego pregúntame qué tipo de negocio quiero analizar y si tengo experiencia usando fórmulas en Google Sheets, y espera mi respuesta."},
+  {id:7,per:2,cod:"105015",nombre:"Fundamentos de Administración",cr:3,tipo:["Teórica"],dif:1,nota:null,
+   d:"Aprenderás a organizar, planear y gestionar recursos en una empresa de forma eficiente",
+   ab:"Te enseñan a manejar un negocio como si fuera tuyo: contratar, organizar y tomar decisiones",
+   sal:"Coordinador de equipos, Gerente de proyectos, Emprendedor",
+   sk:["Gestión de equipos","Planeación estratégica","Organización empresarial"],
+   li:"Gestión empresarial y planeación estratégica: organización de equipos, asignación eficiente de recursos y diseño de estructuras operativas para negocios digitales",
+   po:"Plan organizacional para agencia de marketing digital: estructura jerárquica, roles con responsabilidades, procesos internos y sistema de toma de decisiones documentado",prompt:"Hola, soy estudiante de Fundamentos de Administración en la UNAD Colombia y tengo que diseñar el plan organizacional de una agencia de marketing digital. Quiero que me guíes paso a paso para entender cada parte. Para comenzar: explícame qué es un plan organizacional y qué diferencia a una empresa bien organizada de una que no lo está. Luego pregúntame si quiero inventar la agencia o basarme en una real, y espera mi respuesta."},
+  {id:8,per:2,cod:"120003",nombre:"Microeconomía",cr:3,tipo:["Teórica","Números"],dif:3,nota:null,
+   d:"Aprenderás cómo funcionan los mercados a nivel de empresas y consumidores",
+   ab:"Es entender por qué una tienda sube o baja los precios según lo que vende y cuánta competencia tiene",
+   sal:"Pricing Manager, Analista de mercados, Estratega competitivo",
+   sk:["Análisis de precios","Estructura de mercados","Elasticidad de demanda"],
+   li:"Análisis de mercados y estructuras competitivas para diseñar estrategias de precios, detectar oportunidades y posicionar marcas con ventaja diferencial",
+   po:"Análisis de pricing estratégico para empresa tech colombiana: estructura del mercado, modelos de precios de competidores, elasticidad de demanda y estrategia recomendada",prompt:"Hola, soy estudiante de Microeconomía en la UNAD Colombia y tengo que hacer un análisis de pricing para una empresa tech colombiana. Quiero entender cómo funciona de verdad, no solo copiar una respuesta. Empieza explicándome en palabras simples qué es la elasticidad del precio y por qué importa al momento de ponerle precio a un producto digital. Luego pregúntame qué tipo de empresa quiero analizar (app, SaaS, agencia, etc.) y espera mi respuesta."},
+  {id:9,per:2,cod:"211622",nombre:"Estadística y Probabilidad",cr:4,tipo:["Números","Práctica"],dif:4,nota:null,
+   d:"Aprenderás a usar números y datos para entender tendencias, hacer predicciones y tomar decisiones",
+   ab:"Es aprender a contar y analizar datos para saber qué está pasando en un negocio",
+   sal:"Analista de datos, Media Buyer, Data-driven Marketer",
+   sk:["Análisis estadístico","Google Analytics","Excel avanzado","Probabilidad"],
+   li:"Análisis estadístico y probabilístico aplicado al marketing: interpretación de métricas, modelos predictivos y decisiones basadas en datos reales",
+   po:"Análisis estadístico de campaña de marketing digital: dataset simulado, KPIs calculados, correlaciones entre variables y recomendaciones estratégicas basadas en datos reales",prompt:"Hola, soy estudiante de Estadística y Probabilidad en la UNAD Colombia y tengo que hacer un análisis estadístico de una campaña de marketing digital. Quiero aprenderlo contigo de forma aplicada. Para arrancar: explícame con un ejemplo sencillo qué diferencia hay entre la media, la mediana y la desviación estándar, usando números de marketing digital. Luego pregúntame qué plataforma quiero analizar (Meta Ads o Google Ads) y qué tanto domino Excel o Google Sheets, y espera mi respuesta."},
+  {id:10,per:2,cod:"106003",nombre:"Contabilidad Financiera Básica",cr:3,tipo:["Números"],dif:3,nota:null,
+   d:"Aprenderás conceptos básicos de contabilidad: ingresos, gastos y llevar las cuentas de un negocio",
+   ab:"Es aprender a llevar la contabilidad de un negocio para saber si estás ganando o perdiendo dinero",
+   sal:"Controller, Emprendedor, Gerente con visión financiera",
+   sk:["Contabilidad básica","Estados financieros","Flujo de caja","ROI"],
+   li:"Lectura e interpretación de estados financieros, KPIs de rentabilidad y gestión de presupuestos de marketing con foco en ROI y sostenibilidad financiera",
+   po:"Estados financieros básicos de startup digital colombiana: balance general, estado de resultados y flujo de caja con proyección a 6 meses y punto de equilibrio calculado",prompt:"Hola, soy estudiante de Contabilidad Financiera Básica en la UNAD Colombia y tengo que elaborar los estados financieros de una startup digital colombiana. Quiero entender cada parte, no solo copiarlos. Para empezar: explícame en términos muy simples para qué sirven los 3 estados financieros básicos (balance general, estado de resultados y flujo de caja) y qué pregunta responde cada uno. Luego pregúntame qué tipo de negocio digital quiero usar como ejemplo y espera mi respuesta."},
+  {id:11,per:2,cod:"150001",nombre:"Fundamentos y Generalidades de la Investigación",cr:2,tipo:["Teórica","Lectura"],dif:2,nota:null,
+   d:"Aprenderás los pasos y métodos para investigar de forma ordenada y profesional",
+   ab:"Es aprender a buscar información de forma seria y ordenada, no solo googleando cualquier cosa",
+   sal:"Investigador de mercados, Analista estratégico, Planner de marca",
+   sk:["Metodología de investigación","Fuentes primarias","Análisis bibliográfico"],
+   li:"Investigación rigurosa con metodología científica: diseño de estudios, recolección de fuentes primarias y análisis de datos para proyectos de marketing basados en evidencia",
+   po:"Informe de investigación: tendencias de consumo digital en Colombia — metodología mixta con análisis de fuentes secundarias, encuesta propia, hallazgos e insights para marcas",prompt:"Hola, soy estudiante de Fundamentos de Investigación en la UNAD Colombia y tengo que hacer un informe de investigación sobre tendencias de consumo digital en Colombia. Quiero aprender la metodología correcta contigo. Para empezar: explícame qué diferencia hay entre un planteamiento del problema y una hipótesis, y dame un ejemplo relacionado con el consumo digital. Luego pregúntame qué aspecto del consumo digital me parece más interesante investigar y espera mi respuesta."},
+  {id:12,per:2,cod:"900001",nombre:"Inglés A1",cr:3,tipo:["Práctica"],dif:2,nota:null,
+   d:"Aprenderás las bases del inglés: vocabulario, gramática y frases esenciales",
+   ab:"Es aprender a saludar, presentarte y decir cosas básicas en inglés",
+   sal:"Comunicación con herramientas globales, equipos internacionales",
+   sk:["Inglés básico A1","Vocabulario esencial","Gramática básica"],
+   li:"Iniciación en inglés profesional con foco en terminología de marketing digital, herramientas globales y comunicación básica con equipos internacionales",
+   po:"Glosario de 40 términos de marketing digital en inglés: definición, pronunciación, equivalente en español y ejemplo de uso real en contexto laboral — útil para estudiar y consultar",prompt:"Hello! I am a student at UNAD Colombia, level A1 English, studying Marketing Digital. I need to create a glossary of 40 marketing digital terms in English. I want to learn with you, step by step. Please start by teaching me 5 basic terms from Social Media category. For each term, tell me the word, what it means in simple Spanish, and one easy example sentence in English. After I read them, ask me if I understood before we continue with more terms. Go slow, I am a beginner."},
+  {id:13,per:3,cod:"700004",nombre:"Prestación Servicio Social Unadista",cr:3,tipo:["Práctica"],dif:1,nota:null,
+   d:"Realizarás un servicio comunitario aplicando tus conocimientos universitarios",
+   ab:"Es hacer un proyecto de ayuda a la comunidad usando lo que has aprendido",
+   sal:"Liderazgo social, Responsabilidad corporativa, ONG",
+   sk:["Gestión de proyectos sociales","Liderazgo comunitario","RSE"],
+   li:"Liderazgo de proyectos sociales con impacto comunitario real, gestión de stakeholders y capacidad para comunicar resultados de RSE con métricas de beneficiarios",
+   po:"Informe de impacto de intervención comunitaria universitaria: descripción de la acción, métricas de beneficiarios, testimonios y lecciones aprendidas para aplicar en la carrera",prompt:"Hola, soy estudiante de Servicio Social Unadista en la UNAD Colombia y tengo que documentar el impacto de mi intervención comunitaria en un informe profesional. Quiero aprender a hacerlo bien contigo. Para arrancar: explícame qué diferencia hay entre un informe académico normal y un informe de impacto social, y por qué medir el impacto con datos importa. Luego pregúntame en qué consistió mi proyecto de servicio social y con qué comunidad trabajé, y espera mi respuesta."},
+  {id:14,per:3,cod:"110013",nombre:"Generación de Ideas de Negocio",cr:3,tipo:["Práctica"],dif:1,nota:null,
+   d:"Aprenderás técnicas para generar ideas de negocios viables y validarlas antes de lanzarlas",
+   ab:"Es aprender a inventarse ideas de negocios y saber si van a funcionar antes de gastar el dinero",
+   sal:"Emprendedor, Consultor de Innovación, Product Manager",
+   sk:["Design Thinking","Ideación","MVP","Business Model Canvas"],
+   li:"Ideación y validación de negocios con Design Thinking, Business Model Canvas y metodología lean — del concepto al MVP con criterio de mercado",
+   po:"Startup digital validada: Business Model Canvas con 9 bloques desarrollados, validación de supuestos críticos y pitch deck de 8 slides listo para presentar a inversionistas",prompt:"Hola, soy estudiante de Generación de Ideas de Negocio en la UNAD Colombia y tengo que desarrollar una propuesta de startup digital validada con Business Model Canvas y pitch deck. Quiero construirla contigo paso a paso, entendiendo cada decisión. Empieza explicándome para qué sirve el Business Model Canvas y cuál es la diferencia entre una idea de negocio y un modelo de negocio validado. Luego pregúntame si ya tengo una idea en mente o si necesito ayuda para encontrar una, y espera mi respuesta."},
+  {id:15,per:3,cod:"126007",nombre:"Macroeconomía",cr:3,tipo:["Teórica","Números"],dif:3,nota:null,
+   d:"Aprenderás cómo funciona la economía de un país: PIB, inflación, desempleo y políticas",
+   ab:"Es entender por qué un país puede ser rico o pobre, por qué sube la gasolina y cómo afecta a los negocios",
+   sal:"Analista de mercados internacionales, estratega de expansión",
+   sk:["Análisis macroeconómico","Indicadores económicos","Política monetaria"],
+   li:"Análisis macroeconómico estratégico: interpretación de inflación, tasas de interés y ciclos económicos para adaptar estrategias de marketing y anticipar cambios de mercado",
+   po:"Análisis macroeconómico de Colombia 2025: PIB, inflación, desempleo y tasa de cambio — y cómo estas variables impactan presupuestos y decisiones de inversión en marketing digital",prompt:"Hola, soy estudiante de Macroeconomía en la UNAD Colombia y tengo que hacer un análisis del entorno macroeconómico de Colombia y su impacto en el marketing digital. Quiero entenderlo bien, no solo tener un documento. Para empezar: explícame con un ejemplo muy concreto cómo la inflación en Colombia puede afectar el presupuesto de una agencia de marketing digital. Luego pregúntame qué tanto conozco sobre los indicadores económicos del país y espera mi respuesta."},
+  {id:16,per:3,cod:"102967999",nombre:"Finanzas y Fijación de Precios",cr:3,tipo:["Números","Práctica"],dif:3,nota:null,
+   d:"Aprenderás cómo fijar el precio de un producto o servicio de forma estratégica y rentable",
+   ab:"Es aprender a decidir cuánto cobrar por algo para ganar dinero sin espantar a los clientes",
+   sal:"Brand Manager, Product Manager, Gerente Comercial",
+   sk:["Pricing estratégico","Análisis de costos","Márgenes de rentabilidad"],
+   li:"Estrategias avanzadas de pricing con base en análisis de costos, elasticidad de la demanda y posicionamiento competitivo — alineadas con objetivos de rentabilidad",
+   po:"Estrategia de pricing completa para producto digital: análisis de competencia, modelos evaluados, simulación de márgenes por escenario y precio final recomendado con justificación financiera",prompt:"Hola, soy estudiante de Finanzas y Fijación de Precios en la UNAD Colombia y tengo que diseñar la estrategia de pricing de un producto digital colombiano. Quiero aprender el proceso de verdad. Para comenzar: explícame cuáles son las 3 formas principales de ponerle precio a algo (basado en costos, en competencia y en valor) y dame un ejemplo sencillo de cada una con un producto digital. Luego pregúntame qué tipo de producto digital quiero analizar y espera mi respuesta."},
+  {id:17,per:3,cod:"105019",nombre:"Investigación Cualitativa",cr:3,tipo:["Teórica","Práctica"],dif:2,nota:null,
+   d:"Aprenderás a investigar usando entrevistas, focus groups y observación para entender a las personas",
+   ab:"Es aprender a hacer preguntas profundas para entender por qué la gente hace lo que hace",
+   sal:"Investigador de mercados, UX Researcher, Planner estratégico",
+   sk:["Focus group","Entrevistas en profundidad","Análisis de insights","UX Research"],
+   li:"Investigación cualitativa del consumidor: diseño de entrevistas en profundidad, grupos focales y análisis de narrativas para extraer insights accionables de marca",
+   po:"Investigación cualitativa: comportamiento digital de millennials colombianos — guía de focus group virtual, análisis de narrativas emergentes e insights accionables para marcas",prompt:"Hola, soy estudiante de Investigación Cualitativa en la UNAD Colombia y tengo que hacer una investigación sobre el comportamiento digital de millennials colombianos. Quiero aprender el proceso metodológico contigo paso a paso. Para empezar: explícame en qué se diferencia una investigación cualitativa de una cuantitativa y cuándo conviene usar cada una. Luego pregúntame qué aspecto del comportamiento digital de los millennials me parece más interesante explorar y espera mi respuesta."},
+  {id:18,per:3,cod:"900002",nombre:"Inglés A2",cr:2,tipo:["Práctica"],dif:2,nota:null,
+   d:"Avanzarás en inglés: podrás mantener conversaciones básicas y entender textos sencillos",
+   ab:"Ya puedes hablar un poco más en inglés: presentarte, pedir cosas y entender conversaciones simples",
+   sal:"Comunicación con herramientas y clientes internacionales",
+   sk:["Inglés A2","Conversación básica","Lectura de textos simples"],
+   li:"Inglés A2 aplicado a marketing digital: lectura de reportes, uso de herramientas globales y comunicación básica en entornos de trabajo internacionales",
+   po:"Presentación ejecutiva en inglés de producto colombiano para América Latina: 6 slides con contenido completo y script de presentación para practicar inglés en contexto profesional real",prompt:"Hello! I am a student at UNAD Colombia, English level A2, studying Marketing Digital. I need to create a presentation in English about a Colombian product for a Latin American market. I want to learn with you, not just receive the answer. Let us start with the first slide: Product Overview. Explain to me what information should go in this slide and why. Then ask me what product I want to present and which country I want to target, and wait for my answer before continuing."},
+  {id:19,per:4,cod:"102967998",nombre:"Creatividad Digital",cr:3,tipo:["Práctica"],dif:2,nota:null,
+   d:"Aprenderás a crear contenido visual y creativo para medios digitales usando herramientas de diseño",
+   ab:"Es aprender a hacer imágenes, videos y publicaciones bonitas para redes sociales e internet",
+   sal:"Content Creator, Diseñador digital, Social Media Manager",
+   sk:["Canva","Adobe Express","Diseño para redes","Storytelling visual"],
+   li:"Producción de contenido digital creativo para campañas multicanal: copy, piezas gráficas y formatos adaptados a Instagram, TikTok, YouTube y plataformas de conversión",
+   po:"Pack de contenido digital para marca colombiana: 15 piezas en Instagram, TikTok y LinkedIn con brief creativo, copy completo de cada pieza y calendario de publicación de 30 días",prompt:"Hola, soy estudiante de Creatividad Digital en la UNAD Colombia y tengo que crear un pack de 15 piezas de contenido para una marca colombiana en Instagram, TikTok y LinkedIn. Quiero aprenderlo contigo, no que me lo hagas completo. Para arrancar: explícame qué es un brief creativo y por qué es el primer paso antes de crear cualquier contenido. Luego pregúntame qué tipo de marca quiero trabajar y qué plataforma me parece más importante, y espera mi respuesta."},
+  {id:20,per:4,cod:"106004",nombre:"Legislación Comercial y Laboral",cr:3,tipo:["Teórica","Lectura"],dif:2,nota:null,
+   d:"Aprenderás las leyes básicas que rigen los negocios y las relaciones laborales en Colombia",
+   ab:"Es aprender las reglas legales del trabajo y los negocios para no meterte en problemas",
+   sal:"Cualquier rol empresarial: contratos, compliance, emprendimiento",
+   sk:["Derecho comercial","Contratos digitales","Normativa laboral","Compliance"],
+   li:"Conocimiento del marco legal comercial y laboral colombiano — contratos, propiedad intelectual, regulación digital y cumplimiento normativo en negocios y agencias de marketing",
+   po:"Guía legal para emprendedores digitales colombianos: tipos de empresa, registro de marca, contratos esenciales, Habeas Data y obligaciones tributarias — explicado sin tecnicismos",prompt:"Hola, soy estudiante de Legislación Comercial y Laboral en la UNAD Colombia y tengo que crear una guía legal práctica para emprendedores digitales colombianos. Quiero entender cada tema bien, no memorizar sin comprender. Para empezar: explícame en lenguaje muy sencillo cuáles son las diferencias principales entre crear una SAS, trabajar como persona natural y crear una empresa unipersonal en Colombia, y cuándo conviene cada opción. Luego pregúntame si ya tengo o pienso tener un negocio propio y espera mi respuesta."},
+  {id:21,per:4,cod:"101267424",nombre:"Investigación Cuantitativa",cr:4,tipo:["Números","Práctica"],dif:3,nota:null,
+   d:"Aprenderás a hacer encuestas, analizar datos numéricos y sacar conclusiones estadísticas",
+   ab:"Es aprender a hacer encuestas a mucha gente y usar los números para saber qué piensa la mayoría",
+   sal:"Investigador de mercados, Analista de datos, Data-driven Marketer",
+   sk:["Encuestas","SPSS","Análisis cuantitativo","Excel avanzado"],
+   li:"Investigación cuantitativa de mercados: encuestas, análisis estadístico de datos y presentación de hallazgos para decisiones de marketing orientadas a resultados medibles",
+   po:"Estudio cuantitativo de hábitos de consumo digital en Colombia: encuesta de 15 preguntas, dataset de 100 respuestas, análisis estadístico completo e insights para marcas digitales",prompt:"Hola, soy estudiante de Investigación Cuantitativa en la UNAD Colombia y tengo que hacer un estudio cuantitativo sobre hábitos de consumo digital en Colombia. Quiero aprender a diseñarlo bien, paso a paso. Para empezar: explícame qué hace que una pregunta de encuesta sea buena o mala, y dame un ejemplo de una pregunta mal formulada y su versión mejorada. Luego pregúntame cuál es el tema específico dentro del consumo digital que más me interesa investigar y espera mi respuesta."},
+  {id:22,per:4,cod:"105016",nombre:"Fundamentos de Negocios Internacionales",cr:3,tipo:["Teórica"],dif:2,nota:null,
+   d:"Aprenderás cómo funcionan los negocios entre países: exportaciones, importaciones y comercio global",
+   ab:"Es entender cómo Colombia puede vender cosas a otros países y cómo traer productos de afuera",
+   sal:"Export Manager, consultor de negocios internacionales",
+   sk:["Comercio internacional","Exportaciones","Tratados de libre comercio"],
+   li:"Análisis del entorno competitivo global y estrategias de internacionalización: identificación de mercados objetivo, modelos de entrada y adaptación cultural de la oferta",
+   po:"Plan de internacionalización para startup colombiana digital: análisis del mercado destino, modo de entrada, adaptación de la oferta, estrategia de marketing local y proyección financiera",prompt:"Hola, soy estudiante de Fundamentos de Negocios Internacionales en la UNAD Colombia y tengo que diseñar un plan de internacionalización para una PYME digital colombiana. Quiero entender cada decisión del proceso. Para comenzar: explícame cuáles son los 3 modos de entrada más comunes a un mercado internacional y cuándo conviene cada uno para una empresa digital pequeña. Luego pregúntame qué tipo de empresa colombiana quiero internacionalizar y a qué mercado, y espera mi respuesta."},
+  {id:23,per:4,cod:"900003",nombre:"Inglés B1",cr:3,tipo:["Práctica"],dif:2,nota:null,
+   d:"Alcanzarás nivel intermedio de inglés: podrás comunicarte en situaciones cotidianas y laborales",
+   ab:"Ya puedes mantener conversaciones en inglés sobre trabajo y vida cotidiana sin trabarte tanto",
+   sal:"Empresas multinacionales, agencias internacionales, trabajo remoto global",
+   sk:["Inglés B1","Comunicación profesional en inglés","Business English"],
+   li:"Inglés B1 para entornos profesionales: redacción de emails, comprensión de briefs internacionales y comunicación fluida en reuniones con clientes o equipos globales",
+   po:"Marketing campaign analysis written in English: performance metrics review, what worked and what did not, and 5 strategic recommendations — professional B1 English report",prompt:"Hello! I am a Marketing student at UNAD Colombia with English level B1. I need to write a marketing campaign analysis in English. I want to learn to do it step by step, not just receive the complete text. Let us start with the first section: Campaign Overview. Explain to me what information I need to include and why each piece matters. Then ask me what campaign I want to analyze — real or invented — and wait for my answer before we continue."},
+  {id:24,per:5,cod:"102967997",nombre:"Comportamiento del Consumidor",cr:4,tipo:["Teórica","Práctica"],dif:2,nota:null,
+   d:"Entenderás por qué la gente compra lo que compra y cómo influir en su decisión de compra",
+   ab:"Es entender por qué tu vecino prefiere una marca aunque otra sea más barata",
+   sal:"Brand Manager, Planner estratégico, Performance Marketer",
+   sk:["Consumer insights","Psicología del consumidor","Buyer persona","Neuromarketing"],
+   li:"Consumer insights: análisis del comportamiento del consumidor digital, mapas de empatía y customer journey para diseñar experiencias de marca que conviertan",
+   po:"Buyer persona completo para marca de moda sostenible: perfil demográfico y psicográfico, mapa de empatía, customer journey completo y mensajes clave por etapa del funnel",prompt:"Hola, soy estudiante de Comportamiento del Consumidor en la UNAD Colombia y tengo que construir un buyer persona completo para una marca de moda sostenible colombiana. Quiero aprenderlo bien contigo. Para empezar: explícame qué es un buyer persona, por qué es diferente a un simple segmento de mercado, y qué preguntas clave hay que responder para crearlo. Luego pregúntame si quiero trabajar con una marca real o inventada, y espera mi respuesta."},
+  {id:25,per:5,cod:"102967993",nombre:"Modelos de Negocio Digital",cr:3,tipo:["Práctica"],dif:2,nota:null,
+   d:"Aprenderás cómo funcionan los modelos de negocio en internet: marketplaces, SaaS, suscripciones",
+   ab:"Es entender cómo empresas como Netflix, Rappi o Mercado Libre ganan dinero con internet",
+   sal:"Product Manager, Emprendedor digital, Growth Hacker",
+   sk:["Business Model Canvas","Modelos freemium","Marketplace","SaaS"],
+   li:"Diseño y validación de modelos de negocio digitales con foco en escalabilidad, propuesta de valor diferencial y estrategias de monetización sostenible",
+   po:"Business Model Canvas completo para agencia de marketing digital: los 9 bloques con profundidad real, validación de supuestos y proyección financiera de los primeros 12 meses",prompt:"Hola, soy estudiante de Modelos de Negocio Digital en la UNAD Colombia y tengo que diseñar el Business Model Canvas completo de una agencia de marketing digital con proyección financiera. Quiero entender cada bloque del Canvas de verdad. Para empezar: explícame la diferencia entre los bloques de Propuesta de Valor y Fuentes de Ingreso, porque siempre los confundo. Luego pregúntame qué tipo de agencia quiero diseñar y a qué tipo de clientes se va a enfocar, y espera mi respuesta."},
+  {id:26,per:5,cod:"900005",nombre:"Inglés B2",cr:3,tipo:["Práctica"],dif:3,nota:null,
+   d:"Alcanzarás nivel intermedio-avanzado de inglés: podrás trabajar, presentar y negociar en inglés",
+   ab:"Ya manejas el inglés bastante bien: reuniones, emails profesionales, películas sin subtítulos",
+   sal:"Agencias internacionales, trabajo con clientes en USA, trabajo remoto global",
+   sk:["Inglés B2","Presentaciones ejecutivas en inglés","Negociación en inglés"],
+   li:"Inglés B2 para comunicación corporativa avanzada: presentaciones a stakeholders internacionales, negociación y redacción de documentos estratégicos en inglés",
+   po:"Full commercial proposal in English for an international tech client: executive summary, services, pricing, timeline and why us — professional B2 level business document",prompt:"Hello! I am a Marketing student at UNAD Colombia with English level B2. I need to write a full commercial proposal in English for an international client. I want to build it with you step by step, understanding each section. Let us start with the Executive Summary — the most important part. Explain to me what makes a strong executive summary in a business proposal and what mistakes people usually make. Then ask me what kind of agency I am representing and what client I am pitching to, and wait for my answer."},
+  {id:27,per:6,cod:"127028",nombre:"Ecommerce",cr:4,tipo:["Práctica"],dif:2,nota:null,
+   d:"Aprenderás a montar y gestionar tiendas online, optimizar conversiones y vender por internet",
+   ab:"Es aprender a poner una tienda en internet para que la gente pueda comprar desde su casa",
+   sal:"E-commerce Manager, Digital Sales Manager, Shopify Expert",
+   sk:["Shopify","WooCommerce","CRO","Email automation","Funnels de venta"],
+   li:"Gestión estratégica de e-commerce: optimización del funnel de conversión, automatización de procesos, gestión de catálogos y experiencia de compra en plataformas digitales",
+   po:"E-commerce completo para marca colombiana: arquitectura de tienda, estrategia de tráfico orgánico y pagado, flujos de email automation y proyección de métricas de conversión",prompt:"Hola, soy estudiante de E-commerce en la UNAD Colombia y tengo que diseñar una tienda online completa para una marca colombiana. Es un proyecto grande y quiero aprenderlo contigo parte por parte. Para empezar: explícame cuáles son los 3 errores más comunes que cometen los emprendedores colombianos al montar su primera tienda online y cómo evitarlos. Luego pregúntame qué tipo de producto o marca quiero vender y espera mi respuesta antes de arrancar con la arquitectura de la tienda."},
+  {id:28,per:6,cod:"102968006",nombre:"Marketing Sustentable",cr:3,tipo:["Teórica"],dif:1,nota:null,
+   d:"Aprenderás a integrar responsabilidad ambiental y social en las estrategias de marketing",
+   ab:"Es aprender a hacer marketing que no dañe el planeta ni engañe a la gente con falsas promesas verdes",
+   sal:"Brand Manager ESG, Marketing Director, consultor de sostenibilidad",
+   sk:["Marketing sostenible","ESG","Greenwashing awareness"],
+   li:"Marketing sostenible y comunicación con propósito: estrategias alineadas con objetivos ESG, economía circular y posicionamiento de marca responsable ante consumidores conscientes",
+   po:"Estrategia de marketing sostenible: diagnóstico de impacto ambiental y social, objetivos ESG, plan de comunicación responsable y KPIs de sostenibilidad para empresa colombiana",prompt:"Hola, soy estudiante de Marketing Sustentable en la UNAD Colombia y tengo que diseñar una estrategia de marketing sostenible para una empresa colombiana. Quiero entender bien la diferencia entre marketing sostenible real y greenwashing. Para empezar: explícame qué es el greenwashing con un ejemplo real de una marca que lo haya hecho y las consecuencias que tuvo. Luego pregúntame qué tipo de empresa colombiana quiero analizar y espera mi respuesta antes de continuar."},
+  {id:29,per:6,cod:"102968001",nombre:"Gerencia Comercial",cr:3,tipo:["Teórica","Práctica"],dif:2,nota:null,
+   d:"Aprenderás a dirigir equipos de ventas, gestionar clientes clave y diseñar estrategias comerciales",
+   ab:"Es aprender a ser el jefe de un equipo de vendedores: motivarlos, ponerles metas y que vendan más",
+   sal:"Director Comercial, Gerente de Ventas, Key Account Manager",
+   sk:["Gestión de equipos de ventas","KPIs comerciales","CRM","Negociación"],
+   li:"Gestión comercial estratégica: liderazgo de equipos de ventas, diseño de estrategias de crecimiento de ingresos y gestión de canales para alcanzar objetivos de revenue",
+   po:"Plan comercial anual para agencia digital: metas de ventas con desglose mensual, estrategia de cuentas por segmento, proceso de ventas completo y KPIs de seguimiento",prompt:"Hola, soy estudiante de Gerencia Comercial en la UNAD Colombia y tengo que diseñar el plan comercial anual de una agencia de servicios digitales. Quiero entender cómo funciona un plan comercial de verdad. Para comenzar: explícame cuál es la diferencia entre una meta de ventas y una estrategia de ventas, porque mucha gente los confunde. Luego pregúntame si quiero trabajar con una agencia inventada o si tengo una referencia real en mente, y espera mi respuesta."},
+  {id:30,per:6,cod:"102968005",nombre:"Logística",cr:3,tipo:["Teórica"],dif:2,nota:null,
+   d:"Aprenderás cómo se mueven los productos desde que se producen hasta que llegan al cliente final",
+   ab:"Es entender cómo un producto viaja desde la fábrica hasta tu puerta y por qué a veces llega tarde",
+   sal:"Logística e-commerce, Supply Chain Manager, operaciones en marketplaces",
+   sk:["Supply chain","Logística e-commerce","Fulfillment","Last mile"],
+   li:"Logística e-commerce: gestión de cadenas de suministro, fulfillment, última milla y optimización de operaciones para garantizar experiencias de compra sin fricción",
+   po:"Manual de operaciones logísticas para e-commerce colombiano: gestión de proveedores, almacenamiento, proceso de despacho, operadores logísticos y política de devoluciones",prompt:"Hola, soy estudiante de Logística en la UNAD Colombia y tengo que crear el manual de operaciones logísticas de una tienda online colombiana. Quiero entender cómo funciona esto en la práctica real. Para empezar: explícame cuál es el recorrido completo de un pedido desde que el cliente lo hace hasta que llega a su puerta, mencionando los puntos donde más cosas pueden salir mal. Luego pregúntame qué tipo de tienda online quiero diseñar y espera mi respuesta."},
+  {id:31,per:7,cod:"127014",nombre:"Marketing Internacional",cr:3,tipo:["Teórica","Práctica"],dif:2,nota:null,
+   d:"Aprenderás a adaptar estrategias de marketing para diferentes países, culturas e idiomas",
+   ab:"Es aprender a vender en otros países sin meter la pata con las costumbres o el idioma de cada lugar",
+   sal:"Global Marketing Manager, Export Marketing, agencias internacionales",
+   sk:["Localización de contenido","Estrategia glocal","Marketing multicultural"],
+   li:"Marketing internacional y localización: diseño de estrategias adaptadas culturalmente, localización de contenidos y gestión de campañas para audiencias de mercados globales",
+   po:"Plan de entrada al mercado de España o Estados Unidos para marca digital colombiana: análisis del mercado, localización, canales de adquisición y roadmap de expansión de 12 meses",prompt:"Hola, soy estudiante de Marketing Internacional en la UNAD Colombia y tengo que diseñar un plan de entrada al mercado de España o Estados Unidos para una marca digital colombiana. Quiero entender cada decisión estratégica. Para empezar: explícame qué es la localización en marketing internacional y en qué se diferencia de simplemente traducir el contenido. Dame un ejemplo real de una marca latinoamericana que haya entrado bien (o mal) a un mercado extranjero. Luego pregúntame qué marca y qué mercado destino quiero trabajar, y espera mi respuesta."},
+  {id:32,per:7,cod:"102477411",nombre:"Marketing Digital",cr:4,tipo:["Práctica"],dif:2,nota:null,
+   d:"Aprenderás todas las herramientas del marketing digital: SEO, SEM, redes sociales, email y más",
+   ab:"Es aprender a usar internet completo para que más gente conozca un negocio",
+   sal:"Digital Marketing Manager, Growth Hacker, Trafficker Digital",
+   sk:["SEO","SEM","Google Ads","Meta Ads","Email marketing","Analytics"],
+   li:"Marketing digital integral: gestión de estrategias multicanal (SEO, SEM, redes sociales, email) con foco en performance, atribución y maximización del ROI por canal",
+   po:"Estrategia de marketing digital 360° para empresa colombiana: análisis de situación, objetivos SMART, estrategia por canal (SEO, SEM, redes, email), presupuesto y dashboard de KPIs",prompt:"Hola, soy estudiante de Marketing Digital en la UNAD Colombia y tengo que hacer mi estrategia de marketing digital 360° final, que es mi proyecto más importante del semestre. Quiero construirla contigo desde cero, tomando buenas decisiones en cada paso. Para empezar: explícame por qué una estrategia de marketing digital siempre tiene que arrancar con un análisis de situación antes de elegir cualquier canal o táctica. Luego pregúntame qué empresa colombiana quiero usar para el proyecto y espera mi respuesta."},
+  {id:33,per:7,cod:"102967995",nombre:"Business Intelligence",cr:3,tipo:["Práctica","Números"],dif:4,nota:null,
+   d:"Aprenderás a convertir grandes volúmenes de datos en información útil para tomar mejores decisiones",
+   ab:"Es aprender a que el computador analice millones de datos y te diga qué está pasando en tu negocio",
+   sal:"Business Analyst, Marketing Intelligence Analyst, Data-driven Manager",
+   sk:["Power BI","Tableau","SQL básico","Dashboards","Data storytelling"],
+   li:"Business Intelligence y visualización de datos: diseño de dashboards estratégicos en Power BI o Looker Studio para traducir datos complejos en decisiones de negocio claras",
+   po:"Dashboard de Business Intelligence en Power BI o Looker Studio para agencia de marketing: diseño por paneles, métricas seleccionadas y manual de uso para el equipo directivo",prompt:"Hola, soy estudiante de Business Intelligence en la UNAD Colombia y tengo que diseñar un dashboard de BI completo para una agencia de marketing digital. Quiero entender qué hace bueno a un dashboard antes de diseñar uno. Para empezar: explícame cuál es la diferencia entre un reporte y un dashboard, y qué principios hacen que un dashboard sea útil de verdad (no solo bonito). Luego pregúntame si tengo acceso a Power BI, Looker Studio o Tableau, o si prefiero hacer un mockup detallado, y espera mi respuesta."},
+  {id:34,per:7,cod:"102967994",nombre:"Branding",cr:3,tipo:["Teórica","Práctica"],dif:2,nota:null,
+   d:"Aprenderás a construir y gestionar marcas estratégicamente: identidad, posicionamiento y valor",
+   ab:"Es aprender por qué la gente prefiere Nike sobre otra marca de zapatos aunque sean similares",
+   sal:"Brand Manager, Brand Strategist, Creative Director",
+   sk:["Brand strategy","Identidad de marca","Posicionamiento","Brand equity","Manual de marca"],
+   li:"Branding estratégico y gestión de identidad de marca: construcción de brand equity, arquitectura de marca y estrategias de posicionamiento para diferenciarse en mercados competitivos",
+   po:"Manual de marca completo para negocio digital colombiano: estrategia de naming, identidad visual, tono de comunicación con ejemplos y guía de usos correctos e incorrectos",prompt:"Hola, soy estudiante de Branding en la UNAD Colombia y tengo que crear el manual de marca completo de un negocio digital colombiano desde cero. Quiero aprender a construir una marca con criterio, no solo con intuición. Para empezar: explícame cuál es la diferencia entre identidad de marca e imagen de marca, y por qué el propósito de la marca debe definirse antes de elegir colores o logos. Luego pregúntame qué tipo de negocio digital quiero brandear y espera mi respuesta."},
+  {id:35,per:8,cod:"102968007",nombre:"Plan de Marketing",cr:4,tipo:["Práctica"],dif:3,nota:null,
+   d:"Aprenderás a crear un plan de marketing completo y profesional desde el análisis hasta la ejecución",
+   ab:"Es el trabajo final grande: crear el plan de marketing completo de un negocio real",
+   sal:"Marketing Manager, Director de Marketing, Consultor estratégico",
+   sk:["Planificación estratégica","Análisis DOFA","Objetivos SMART","Presupuesto de marketing"],
+   li:"Diseño de planes de marketing 360°: análisis de mercado, definición de objetivos SMART, tácticas por canal, asignación de presupuesto y métricas de seguimiento para marcas y agencias",
+   po:"Plan de marketing estratégico integrador: diagnóstico PESTEL y Porter, DOFA estratégico, objetivos SMART, estrategia de posicionamiento, tácticas por canal y dashboard de KPIs",prompt:"Hola, soy estudiante de último semestre de Marketing y Negocios Digitales en la UNAD Colombia. Mi proyecto integrador es el plan de marketing estratégico más completo de toda la carrera y quiero hacerlo muy bien. Necesito que me guíes paso a paso como un consultor senior que me está mentoreando. Para arrancar: explícame cuál es la lógica detrás de la estructura de un plan de marketing — por qué el análisis va primero que los objetivos, y los objetivos antes que la estrategia. Luego pregúntame qué empresa quiero analizar y espera mi respuesta antes de continuar."},
+  {id:36,per:8,cod:"102968004",nombre:"Innovación y Emprendimiento Digital",cr:3,tipo:["Práctica"],dif:2,nota:null,
+   d:"Aprenderás a crear y lanzar negocios digitales propios aplicando metodologías ágiles",
+   ab:"Es la clase donde te enseñan a crear tu propia empresa digital y a innovar",
+   sal:"Emprendedor, Freelancer senior, Startup Founder, Innovation Manager",
+   sk:["Lean Startup","Metodologías ágiles","Pitch deck","Growth hacking"],
+   li:"Emprendimiento digital con mentalidad ágil: lanzamiento de negocios digitales, validación rápida de mercado, growth hacking y escalabilidad con recursos limitados",
+   po:"Startup digital end-to-end: validación del problema, solución y MVP definido, Business Model Canvas con proyección financiera y pitch deck de 10 slides para Demo Day",prompt:"Hola, soy estudiante de último semestre de Marketing Digital en la UNAD Colombia y tengo que desarrollar una startup digital completa lista para inversionistas. Es el proyecto más ambicioso de la carrera y quiero construirlo bien contigo. Para empezar: explícame por qué lo más importante en una startup NO es la idea sino el problema, y cómo saber si un problema vale la pena resolver antes de invertir tiempo y dinero. Luego pregúntame si ya tengo una idea o problema identificado, y espera mi respuesta."},
+  {id:37,per:8,cod:"102968008",nombre:"Publicidad y Promoción",cr:3,tipo:["Práctica"],dif:2,nota:null,
+   d:"Aprenderás a crear campañas publicitarias integrales: concepto creativo, mensaje y medios",
+   ab:"Es aprender a hacer anuncios que la gente no ignore, para todos los medios",
+   sal:"Publicista, Creative Director, Media Planner, Account Manager",
+   sk:["Estrategia creativa","Copywriting","Media planning","Brief creativo","Campañas 360°"],
+   li:"Publicidad y promoción 360°: estrategia creativa, planificación de medios pagados y orgánicos, briefing de campañas y evaluación de impacto en audiencias objetivo",
+   po:"Campaña publicitaria 360° para lanzamiento de producto digital: concepto creativo central, piezas por canal (digital y offline), plan de medios con presupuesto y KPIs de evaluación",prompt:"Hola, soy estudiante de Publicidad y Promoción en la UNAD Colombia y tengo que diseñar una campaña publicitaria 360° para el lanzamiento de un producto digital colombiano. Quiero entender el proceso creativo real, no solo llenar una plantilla. Para empezar: explícame qué es un insight del consumidor en publicidad — qué lo diferencia de un dato o una observación — y dame un ejemplo real de una campaña colombiana o latinoamericana construida sobre un buen insight. Luego pregúntame qué producto digital quiero lanzar y espera mi respuesta."},
+  {id:38,per:8,cod:"126009",nombre:"Diseño y Evaluación de Proyectos",cr:3,tipo:["Práctica","Números"],dif:3,nota:null,
+   d:"Aprenderás a estructurar, gestionar y evaluar proyectos de negocio midiendo su viabilidad",
+   ab:"Es aprender a organizar un proyecto de principio a fin y saber si vale la pena antes de gastar el dinero",
+   sal:"Project Manager, Consultor, Director de Proyectos",
+   sk:["Gestión de proyectos","Análisis costo-beneficio","PMI básico","Viabilidad financiera"],
+   li:"Evaluación de proyectos de negocio con análisis de viabilidad financiera: VPN, TIR, flujo de caja proyectado y criterios de inversión para startups y negocios digitales",
+   po:"Proyecto integrador de marketing digital: planificación estratégica, presupuesto por canal, simulación de ejecución con resultados proyectados y evaluación de ROI de la inversión",prompt:"Hola, soy estudiante de Diseño y Evaluación de Proyectos en la UNAD Colombia y tengo que hacer la simulación completa de un proyecto de marketing digital, desde la planificación hasta la evaluación de resultados. Es mi proyecto de último semestre. Quiero aprenderlo de verdad contigo. Para comenzar: explícame qué es la estructura de desglose del trabajo (EDT) y por qué es el primer paso real para planificar cualquier proyecto, con un ejemplo aplicado a marketing digital. Luego pregúntame qué empresa y tipo de campaña quiero simular y espera mi respuesta."},
+];
+
+const electivosData={
+  "Electivo Componente Económico-Administrativo":{per:3,opciones:[
+    {cod:"120002",nombre:"Responsabilidad Social Empresarial",cr:3,d:"Aprenderás cómo las empresas integran prácticas éticas y sostenibles en su operación",ab:"Es aprender cómo las empresas pueden ganar dinero sin hacerle daño a la gente ni al planeta",sal:"Consultor RSE, Brand Manager social, Director de Sostenibilidad",sk:["RSE","Ética empresarial","Sostenibilidad corporativa"],li:"RSE estratégica integrada a la marca: diseño de iniciativas de sostenibilidad, comunicación de impacto y construcción de reputación corporativa que conecte con consumidores conscientes",po:"Informe de RSE para empresa colombiana con diagnóstico, iniciativas y métricas de impacto"},
+    {cod:"105020",nombre:"Emprendimiento Solidario",cr:3,d:"Aprenderás a crear negocios que beneficien a la comunidad y no solo a los accionistas",ab:"Es aprender a montar un negocio que gane dinero pero también ayude a la gente del barrio",sal:"Emprendedor social, Director de cooperativas, ONG con modelo de negocio",sk:["Economía solidaria","Emprendimiento social","Cooperativismo"],li:"Emprendimiento social y solidario: diseño de modelos de negocio con triple impacto (económico, social y ambiental) y estrategias de comunicación de valor para comunidades",po:"Plan de negocio para empresa social colombiana con modelo de triple impacto"},
+    {cod:"112001",nombre:"Fundamentos de Gestión Integral",cr:3,d:"Aprenderás a gestionar una organización de forma integral: procesos, calidad y mejora continua",ab:"Es aprender a que todas las partes de un negocio funcionen bien juntas, como un reloj",sal:"Gerente de operaciones, consultor de procesos, coordinador de calidad",sk:["Gestión por procesos","Mejora continua","Calidad","Indicadores"],li:"Gestión integral de organizaciones: diseño de procesos, implementación de sistemas de calidad y mejora continua — aplicado a agencias, startups y equipos de marketing",po:"Mapa de procesos y sistema de indicadores para una agencia de marketing digital"},
+  ]},
+  "Electivo Componente Social-Solidario":{per:5,opciones:[
+    {cod:"40004",nombre:"Inclusión Social",cr:3,d:"Aprenderás sobre diversidad e inclusión y cómo crear campañas que lleguen a todos",ab:"Es aprender a no dejar a nadie por fuera cuando comunicas o diseñas un negocio",sal:"Diversity & Inclusion Manager, marketing inclusivo, campañas sociales",sk:["Marketing inclusivo","Diversidad","Accesibilidad digital"],li:"Marketing inclusivo y diseño de campañas para audiencias diversas: comunicación accesible, lenguaje incluyente y estrategias que amplíen el alcance sin excluir a nadie",po:"Campaña de marketing inclusivo para una marca colombiana con análisis de audiencias diversas"},
+    {cod:"40005",nombre:"Sujeto, Comunidad e Interacción Social",cr:3,d:"Aprenderás cómo las personas interactúan en comunidad y cómo influir positivamente en grupos",ab:"Es entender cómo funciona la gente en grupos y cómo un líder puede mover a una comunidad",sal:"Community Manager, líder de comunidades digitales, gestión de audiencias",sk:["Gestión de comunidades","Psicología social","Influencia social"],li:"Gestión de comunidades digitales: comprensión de dinámicas sociales, construcción de audiencias leales y estrategias de engagement para marcas con presencia en redes sociales",po:"Estrategia de construcción de comunidad digital para una marca con plan de engagement"},
+    {cod:"40006",nombre:"Sostenibilidad, Desarrollo y Calidad de Vida",cr:3,d:"Aprenderás sobre desarrollo sostenible y cómo los negocios contribuyen al bienestar social",ab:"Es entender cómo vivir mejor sin agotar los recursos del planeta y cómo los negocios ayudan",sal:"Marketing verde, consultor de sostenibilidad, comunicación de impacto",sk:["ODS","Sostenibilidad","Economía circular","Marketing verde"],li:"Estrategia de negocio sostenible: aplicación de marcos ODS y ESG, comunicación de impacto ambiental y construcción de marcas responsables que lideran en sus industrias",po:"Diagnóstico de sostenibilidad de una empresa y plan alineado con ODS relevantes"},
+  ]},
+  "Electivo Disciplinar Específico I (Transformación Digital)":{per:4,opciones:[
+    {cod:"102968003",nombre:"Inbound Marketing",cr:3,d:"Aprenderás a atraer clientes con contenido útil en lugar de interrumpirlos con publicidad",ab:"Es aprender a que los clientes lleguen solos a ti porque les das información útil, sin perseguirlos",sal:"Inbound Marketing Specialist, Content Strategist, Growth Hacker",sk:["HubSpot","Content marketing","SEO","Lead nurturing","Email marketing"],li:"Inbound marketing end-to-end: estrategia de contenidos para atracción orgánica, flujos de email nurturing, lead scoring y optimización del funnel con HubSpot y herramientas CRM",po:"Estrategia de inbound completa: buyer personas, contenido, SEO y email sequences"},
+    {cod:"202016911",nombre:"Big Data",cr:3,d:"Aprenderás a trabajar con grandes volúmenes de datos y extraer insights valiosos",ab:"Es aprender a manejar millones de datos del cliente para saber qué quiere antes de que él lo sepa",sal:"Data Analyst, Marketing Intelligence, Business Analyst",sk:["Python básico","SQL","Tableau","Business Intelligence"],li:"Análisis de Big Data aplicado al marketing: procesamiento de grandes volúmenes de datos, extracción de patrones de comportamiento del usuario y soporte a decisiones estratégicas con dashboards",po:"Análisis de dataset de comportamiento de usuarios con insights accionables de marketing"},
+    {cod:"402487435",nombre:"Narrativas Digitales",cr:3,d:"Aprenderás a contar historias de marca de forma efectiva en entornos digitales",ab:"Es aprender a contar historias que enganchen a la gente en internet y hagan que sigan una marca",sal:"Storyteller, Content Creator, Brand Storyteller, Social Media Manager",sk:["Storytelling","Narrativa de marca","Video marketing","Transmedia"],li:"Brand storytelling y narrativas transmedia: construcción de historias de marca que conectan emocionalmente, adaptadas a video, podcast, redes sociales y experiencias interactivas",po:"Estrategia de narrativa de marca en formatos video, texto y audio para empresa colombiana"},
+    {cod:"213034",nombre:"Seguridad Informática",cr:3,d:"Aprenderás los fundamentos de ciberseguridad y cómo proteger datos de clientes y empresas",ab:"Es aprender a no ser hackeado y a proteger la información de tus clientes en internet",sal:"Data Privacy Manager, Marketing compliance, RGPD specialist",sk:["Ciberseguridad básica","RGPD","Protección de datos","Compliance digital"],li:"Ciberseguridad y privacidad de datos para marketers: cumplimiento RGPD/Habeas Data, gestión de cookies, protección de bases de clientes y marketing digital dentro del marco legal",po:"Auditoría de seguridad y privacidad digital para tienda online con plan de cumplimiento"},
+    {cod:"102967992",nombre:"Analítica Web",cr:3,d:"Aprenderás a interpretar datos de sitios web para tomar decisiones de marketing basadas en evidencia",ab:"Es aprender a leer los números de Google Analytics para saber qué hace la gente en tu página",sal:"Web Analyst, Data-driven Marketing Manager, CRO Specialist",sk:["Google Analytics 4","Tag Manager","Looker Studio","CRO","Heatmaps"],li:"Analítica web avanzada con GA4 y Looker Studio: configuración de eventos, análisis de funnels, optimización de conversiones (CRO) y mejora de UX basada en comportamiento real del usuario",po:"Dashboard de analítica web completo con GA4 para un e-commerce con análisis de conversión"},
+    {cod:"126017",nombre:"Intraemprendimiento e Innovación Social",cr:3,d:"Aprenderás a innovar dentro de empresas existentes y crear proyectos con impacto social",ab:"Es aprender a ser emprendedor dentro de una empresa donde ya trabajas, mejorando desde adentro",sal:"Innovation Manager, Corporate Entrepreneur, consultor de innovación",sk:["Intraemprendimiento","Design Thinking","Innovación abierta","Gestión del cambio"],li:"Intraemprendimiento e innovación corporativa: liderazgo de proyectos de transformación desde adentro de organizaciones, con Design Thinking y metodologías ágiles para generar impacto real",po:"Propuesta de innovación para empresa existente con prototipo y plan de implementación"},
+  ]},
+  "Electivo Disciplinar Específico II":{per:5,opciones:[
+    {cod:"102968003",nombre:"Inbound Marketing",cr:3,d:"Aprenderás a atraer clientes con contenido útil en lugar de interrumpirlos con publicidad",ab:"Es aprender a que los clientes lleguen solos a ti porque les das información útil",sal:"Inbound Marketing Specialist, Content Strategist, Growth Hacker",sk:["HubSpot","Content marketing","SEO","Lead nurturing"],li:"Inbound marketing: atracción orgánica de clientes con contenido de valor, flujos de nurturing automatizados y estrategias de conversión con enfoque en el ciclo de compra del usuario",po:"Estrategia de inbound con buyer personas, contenido, email sequences y métricas"},
+    {cod:"202016911",nombre:"Big Data",cr:3,d:"Aprenderás a trabajar con grandes volúmenes de datos para extraer insights valiosos",ab:"Es aprender a manejar millones de datos del cliente para saber exactamente qué quiere",sal:"Data Analyst, Marketing Intelligence, Business Analyst",sk:["Python básico","SQL","Tableau","Business Intelligence"],li:"Big Data y analítica avanzada: extracción de insights de grandes datasets para identificar patrones de comportamiento y dar soporte a decisiones estratégicas de marketing con datos",po:"Análisis de dataset de comportamiento de usuarios con insights y recomendaciones"},
+    {cod:"102967992",nombre:"Analítica Web",cr:3,d:"Aprenderás a interpretar datos de sitios web para tomar decisiones de marketing",ab:"Es aprender a leer los números de Google Analytics para saber qué hace la gente en tu página",sal:"Web Analyst, Data-driven Marketing Manager, CRO Specialist",sk:["Google Analytics 4","Tag Manager","Looker Studio","CRO"],li:"Analítica web con GA4: medición avanzada de comportamiento, análisis de embudos de conversión y auditorías de UX para maximizar el rendimiento de sitios web y landing pages",po:"Dashboard de analítica web con GA4 para e-commerce con análisis de conversión"},
+    {cod:"402487435",nombre:"Narrativas Digitales",cr:3,d:"Aprenderás a contar historias de marca efectivas en entornos digitales",ab:"Es aprender a contar historias que enganchen a la gente en internet",sal:"Storyteller, Content Creator, Brand Storyteller",sk:["Storytelling","Narrativa de marca","Video marketing","Transmedia"],li:"Storytelling de marca en entornos digitales: creación de narrativas transmedia que generan engagement, construyen comunidad y posicionan a las marcas como referentes en su sector",po:"Estrategia de narrativa de marca en formatos video, texto y audio"},
+  ]},
+  "Electivo Disciplinar Específico III (Competitividad)":{per:6,opciones:[
+    {cod:"127003",nombre:"Integración Comercial y Acuerdos Internacionales",cr:3,d:"Aprenderás sobre tratados de comercio y cómo las empresas colombianas los aprovechan",ab:"Es entender los acuerdos que tiene Colombia para que las empresas puedan vender más fácil en otros países",sal:"Export Manager, consultor de comercio exterior, marketing internacional",sk:["Tratados de libre comercio","Comercio exterior","Acuerdos de integración"],li:"TLCs y acuerdos comerciales internacionales: análisis de su impacto en estrategias de negocio, identificación de ventajas arancelarias y apertura de mercados para empresas colombianas",po:"Análisis de oportunidades de exportación usando TLCs vigentes de Colombia"},
+    {cod:"126014",nombre:"Gestión de Importaciones y Exportaciones",cr:3,d:"Aprenderás los procesos prácticos para importar y exportar productos entre países",ab:"Es aprender todos los pasos y papeles necesarios para mandar o traer mercancías entre países",sal:"Import/Export Manager, agente de aduana, logística internacional",sk:["Exportaciones","Importaciones","Aduana","Logística internacional"],li:"Gestión de comercio exterior: procesos de importación y exportación, normativa aduanera colombiana, documentación DIAN y operaciones logísticas internacionales sin contratiempos",po:"Guía para la exportación de un producto colombiano a España o México"},
+    {cod:"127009",nombre:"Distribución Física Internacional",cr:3,d:"Aprenderás cómo se transportan físicamente los productos entre países de forma eficiente",ab:"Es entender cómo un producto llega de Colombia a otro país sin que se pierda",sal:"Logística internacional, supply chain manager, operaciones globales",sk:["Incoterms","Transporte internacional","DFI","Seguros de carga"],li:"Logística internacional y distribución física: Incoterms, transporte multimodal, gestión de cadenas globales de suministro y optimización de costos logísticos en operaciones cross-border",po:"Diseño de cadena de distribución internacional para un producto colombiano"},
+    {cod:"102968002",nombre:"Gestión Stakeholders",cr:3,d:"Aprenderás a identificar y gestionar todas las partes interesadas en un negocio",ab:"Es aprender a manejar a todas las personas que pueden afectar tu empresa",sal:"Account Manager, Director de Relaciones Públicas, Community Manager corporativo",sk:["Stakeholder mapping","Gestión de relaciones","Relaciones públicas"],li:"Gestión estratégica de stakeholders: mapeo de grupos de interés, comunicación corporativa alineada, manejo de relaciones con clientes, medios, aliados e inversores para construir confianza",po:"Mapa de stakeholders y plan de comunicación para empresa digital en crecimiento"},
+    {cod:"126015",nombre:"Mercados Globales Emergentes",cr:3,d:"Aprenderás sobre los mercados en crecimiento del mundo y cómo posicionarse en ellos",ab:"Es aprender sobre países que están creciendo mucho y cómo aprovechar eso para vender",sal:"International Marketing Manager, estratega de expansión global",sk:["Mercados emergentes","Expansión internacional","Entry strategy"],li:"Estrategias de expansión en mercados emergentes: análisis de economías de alto crecimiento, modelos de entrada, adaptación de oferta y posicionamiento competitivo en contextos globales",po:"Estudio de mercado y estrategia de entrada en un mercado emergente de alto potencial"},
+  ]},
+  "Electivo Disciplinar Común I":{per:5,opciones:[
+    {cod:"126001",nombre:"Habilidades para la Toma de Decisiones",cr:3,d:"Aprenderás herramientas para tomar mejores decisiones en entornos complejos",ab:"Es aprender a elegir bien entre varias opciones cuando la situación es difícil",sal:"Manager, Director, Consultor estratégico, cualquier rol de liderazgo",sk:["Toma de decisiones","Análisis de escenarios","Pensamiento crítico","Risk management"],li:"Frameworks de decisión estratégica: análisis de escenarios, matrices de priorización y herramientas de pensamiento sistémico para líderes que toman decisiones en entornos inciertos y complejos",po:"Análisis de decisión estratégica para empresa usando marcos de decisión multicriterio"},
+    {cod:"121003",nombre:"Gestión de la Innovación y Transferencia Tecnológica",cr:3,d:"Aprenderás a gestionar procesos de innovación y transferencia tecnológica",ab:"Es aprender cómo las empresas adoptan tecnología nueva sin quedarse obsoletas",sal:"Innovation Manager, consultor de transformación digital, CTO en startups",sk:["Gestión de la innovación","Transferencia tecnológica","Open innovation"],li:"Innovación y transferencia tecnológica: gestión de proyectos de I+D, open innovation, adopción de nuevas tecnologías y construcción de ventajas competitivas en organizaciones digitales",po:"Mapa de innovación para empresa colombiana con roadmap tecnológico y alianzas"},
+    {cod:"121012",nombre:"Gestión del Talento Humano",cr:3,d:"Aprenderás a atraer, desarrollar y retener personas talentosas en una organización",ab:"Es aprender a conseguir buenos empleados, mantenerlos contentos y ayudarlos a crecer",sal:"Gerente de RRHH, Talent Acquisition, employer branding",sk:["Reclutamiento","Employer branding","Cultura organizacional","Evaluación de desempeño"],li:"Gestión del talento y employer branding: reclutamiento digital, onboarding, desarrollo de equipos y estrategias de retención que convierten a las empresas en lugares donde la gente quiere trabajar",po:"Estrategia de employer branding para una agencia de marketing digital"},
+    {cod:"126008",nombre:"Gerencia Estratégica de Costos y Presupuestos",cr:3,d:"Aprenderás a planificar y controlar los costos y presupuestos estratégicamente",ab:"Es aprender a no gastar más de lo que tienes y saber exactamente en qué se va el dinero",sal:"Controller financiero, CFO de startups, gerente con visión financiera",sk:["Presupuesto","Control de costos","Análisis financiero","Estados financieros"],li:"Gerencia de costos y presupuestos de marketing: planificación financiera de campañas, control del gasto por canal, análisis de ROI y reportes de rentabilidad para directivos y clientes",po:"Presupuesto anual de marketing con análisis de ROI por canal y escenarios"},
+    {cod:"116005",nombre:"Matemática Financiera",cr:3,d:"Aprenderás a calcular el valor del dinero en el tiempo, tasas de interés e inversiones",ab:"Es aprender a calcular si vale más el dinero ahora o en el futuro, y si una inversión va a ser rentable",sal:"Analista financiero, emprendedor con visión financiera, gestor de inversiones",sk:["Valor presente y futuro","Tasas de interés","Análisis de inversiones","Flujo de caja"],li:"Matemática financiera para tomadores de decisión: cálculo de VPN, TIR, payback y análisis de rentabilidad para evaluar inversiones de marketing y proyectos de negocio con rigor financiero",po:"Análisis de rentabilidad de tres opciones de inversión en marketing digital con VPN y TIR"},
+  ]},
+  "Electivo Disciplinar Común II":{per:6,opciones:[
+    {cod:"126003",nombre:"Diagnóstico Empresarial para la Competitividad",cr:3,d:"Aprenderás a analizar el estado actual de una empresa para identificar fortalezas y áreas de mejora",ab:"Es aprender a hacerle un chequeo completo a una empresa para saber en qué está fallando",sal:"Consultor empresarial, analista estratégico, gerente de mejora continua",sk:["Diagnóstico empresarial","DOFA","Benchmarking","Plan de mejora"],li:"Diagnóstico estratégico empresarial: análisis DOFA, benchmarking competitivo e identificación de brechas para diseñar planes de mejora que aumenten la competitividad y el desempeño",po:"Diagnóstico de competitividad de una agencia de marketing digital con plan de acción"},
+    {cod:"126004",nombre:"Planeación y Prospectiva hacia Escenarios Globales",cr:3,d:"Aprenderás a planificar a largo plazo anticipándote a posibles futuros escenarios",ab:"Es aprender a pensar en el futuro de forma organizada para que los cambios no te agarren desprevenido",sal:"Planner estratégico, consultor de prospectiva, Director de Estrategia",sk:["Planeación estratégica","Prospectiva","Análisis de escenarios","Tendencias globales"],li:"Planeación estratégica y prospectiva: construcción de escenarios futuros, análisis de tendencias globales y diseño de estrategias resilientes para organizaciones que quieren liderar a largo plazo",po:"Análisis prospectivo del futuro del marketing digital en Colombia a 5 años"},
+    {cod:"106011",nombre:"Finanzas Corporativas para la Toma de Decisiones",cr:3,d:"Aprenderás a tomar decisiones financieras estratégicas dentro de una empresa",ab:"Es aprender a decidir cómo usar el dinero de la empresa de la forma más inteligente posible",sal:"CFO, analista financiero, consultor de inversiones, gerente estratégico",sk:["Finanzas corporativas","Valoración de empresas","Capital de trabajo"],li:"Finanzas corporativas para estrategas: valoración de empresas, análisis de capital de trabajo y criterios de decisión financiera para líderes que necesitan hablar el lenguaje de los inversores",po:"Análisis financiero corporativo de una startup digital colombiana con valoración"},
+    {cod:"105013",nombre:"Pensamiento Solidario",cr:3,d:"Aprenderás los valores de la economía solidaria y la cooperación como alternativa empresarial",ab:"Es aprender que un negocio puede crecer ayudando a otros, no solo compitiendo",sal:"Gestión de cooperativas, emprendimiento social, organizaciones solidarias",sk:["Economía solidaria","Cooperativismo","Valores sociales"],li:"Economía solidaria y modelos de negocio con propósito: cooperativismo, gestión de organizaciones solidarias y diseño de empresas que generan valor económico y social simultáneamente",po:"Propuesta de modelo solidario para comunidad productora colombiana con plan de mercadeo"},
+  ]},
+  "Electivo Formación Complementaria I":{per:3,opciones:[
+    {cod:"80010",nombre:"Teatro",cr:1,d:"Aprenderás técnicas de expresión corporal y vocal que mejoran tu comunicación",ab:"Es aprender a actuar un poco para perder el miedo al público y expresarte mejor",sal:"Presentaciones públicas, storytelling, comunicación con clientes",sk:["Expresión corporal","Comunicación no verbal","Confianza en público"],li:"Comunicación persuasiva con técnicas teatrales: presencia escénica, manejo de voz y cuerpo, storytelling en vivo y presentaciones de alto impacto que captan y retienen audiencias",po:"Video de presentación o pitch aplicando técnicas teatrales de impacto"},
+    {cod:"80005",nombre:"Guitarra",cr:1,d:"Aprenderás los fundamentos del instrumento como desarrollo personal y cultural",ab:"Es aprender a tocar guitarra como hobby que desarrolla tu disciplina y creatividad",sal:"Creatividad, disciplina, trabajo en equipo — habilidades blandas",sk:["Disciplina","Creatividad","Expresión artística"],li:"Disciplina creativa a través de la música: desarrollo de la constancia, el aprendizaje progresivo y la creatividad aplicada — habilidades blandas que diferencian a los profesionales más completos",po:"Proyecto musical documentado como ejemplo de aprendizaje autodirigido y disciplina"},
+    {cod:"80007",nombre:"Protocolo",cr:1,d:"Aprenderás las normas de etiqueta empresarial y protocolo en eventos y reuniones",ab:"Es aprender a comportarte bien en reuniones importantes y no meter la pata",sal:"Account Manager, relaciones con clientes VIP, eventos corporativos",sk:["Protocolo empresarial","Etiqueta","Imagen profesional"],li:"Protocolo empresarial y etiqueta profesional para entornos corporativos de alto nivel",po:"Guía de protocolo para eventos corporativos y reuniones de negocio"},
+    {cod:"300040",nombre:"Hoja de Vida",cr:1,d:"Aprenderás a construir un CV y perfil profesional que te ayude a conseguir empleo",ab:"Es aprender a escribir tu hoja de vida para que las empresas quieran contratarte",sal:"Todos los roles — un buen CV y perfil LinkedIn es fundamental",sk:["CV profesional","LinkedIn","Personal branding","Búsqueda de empleo"],li:"Perfil profesional y personal branding para posicionamiento en el mercado laboral digital",po:"CV profesional y perfil LinkedIn optimizado para el mercado de marketing digital"},
+    {cod:"80020",nombre:"Actividad Física y para la Salud",cr:2,d:"Aprenderás hábitos de vida saludable y la importancia de la actividad física para el rendimiento",ab:"Es aprender que hacer ejercicio y comer bien no solo te hace sentir mejor sino que trabajas mejor",sal:"Productividad personal — el bienestar mejora el desempeño en cualquier trabajo",sk:["Hábitos saludables","Gestión del estrés","Productividad personal"],li:"Hábitos de bienestar para alto desempeño profesional y trabajo bajo presión",po:"Plan personal de bienestar y productividad con objetivos medibles y seguimiento semanal"},
+  ]},
+  "Electivo Formación Complementaria II":{per:4,opciones:[
+    {cod:"404086996",nombre:"Apreciación de las Imágenes del Arte",cr:1,d:"Aprenderás a leer y apreciar imágenes artísticas, desarrollando tu sentido estético",ab:"Es aprender a ver cuadros y fotos artísticas y entender por qué son especiales",sal:"Creatividad, dirección de arte, content creation, diseño de campañas",sk:["Alfabetidad visual","Sentido estético","Análisis de imágenes"],li:"Apreciación estética y alfabetidad visual aplicada al diseño de campañas y dirección de arte",po:"Análisis visual de 5 campañas publicitarias icónicas desde perspectiva estética y conceptual"},
+    {cod:"80007",nombre:"Protocolo",cr:1,d:"Aprenderás las normas de etiqueta empresarial para reuniones y eventos",ab:"Es aprender a comportarte bien en reuniones importantes",sal:"Account Manager, relaciones con clientes VIP, eventos corporativos",sk:["Protocolo empresarial","Etiqueta","Imagen profesional"],li:"Protocolo empresarial para entornos corporativos de alto nivel",po:"Guía de protocolo para eventos corporativos y reuniones de negocio"},
+    {cod:"300040",nombre:"Hoja de Vida",cr:1,d:"Aprenderás a construir un CV y perfil profesional que te ayude a conseguir empleo",ab:"Es aprender a escribir tu hoja de vida para que las empresas quieran contratarte",sal:"Todos los roles — un buen CV es fundamental",sk:["CV profesional","LinkedIn","Personal branding"],li:"Perfil profesional y personal branding para el mercado laboral digital",po:"CV profesional y perfil LinkedIn optimizado para marketing digital"},
+  ]},
+  "Electivo Disciplinar Específico IV (Transformación Digital)":{per:7,opciones:[
+    {cod:"102968003",nombre:"Inbound Marketing",cr:3,d:"Aprenderás a atraer clientes con contenido útil en lugar de interrumpirlos con publicidad",ab:"Es aprender a que los clientes lleguen solos porque les das información útil",sal:"Inbound Marketing Specialist, Content Strategist, Growth Hacker",sk:["HubSpot","Content marketing","SEO","Lead nurturing"],li:"Inbound marketing: atracción orgánica de clientes con contenido de valor, flujos de nurturing automatizados y estrategias de conversión con enfoque en el ciclo de compra del usuario",po:"Estrategia de inbound con buyer personas, contenido y email sequences"},
+    {cod:"202016911",nombre:"Big Data",cr:3,d:"Aprenderás a trabajar con grandes volúmenes de datos para extraer insights valiosos",ab:"Es aprender a manejar millones de datos del cliente para saber qué quiere",sal:"Data Analyst, Marketing Intelligence, Business Analyst",sk:["Python básico","SQL","Tableau","Business Intelligence"],li:"Big Data y analítica avanzada: extracción de insights de grandes datasets para identificar patrones de comportamiento y dar soporte a decisiones estratégicas de marketing con datos",po:"Análisis de dataset de comportamiento de usuarios con insights accionables"},
+    {cod:"102967992",nombre:"Analítica Web",cr:3,d:"Aprenderás a interpretar datos de sitios web para tomar decisiones de marketing",ab:"Es aprender a leer los números de Google Analytics para saber qué hace la gente en tu página",sal:"Web Analyst, Data-driven Marketing Manager, CRO Specialist",sk:["Google Analytics 4","Tag Manager","Looker Studio","CRO"],li:"Análisis web avanzado con GA4 para optimización de conversiones",po:"Dashboard de analítica web completo con GA4 para e-commerce"},
+    {cod:"402487435",nombre:"Narrativas Digitales",cr:3,d:"Aprenderás a contar historias de marca en entornos digitales",ab:"Es aprender a contar historias que enganchen a la gente en internet",sal:"Storyteller, Content Creator, Brand Storyteller",sk:["Storytelling","Narrativa de marca","Video marketing"],li:"Narrativas de marca digitales y storytelling transmedia para engagement",po:"Estrategia de narrativa de marca en formatos video, texto y audio"},
+    {cod:"213034",nombre:"Seguridad Informática",cr:3,d:"Aprenderás fundamentos de ciberseguridad y protección de datos",ab:"Es aprender a no ser hackeado y proteger la información de tus clientes",sal:"Data Privacy Manager, Marketing compliance, RGPD specialist",sk:["Ciberseguridad básica","RGPD","Protección de datos"],li:"Seguridad informática y privacidad de datos aplicada a marketing digital",po:"Auditoría de privacidad digital con plan de cumplimiento normativo"},
+    {cod:"126017",nombre:"Intraemprendimiento e Innovación Social",cr:3,d:"Aprenderás a innovar dentro de empresas existentes con impacto social",ab:"Es aprender a ser emprendedor dentro de la empresa donde ya trabajas",sal:"Innovation Manager, Corporate Entrepreneur, consultor de innovación",sk:["Intraemprendimiento","Design Thinking","Innovación abierta"],li:"Intraemprendimiento e innovación social con metodologías ágiles",po:"Propuesta de innovación para empresa existente con prototipo e implementación"},
+  ]},
+  "Electivo Disciplinar Común III":{per:7,opciones:[
+    {cod:"126001",nombre:"Habilidades para la Toma de Decisiones",cr:3,d:"Aprenderás herramientas para tomar mejores decisiones en entornos complejos",ab:"Es aprender a elegir bien cuando la situación es difícil",sal:"Manager, Director, Consultor estratégico",sk:["Toma de decisiones","Pensamiento crítico","Risk management"],li:"Herramientas para toma de decisiones estratégicas en entornos de alta incertidumbre",po:"Análisis de decisión estratégica usando marcos de decisión multicriterio"},
+    {cod:"121003",nombre:"Gestión de la Innovación y Transferencia Tecnológica",cr:3,d:"Aprenderás a gestionar procesos de innovación y transferencia tecnológica",ab:"Es aprender cómo las empresas adoptan tecnología nueva",sal:"Innovation Manager, consultor de transformación digital",sk:["Gestión de la innovación","Transferencia tecnológica","Open innovation"],li:"Innovación y transferencia tecnológica: gestión de proyectos de I+D, open innovation, adopción de nuevas tecnologías y construcción de ventajas competitivas en organizaciones digitales",po:"Mapa de innovación para empresa colombiana con roadmap y alianzas"},
+    {cod:"121012",nombre:"Gestión del Talento Humano",cr:3,d:"Aprenderás a atraer, desarrollar y retener personas talentosas",ab:"Es aprender a conseguir buenos empleados y mantenerlos contentos",sal:"Gerente de RRHH, Talent Acquisition, employer branding",sk:["Reclutamiento","Employer branding","Cultura organizacional"],li:"Gestión del talento humano en reclutamiento y retención en empresas digitales",po:"Estrategia de employer branding para empresa de marketing digital"},
+    {cod:"126008",nombre:"Gerencia Estratégica de Costos y Presupuestos",cr:3,d:"Aprenderás a planificar y controlar costos y presupuestos estratégicamente",ab:"Es aprender a no gastar más de lo que tienes y saber en qué se va el dinero",sal:"Controller financiero, CFO de startups, gerente financiero",sk:["Presupuesto","Control de costos","Análisis financiero"],li:"Gerencia de costos y presupuestos en planificación financiera de empresas digitales",po:"Presupuesto anual de marketing con análisis de ROI por canal"},
+    {cod:"116005",nombre:"Matemática Financiera",cr:3,d:"Aprenderás a calcular el valor del dinero en el tiempo y evaluar inversiones",ab:"Es aprender a calcular si vale más el dinero ahora o en el futuro",sal:"Analista financiero, emprendedor con visión financiera",sk:["Valor presente y futuro","Análisis de inversiones","Flujo de caja"],li:"Matemática financiera aplicada a evaluación de rentabilidad e inversiones de marketing",po:"Análisis de rentabilidad de tres opciones de inversión en marketing digital"},
+  ]},
+  "Electivo Formación Complementaria III":{per:7,opciones:[
+    {cod:"80010",nombre:"Teatro",cr:1,d:"Técnicas de expresión corporal y vocal para mejorar tu comunicación",ab:"Es aprender a actuar para perder el miedo al público y expresarte mejor",sal:"Presentaciones públicas, storytelling, comunicación con clientes",sk:["Expresión corporal","Comunicación no verbal","Confianza en público"],li:"Teatro aplicado a comunicación persuasiva y presentaciones de alto impacto",po:"Video de presentación o pitch aplicando técnicas teatrales"},
+    {cod:"80005",nombre:"Guitarra",cr:1,d:"Los fundamentos de la guitarra como desarrollo personal y cultural",ab:"Es aprender a tocar guitarra como hobby que desarrolla disciplina y creatividad",sal:"Habilidades blandas: creatividad, disciplina, trabajo en equipo",sk:["Disciplina","Creatividad","Expresión artística"],li:"Formación artística que desarrolla disciplina y creatividad para el entorno profesional",po:"Proyecto musical documentado como ejemplo de aprendizaje autodirigido"},
+    {cod:"80007",nombre:"Protocolo",cr:1,d:"Normas de etiqueta empresarial para reuniones y eventos",ab:"Es aprender a comportarte bien en reuniones importantes",sal:"Account Manager, relaciones con clientes VIP",sk:["Protocolo empresarial","Etiqueta","Imagen profesional"],li:"Protocolo empresarial para entornos corporativos de alto nivel",po:"Guía de protocolo para eventos corporativos"},
+    {cod:"300040",nombre:"Hoja de Vida",cr:1,d:"Construirás un CV y perfil profesional para conseguir empleo",ab:"Es aprender a escribir tu hoja de vida para que las empresas te quieran contratar",sal:"Todos los roles — fundamental para cualquier trabajo",sk:["CV profesional","LinkedIn","Personal branding"],li:"Perfil profesional y personal branding para el mercado laboral digital",po:"CV y perfil LinkedIn optimizado para marketing digital"},
+    {cod:"80020",nombre:"Actividad Física y para la Salud",cr:2,d:"Hábitos de vida saludable y actividad física para el rendimiento profesional",ab:"Es aprender que el ejercicio y comer bien te hace trabajar mejor",sal:"Productividad personal en cualquier trabajo",sk:["Hábitos saludables","Gestión del estrés","Productividad"],li:"Hábitos de bienestar para alto desempeño profesional bajo presión",po:"Plan de bienestar y productividad con objetivos medibles"},
+  ]},
+  "Electivo Disciplinar Específico V (Marketing Sustentabilidad)":{per:8,opciones:[
+    {cod:"126022",nombre:"Bienestar Laboral y Organizaciones Saludables",cr:3,d:"Aprenderás a crear entornos de trabajo saludables que mejoren el bienestar y la productividad",ab:"Es aprender a que la gente esté bien en el trabajo para que trabajen mejor y no se enfermen de estrés",sal:"Gerente de RRHH, Wellness Manager, consultor organizacional",sk:["Bienestar organizacional","Salud laboral","Cultura empresarial"],li:"Estrategias de bienestar laboral y organizaciones saludables para mejorar productividad",po:"Plan de bienestar laboral para agencia de marketing con métricas de impacto"},
+    {cod:"107062",nombre:"Gobierno Corporativo y Sostenibilidad Organizacional",cr:3,d:"Aprenderás cómo se gobiernan las empresas de forma ética, transparente y sostenible",ab:"Es aprender las reglas de buen comportamiento de las empresas para que no hagan trampa",sal:"Consultor de gobierno corporativo, Director de Compliance, ESG Manager",sk:["Gobierno corporativo","Transparencia","Compliance","Reporte integrado"],li:"Gobierno corporativo y sostenibilidad organizacional en estrategia y comunicación empresarial",po:"Guía de gobierno corporativo para startup colombiana con política de sostenibilidad"},
+    {cod:"102967996",nombre:"Comercio Justo",cr:3,d:"Aprenderás sobre el movimiento de comercio justo y sus principios en los negocios",ab:"Es entender cómo comprar productos que se hicieron sin explotar a nadie y cómo vender así",sal:"Consultor de comercio justo, marketing sostenible, certificaciones internacionales",sk:["Comercio justo","Certificaciones Fairtrade","Marketing ético"],li:"Comercio justo aplicado en estrategias de marca ética y marketing sostenible",po:"Estrategia de marketing para producto de comercio justo colombiano en mercados internacionales"},
+    {cod:"120006",nombre:"Gestión Ambiental",cr:3,d:"Aprenderás sobre gestión ambiental y cómo las empresas reducen su impacto en el planeta",ab:"Es aprender cómo las empresas pueden funcionar sin dañar el medio ambiente",sal:"Gestor ambiental, consultor de sostenibilidad, marketing verde",sk:["Gestión ambiental","Huella de carbono","ISO 14001","Sostenibilidad"],li:"Gestión ambiental integrada en estrategias de negocio y comunicación corporativa",po:"Diagnóstico ambiental de empresa y plan de reducción de huella de carbono"},
+    {cod:"126015",nombre:"Mercados Globales Emergentes",cr:3,d:"Aprenderás sobre los mercados en crecimiento del mundo y cómo posicionarse en ellos",ab:"Es aprender sobre países que están creciendo mucho y cómo aprovechar eso",sal:"International Marketing Manager, estratega de expansión global",sk:["Mercados emergentes","Expansión internacional","Entry strategy"],li:"Estrategias de expansión en mercados emergentes: análisis de economías de alto crecimiento, modelos de entrada, adaptación de oferta y posicionamiento competitivo en contextos globales",po:"Estrategia de entrada para startup colombiana en mercado emergente de alto potencial"},
+    {cod:"121005",nombre:"Sistemas de Producción Sostenible",cr:3,d:"Aprenderás métodos de producción que cuidan el ambiente y son económicamente viables",ab:"Es aprender a fabricar cosas usando menos recursos naturales y sin contaminar tanto",sal:"Consultor de producción sostenible, cadenas verdes, operaciones",sk:["Producción sostenible","Economía circular","Eficiencia de recursos"],li:"Sistemas de producción sostenible integrados en modelos de negocio y comunicación de marca",po:"Análisis de cadena de valor sostenible para empresa de consumo con plan de mejora"},
+    {cod:"127031",nombre:"Diseño de Proyectos Socialmente Responsables",cr:3,d:"Aprenderás a diseñar proyectos que generen valor económico y social simultáneamente",ab:"Es aprender a hacer proyectos de negocio que ganen dinero y ayuden a la comunidad",sal:"Gerente de proyectos RSE, consultor social, gestión de impacto",sk:["Proyectos sociales","Impacto social","RSE","Medición de impacto"],li:"Proyectos empresariales socialmente responsables con metodología de medición de impacto",po:"Proyecto socialmente responsable: diseño, implementación y medición de impacto"},
+  ]},
+  "Electivo Disciplinar Específico VI (Competitividad)":{per:8,opciones:[
+    {cod:"127003",nombre:"Integración Comercial y Acuerdos Internacionales",cr:3,d:"Aprenderás sobre tratados de comercio y cómo las empresas colombianas los aprovechan",ab:"Es entender los acuerdos de Colombia para vender más fácil en otros países",sal:"Export Manager, consultor de comercio exterior, marketing internacional",sk:["Tratados de libre comercio","Comercio exterior"],li:"TLCs y acuerdos comerciales internacionales: análisis de su impacto en estrategias de negocio, identificación de ventajas arancelarias y apertura de mercados para empresas colombianas",po:"Análisis de oportunidades de exportación usando TLCs vigentes"},
+    {cod:"126014",nombre:"Gestión de Importaciones y Exportaciones",cr:3,d:"Aprenderás los procesos prácticos para importar y exportar entre países",ab:"Es aprender todos los pasos para mandar o traer mercancías entre países",sal:"Import/Export Manager, logística internacional",sk:["Exportaciones","Importaciones","Aduana"],li:"Gestión de importaciones y exportaciones con normativa aduanera colombiana",po:"Guía para exportación de producto colombiano a España o México"},
+    {cod:"127009",nombre:"Distribución Física Internacional",cr:3,d:"Aprenderás cómo se transportan físicamente los productos entre países",ab:"Es entender cómo un producto llega de Colombia a otro país sin que se pierda",sal:"Logística internacional, supply chain manager",sk:["Incoterms","Transporte internacional","DFI"],li:"Logística internacional y distribución física: Incoterms, transporte multimodal, gestión de cadenas globales de suministro y optimización de costos logísticos en operaciones cross-border",po:"Diseño de cadena de distribución internacional para producto colombiano"},
+    {cod:"102968002",nombre:"Gestión Stakeholders",cr:3,d:"Aprenderás a identificar y gestionar todas las partes interesadas en un negocio",ab:"Es aprender a manejar a todos los que pueden afectar tu empresa",sal:"Account Manager, Director de Relaciones Públicas",sk:["Stakeholder mapping","Gestión de relaciones","Relaciones públicas"],li:"Gestión estratégica de stakeholders y relaciones corporativas",po:"Mapa de stakeholders y plan de comunicación para empresa digital"},
+    {cod:"101067145",nombre:"Finanzas Internacionales",cr:3,d:"Aprenderás sobre mercados financieros internacionales, tipos de cambio y riesgo cambiario",ab:"Es entender cómo el valor del dólar o el euro afecta a los negocios colombianos",sal:"Analista de finanzas internacionales, gestión de riesgo cambiario",sk:["Tipo de cambio","Riesgo cambiario","Mercados financieros internacionales"],li:"Finanzas internacionales y gestión del riesgo cambiario para negocios con operaciones globales",po:"Análisis de riesgo cambiario para empresa colombiana que exporta o paga en dólares"},
+  ]},
+};
+
+/* ── STATE ── */
+let username='Usuario';
+let darkMode=false;
+let hasUnsaved=false;
+let electivosSeleccionados={};
+let electivosNotas={};
+let openPers={sal:new Set([1]),li:new Set([1]),po:new Set([1])};
+let openMalla=new Set([1]);
+let periodos=[...new Set(materias.map(m=>m.per))].sort((a,b)=>a-b);
+
+/* ── SAVE / LOAD ── */
+function saveData(){
+  const notas={};
+  materias.forEach(m=>{if(m.nota!==null)notas[m.id]=m.nota;});
+  localStorage.setItem(SAVE_KEY,JSON.stringify({notas,electivosSeleccionados,electivosNotas,username,darkMode}));
+  const btn=document.getElementById('saveBtn');
+  btn.textContent='✓ Guardado';btn.classList.add('saved');btn.classList.remove('unsaved');
+  hasUnsaved=false;
+  setTimeout(()=>{btn.textContent='💾 Guardar';btn.classList.remove('saved');},2000);
+}
+function loadData(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;
+    const d=JSON.parse(raw);
+    if(d.notas)Object.entries(d.notas).forEach(([id,n])=>{const m=materias.find(x=>x.id===+id);if(m)m.nota=n;});
+    if(d.electivosSeleccionados)electivosSeleccionados=d.electivosSeleccionados;
+    if(d.electivosNotas)electivosNotas=d.electivosNotas;
+    // Clean: keep only nota for the currently selected option per group
+    Object.entries(electivosData).forEach(([grupo,gd])=>{
+      const sel=electivosSeleccionados[grupo];
+      gd.opciones.forEach(op=>{
+        if(op.cod!==sel)delete electivosNotas[grupo+':::'+op.cod];
+      });
+    });
+    if(d.username){username=d.username;document.getElementById('greetName').textContent=username;document.getElementById('cfgName').value=username;}
+    if(d.darkMode){darkMode=true;document.body.classList.add('dark');document.getElementById('darkToggle').checked=true;}
+  }catch(e){}
+}
+function markUnsaved(){
+  if(!hasUnsaved){hasUnsaved=true;document.getElementById('saveBtn').classList.add('unsaved');}
+  document.getElementById('resetBtn').style.opacity='1';
+  document.getElementById('resetBtn').style.pointerEvents='auto';
+}
+function resetChanges(){
+  if(!hasUnsaved)return;
+  if(!confirm('¿Reiniciar todos los cambios desde el último guardado?'))return;
+  // Reload notas from localStorage
+  materias.forEach(m=>m.nota=null);
+  electivosSeleccionados={};
+  electivosNotas={};
+  const raw=localStorage.getItem(SAVE_KEY);
+  if(raw){
+    try{
+      const d=JSON.parse(raw);
+      if(d.notas)Object.entries(d.notas).forEach(([id,n])=>{const m=materias.find(x=>x.id===+id);if(m)m.nota=n;});
+      if(d.electivosSeleccionados)electivosSeleccionados=d.electivosSeleccionados;
+      if(d.electivosNotas)electivosNotas=d.electivosNotas;
+    }catch(e){}
+  }
+  hasUnsaved=false;
+  document.getElementById('saveBtn').classList.remove('unsaved');
+  document.getElementById('resetBtn').style.opacity='0.4';
+  document.getElementById('resetBtn').style.pointerEvents='none';
+  renderMalla();updateAll();
+  const dp=document.getElementById('detailPanel');
+  if(dp)dp.innerHTML=`<div class="detail-panel"><div class="empty-panel"><div style="font-size:32px;opacity:0.15;margin-bottom:10px">📋</div><div style="font-size:13px;line-height:1.6">Selecciona una materia<br>para ver su guía completa</div></div></div>`;
+}
+
+/* ── HELPERS ── */
+function nClass(n){
+  if(n===null||n===undefined)return 'n-empty';
+  if(n>=4.5)return 'n-a';if(n>=3.5)return 'n-b';if(n>=3.0)return 'n-c';return 'n-f';
+}
+function tipoTag(t){
+  const m={'Teórica':'tag-teorica','Práctica':'tag-practica','Lectura':'tag-lectura','Números':'tag-numeros'};
+  return `<span class="tag ${m[t]||''}" style="margin-right:3px">${t}</span>`;
+}
+function showViewGear(){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('view-config').classList.add('active');
+  document.getElementById('topbarTitle').textContent='Configuración';
+  document.getElementById('gearBtn').classList.add('active');
+  requestAnimationFrame(()=>{document.getElementById('mainContent').scrollTop=0;});
+}
+function showView(id,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('gearBtn').classList.remove('active');
+  document.getElementById('view-'+id).classList.add('active');
+  if(el)el.classList.add('active');
+  const t={dashboard:'Dashboard',malla:'Malla Curricular',profesional:'Perfil Profesional',salida:'Salida Laboral',portafolio:'Portafolio',config:'Configuración'};
+  document.getElementById('topbarTitle').textContent=t[id]||id;
+  requestAnimationFrame(()=>{document.getElementById('mainContent').scrollTop=0;});
+  if(id==='salida')renderSalida();
+  if(id==='portafolio')renderPortafolio();
+  if(id==='profesional')renderProfesional();
+}
+function getElectivos(){
+  const res=[];
+  Object.entries(electivosSeleccionados).forEach(([grupo,cod])=>{
+    const gd=electivosData[grupo];if(!gd)return;
+    const op=gd.opciones.find(o=>o.cod===cod);
+    if(op)res.push({...op,per:gd.per,esElec:true,grupo});
+  });
+  return res;
+}
+function getAllMats(){return[...materias,...getElectivos()];}
+
+/* ── STATS ── */
+function updateAll(){
+  // Materias obligatorias aprobadas
+  const apro=materias.filter(m=>m.nota!==null&&m.nota>=3);
+  const notas=apro.map(m=>m.nota);
+  // Incluir electivos con nota en promedio y créditos
+  const elecApro=getElectivos().filter(e=>{
+    const n=electivosNotas[e.grupo+':::'+e.cod];
+    return n!==undefined&&n>=3;
+  });
+  const elecRepro=getElectivos().filter(e=>{
+    const n=electivosNotas[e.grupo+':::'+e.cod];
+    return n!==undefined&&n<3;
+  });
+  const todasNotas=[...notas,...elecApro.map(e=>electivosNotas[e.grupo+':::'+e.cod])];
+  const prom=todasNotas.length?(todasNotas.reduce((a,b)=>a+b,0)/todasNotas.length).toFixed(2):'—';
+  const cred=apro.reduce((a,m)=>a+m.cr,0)+elecApro.reduce((a,e)=>a+(e.cr||3),0);
+  const pct=Math.round((cred/TOTAL)*100);
+  document.getElementById('dPct').textContent=pct+'%';
+  document.getElementById('dProm').textContent=prom;
+  document.getElementById('dApro').textContent=apro.length+elecApro.length;
+  document.getElementById('dCred').textContent=cred;
+  document.getElementById('sidebarProg').style.width=pct+'%';
+  document.getElementById('sidebarLabel').textContent=pct+'% · '+cred+'/'+TOTAL+' cr.';
+  let bh='';
+  periodos.forEach(p=>{
+    const ms=materias.filter(m=>m.per===p);
+    const elecEnPer=getElectivos().filter(e=>e.per===p);
+    const totalMs=ms.length; // solo obligatorias para el porcentaje de barra
+    const ap=ms.filter(m=>m.nota!==null&&m.nota>=3).length;
+    const rep=ms.filter(m=>m.nota!==null&&m.nota<3).length;
+    const elecAp=elecEnPer.filter(e=>{const n=electivosNotas[e.grupo+':::'+e.cod];return n!==undefined&&n>=3;}).length;
+    const elecRep=elecEnPer.filter(e=>{const n=electivosNotas[e.grupo+':::'+e.cod];return n!==undefined&&n<3;}).length;
+    const pc=Math.round((ap/totalMs)*100);
+    const cl=pc===100?'bar-fill done':pc>0?'bar-fill':'bar-fill low';
+    const apLabel=(ap+elecAp)+'/'+(totalMs+elecEnPer.length)+' aprobadas';
+    const repTotal=rep+elecRep;
+    const repLabel=repTotal>0?` · <span style="color:var(--danger)">${repTotal} reprobada${repTotal>1?'s':''}</span>`:'';
+    bh+=`<div class="prog-row"><div class="prog-meta"><span>Periodo ${p}</span><span>${apLabel}${repLabel}</span></div><div class="bar"><div class="${cl}" style="width:${pc}%"></div></div></div>`;
+  });
+  document.getElementById('dBars').innerHTML=bh;
+}
+
+/* ── MALLA ── */
+function toggleMalla(p){
+  const acc=document.querySelector(`.malla-acc[data-per="${p}"]`);
+  const body=acc?acc.querySelector('.malla-acc-body'):null;
+  const arrow=acc?acc.querySelector('.malla-acc-arrow'):null;
+  if(!acc)return;
+
+  if(openMalla.has(p)){
+    // CERRAR: colapsar hacia arriba sin re-renderizar
+    openMalla.delete(p);
+    if(body){
+      body.style.maxHeight=body.scrollHeight+'px';
+      body.style.opacity='1';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        body.style.maxHeight='0';
+        body.style.opacity='0';
+      }));
+      // Ocultar del DOM después de la animación sin re-renderizar nada
+      setTimeout(()=>{body.style.display='none';},360);
+    }
+    if(arrow)arrow.classList.add('closed');
+  } else {
+    // ABRIR: mostrar y expandir hacia abajo
+    openMalla.add(p);
+    if(body){
+      body.style.display='';
+      body.style.transition='none';
+      body.style.maxHeight='0';
+      body.style.opacity='0';
+      body.getBoundingClientRect(); // force reflow
+      body.style.transition='';
+      body.style.maxHeight=body.scrollHeight+'px';
+      body.style.opacity='1';
+      setTimeout(()=>{body.style.maxHeight='5000px';},390);
+    }
+    if(arrow)arrow.classList.remove('closed');
+  }
+}
+
+function renderMalla(){
+  const q=(document.getElementById('mallaSearch')||{}).value||'';
+  const sq=q.toLowerCase().trim();
+  let html='';
+  periodos.forEach(p=>{
+    const ms=materias.filter(m=>m.per===p);
+    const filtered=sq?ms.filter(m=>m.nombre.toLowerCase().includes(sq)||m.d.toLowerCase().includes(sq)):ms;
+    const elecs=Object.entries(electivosData).filter(([k,v])=>v.per===p);
+    if(!filtered.length&&!elecs.length)return;
+    const isOpen=openMalla.has(p)||sq.length>0;
+    const apro=ms.filter(m=>m.nota!==null&&m.nota>=3).length;
+    const repro=ms.filter(m=>m.nota!==null&&m.nota<3).length;
+    const pct=Math.round((apro/ms.length)*100);
+    html+=`<div class="malla-acc" data-per="${p}">
+      <div class="malla-acc-header" onclick="toggleMalla(${p})">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span>Periodo ${p}</span>
+          <span style="font-size:11px;color:var(--text3);font-weight:400">${ms.length} materias · 18 cr.</span>
+          ${apro>0?`<span style="font-size:10px;font-weight:600;color:var(--success);background:rgba(0,168,107,0.1);padding:2px 7px;border-radius:10px">${apro} aprobada${apro>1?'s':''}</span>`:''}
+          ${repro>0?`<span style="font-size:10px;font-weight:600;color:var(--danger);background:rgba(201,43,43,0.08);padding:2px 7px;border-radius:10px">${repro} reprobada${repro>1?'s':''}</span>`:''}
+        </div>
+        <span class="malla-acc-arrow ${isOpen?'':'closed'}">▼</span>
+      </div>`;
+    const bodyStyle=isOpen?'max-height:5000px;opacity:1':'display:none;max-height:0;opacity:0';
+    html+=`<div class="malla-acc-body" style="${bodyStyle}">`;
+    filtered.forEach(m=>{
+        const e=m.nota!==null?(m.nota>=3?'aprobada':'reprobada'):m.cursando?'cursando':'pendiente';
+        const et=m.nota!==null?(m.nota>=3?'Aprobada':'Reprobada'):m.cursando?'En curso':'Pendiente';
+        html+=`<div class="mat-row" id="mrow-${m.id}" onclick="selMat(${m.id})">
+          <div style="flex:1">
+            <div class="mat-nombre">${m.nombre}</div>
+            <div class="mat-desc">${m.d.substring(0,70)}…</div>
+            <div class="mat-meta">Cód. ${m.cod} · ${m.cr} créditos</div>
+            <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px">${m.tipo.map(tipoTag).join('')}<span class="tag tag-${e}">${et}</span></div>
+          </div>
+          <div class="${nClass(m.nota)} nota-badge">${m.nota!==null?m.nota:'—'}</div>
+        </div>`;
+      });
+      if(!sq){
+        elecs.forEach(([grupo,data])=>{
+          const sel=electivosSeleccionados[grupo];
+          const sg=grupo.replace(/'/g,'&#39;');
+          html+=`<div class="elec-block" data-grupo="${sg}"><div class="elec-title">${grupo}</div>`;
+          data.opciones.forEach(op=>{
+            const isSel=sel===op.cod;
+            if(isSel){
+              // Render selected electiva as a full mat-row like regular materias
+              const nKey=grupo+':::'+op.cod;
+              const nota=electivosNotas[nKey]!==undefined?electivosNotas[nKey]:null;
+              const e=nota!==null?(nota>=3?'aprobada':'reprobada'):'pendiente';
+              const et=nota!==null?(nota>=3?'Aprobada':'Reprobada'):'Pendiente';
+              const tipoTags=(op.tipo||['Electiva']).map(tipoTag).join('');
+              html+=`<div class="mat-row selected" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
+                <div style="flex:1">
+                  <div class="mat-nombre">${op.nombre}</div>
+                  <div class="mat-desc">${(op.d||'').substring(0,70)}…</div>
+                  <div class="mat-meta">Cód. ${op.cod} · ${op.cr||3} créditos</div>
+                  <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px">
+                    <span class="tag tag-electiva">◆ Electiva</span>
+                    <span class="tag tag-${e}">${et}</span>
+                  </div>
+                </div>
+                <div class="${nClass(nota)} nota-badge">${nota!==null?nota:'—'}</div>
+              </div>`;
+            } else {
+              html+=`<div class="elec-opt" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
+                <div class="radio"></div>
+                <div class="elec-name">${op.nombre}</div>
+                <div class="elec-cr">${op.cr||3} cr.</div>
+              </div>`;
+            }
+          });
+          html+=`</div>`;
+        });
+      }
+      html+=`</div>`;
+    html+=`</div>`;
+  });
+  document.getElementById('mallaList').innerHTML=html;
+}
+
+function selMat(id){
+  document.querySelectorAll('.mat-row').forEach(r=>r.classList.remove('selected'));
+  const row=document.getElementById('mrow-'+id);
+  if(row)row.classList.add('selected');
+  const m=materias.find(x=>x.id===id);if(!m)return;
+  const dls=['','Muy fácil','Fácil','Media','Alta','Muy alta'];
+  const dlc=['','var(--success)','var(--success)','var(--unad-blue)','var(--warning)','var(--danger)'];
+  const hasNota=m.nota!==null;
+  document.getElementById('detailPanel').innerHTML=`<div class="detail-panel">
+    <div class="panel-name">${m.nombre}</div>
+    <div class="panel-meta">Cód. ${m.cod} · ${m.cr} créditos · Periodo ${m.per}</div>
+    <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:12px">${m.tipo.map(tipoTag).join('')}</div>
+    <div class="info-box">${m.d}</div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">¿Cómo explicárselo a cualquier persona?</div>
+      <div class="info-box gold">${m.ab}</div>
+    </div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">Dificultad</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="flex:1;height:5px;background:var(--bg4);border-radius:3px;overflow:hidden"><div style="height:100%;width:${m.dif*20}%;background:${dlc[m.dif]};border-radius:3px"></div></div>
+        <span style="font-size:11px;color:${dlc[m.dif]};font-weight:700;white-space:nowrap">${dls[m.dif]}</span>
+      </div>
+    </div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">Habilidades para tu CV</div>
+      <div class="chip-list">${m.sk.map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+    </div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">Salida laboral</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5">${m.sal}</div>
+    </div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">Calificación</div>
+      ${hasNota
+        ? `<div id="nota-section-${m.id}"><div style="font-size:28px;font-weight:700;font-family:'IBM Plex Mono';color:${m.nota>=4?'var(--success)':m.nota>=3?'var(--unad-blue)':'var(--danger)'}">${m.nota}<span style="font-size:13px;color:var(--text3);font-weight:400"> / 5.0</span></div>
+           <button class="small-btn" onclick="editNota(${m.id})">Editar nota</button></div>`
+        : `<div id="nota-section-${m.id}"><div class="nota-widget">
+             <button type="button" tabindex="-1" class="nota-btn" onclick="adjNota(${m.id},-0.1)">−</button>
+             <input class="nota-inp" id="ni-${m.id}" type="number" min="1" max="5" step="0.1" onkeydown="if(event.key==='Enter'){event.preventDefault();saveNota(${m.id})}">
+             <button type="button" tabindex="-1" class="nota-btn" onclick="adjNota(${m.id},0.1)">+</button>
+           </div>
+           <div id="nota-hint-${m.id}" class="nota-hint">↵ Enter para guardar · Escribe 35 para 3.5</div></div>`
+      }
+    </div>
+  </div>`;
+}
+
+function selElec(grupo,cod){
+  // Clear any nota for other options in this group (only 1 can be active)
+  const gd=electivosData[grupo];
+  if(gd){gd.opciones.forEach(op=>{if(op.cod!==cod)delete electivosNotas[grupo+':::'+op.cod];});}
+  electivosSeleccionados[grupo]=cod;
+  markUnsaved();
+  // Update accordion header
+  if(gd)updateAccHeader(gd.per);
+  updateAll();
+  // Desmarcar cualquier materia seleccionada
+  document.querySelectorAll('.mat-row').forEach(r=>r.classList.remove('selected'));
+  // Re-render just this elec-block since the selected row changes from elec-opt to mat-row
+  const sg=grupo.replace(/'/g,'&#39;');
+  const block=document.querySelector(`.elec-block[data-grupo="${sg}"]`);
+  if(block&&gd){
+    let inner=`<div class="elec-title">${grupo}</div>`;
+    gd.opciones.forEach(op=>{
+      const isSel=op.cod===cod;
+      if(isSel){
+        const nKey=grupo+':::'+op.cod;
+        const nota=electivosNotas[nKey]!==undefined?electivosNotas[nKey]:null;
+        const e=nota!==null?(nota>=3?'aprobada':'reprobada'):'pendiente';
+        const et=nota!==null?(nota>=3?'Aprobada':'Reprobada'):'Pendiente';
+        inner+=`<div class="mat-row selected" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
+          <div style="flex:1">
+            <div class="mat-nombre">${op.nombre}</div>
+            <div class="mat-desc">${(op.d||'').substring(0,70)}…</div>
+            <div class="mat-meta">Cód. ${op.cod} · ${op.cr||3} créditos</div>
+            <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px">
+              <span class="tag tag-electiva">◆ Electiva</span>
+              <span class="tag tag-${e}">${et}</span>
+            </div>
+          </div>
+          <div class="${nClass(nota)} nota-badge">${nota!==null?nota:'—'}</div>
+        </div>`;
+      } else {
+        inner+=`<div class="elec-opt" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
+          <div class="radio"></div>
+          <div class="elec-name">${op.nombre}</div>
+          <div class="elec-cr">${op.cr||3} cr.</div>
+        </div>`;
+      }
+    });
+    block.innerHTML=inner;
+  }
+  showElecDetail(grupo,cod);
+}
+
+function showElecDetail(grupo,cod){
+  const gd=electivosData[grupo];if(!gd)return;
+  const op=gd.opciones.find(o=>o.cod===cod);if(!op)return;
+  const nKey=grupo+':::'+cod;
+  const nota=electivosNotas[nKey]!==undefined?electivosNotas[nKey]:null;
+  const hasNota=nota!==null;
+  document.getElementById('detailPanel').innerHTML=`<div class="detail-panel" style="border-left-color:var(--unad-gold)">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:3px">
+      <div class="panel-name">${op.nombre}</div>
+      <span class="tag tag-electiva" style="flex-shrink:0;margin-top:2px">◆ Electiva</span>
+    </div>
+    <div class="panel-meta">Cód. ${op.cod} · ${op.cr} créditos · Periodo ${gd.per} · ${grupo}</div>
+    <div class="info-box" style="border-left-color:var(--unad-gold)">${op.d}</div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">¿Cómo explicárselo a cualquier persona?</div>
+      <div class="info-box gold">${op.ab}</div>
+    </div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">Habilidades para tu CV</div>
+      <div class="chip-list">${(op.sk||[]).map(s=>`<span class="chip">${s}</span>`).join('')}</div>
+    </div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">Salida laboral</div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5">${op.sal||'—'}</div>
+    </div>
+    <div class="panel-sect">
+      <div class="panel-sect-title">Calificación</div>
+      <div id="enota-section-${cod}">
+      ${hasNota
+        ? `<div style="font-size:28px;font-weight:700;font-family:'IBM Plex Mono';color:${nota>=4?'var(--success)':nota>=3?'var(--unad-blue)':'var(--danger)'}">${nota}<span style="font-size:13px;color:var(--text3);font-weight:400"> / 5.0</span></div>
+           <button class="small-btn" onclick="editElecNota('${grupo.replace(/'/g,"\\'")}','${cod}')">Editar nota</button>`
+        : `<div class="nota-widget">
+             <button type="button" tabindex="-1" class="nota-btn" onclick="adjElecNota('${grupo.replace(/'/g,"\\'")}','${cod}',-0.1)">−</button>
+             <input class="nota-inp" id="eni-${cod}" type="number" min="1" max="5" step="0.1" onkeydown="if(event.key==='Enter'){event.preventDefault();saveElecNota('${grupo.replace(/'/g,"\\'")}','${cod}')}">
+             <button type="button" tabindex="-1" class="nota-btn" onclick="adjElecNota('${grupo.replace(/'/g,"\\'")}','${cod}',0.1)">+</button>
+           </div>
+           <div id="nota-hint-e${cod}" class="nota-hint">↵ Enter para guardar · Escribe 35 para 3.5</div>`
+      }
+      </div>
+    </div>
+    <div class="panel-sect">
+      <div class="panel-sect-title" style="color:var(--unad-gold)">Cambiar electiva de este grupo</div>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Otras opciones disponibles:</div>
+      ${gd.opciones.filter(o=>o.cod!==cod).map(o=>`
+        <div class="elec-opt" onclick="selElec('${grupo.replace(/'/g,"\\'")}','${o.cod}')" style="padding:7px 0">
+          <div class="radio"></div>
+          <div class="elec-name">${o.nombre}</div>
+          <div class="elec-cr">${o.cr} cr.</div>
+        </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function parseNota(raw){
+  // Allow "35" → 3.5, "45" → 4.5, "3" → 3.0, "3.5" → 3.5
+  let s=String(raw).trim().replace(',','.');
+  let v=parseFloat(s);
+  if(isNaN(v))return null;
+  // If integer >= 10 and <= 50, treat as tenths: 35 → 3.5
+  if(Number.isInteger(v)&&v>=10&&v<=50)v=v/10;
+  // If integer 1-5, keep as-is
+  if(v<1||v>5)return null;
+  return parseFloat(v.toFixed(1));
+}
+function showNotaError(id,msg){
+  const hint=document.getElementById('nota-hint-'+id);
+  if(!hint)return;
+  hint.textContent=msg;
+  hint.style.color='var(--danger)';
+  // Retrigger shake even if already shaking
+  hint.classList.remove('shake');
+  void hint.offsetWidth; // force reflow to restart animation
+  hint.classList.add('shake');
+}
+function clearNotaError(id){
+  const hint=document.getElementById('nota-hint-'+id);
+  if(hint){hint.textContent='↵ Enter para guardar · Escribe 35 para 3.5';hint.style.color='';hint.classList.remove('shake');}
+}
+function adjNota(id,delta){
+  const inp=document.getElementById('ni-'+id);if(!inp)return;
+  let v=parseFloat(inp.value);
+  if(isNaN(v)||v<0.1)v=0;
+  v=Math.round((v+delta)*10)/10;
+  v=Math.max(1,Math.min(5,v));
+  inp.value=v.toFixed(1);
+  clearNotaError(id);
+}
+function updateAccHeader(per){
+  const ms=materias.filter(x=>x.per===per);
+  let apro=ms.filter(x=>x.nota!==null&&x.nota>=3).length;
+  let repro=ms.filter(x=>x.nota!==null&&x.nota<3).length;
+  // Include electivas in this period
+  const elecEnPer=getElectivos().filter(e=>e.per===per);
+  elecEnPer.forEach(e=>{
+    const n=electivosNotas[e.grupo+':::'+e.cod];
+    if(n!==undefined){if(n>=3)apro++;else repro++;}
+  });
+  const acc=document.querySelector(`.malla-acc[data-per="${per}"]`);
+  if(!acc)return;
+  const headerDiv=acc.querySelector('.malla-acc-header > div');
+  if(!headerDiv)return;
+  const chips=headerDiv.querySelectorAll('span:nth-child(n+3)');
+  chips.forEach(s=>s.remove());
+  if(apro>0){const s=document.createElement('span');s.style.cssText='font-size:10px;font-weight:600;color:var(--success);background:rgba(0,168,107,0.1);padding:2px 7px;border-radius:10px';s.textContent=apro+' aprobada'+(apro>1?'s':'');headerDiv.appendChild(s);}
+  if(repro>0){const s=document.createElement('span');s.style.cssText='font-size:10px;font-weight:600;color:var(--danger);background:rgba(201,43,43,0.08);padding:2px 7px;border-radius:10px';s.textContent=repro+' reprobada'+(repro>1?'s':'');headerDiv.appendChild(s);}
+}
+
+function saveNota(id){
+  const inp=document.getElementById('ni-'+id);if(!inp)return;
+  const v=parseNota(inp.value);
+  if(v===null){showNotaError(id,'Nota inválida. Rango: 1.0 – 5.0 (ej: 35 = 3.5)');return;}
+  const m=materias.find(x=>x.id===id);if(!m)return;
+  m.nota=v;
+  markUnsaved();
+
+  // Actualizar sección de nota en el panel inline
+  const notaSection=document.getElementById('nota-section-'+id);
+  if(notaSection){
+    const color=m.nota>=4?'var(--success)':m.nota>=3?'var(--unad-blue)':'var(--danger)';
+    notaSection.innerHTML=`<div style="font-size:28px;font-weight:700;font-family:'IBM Plex Mono';color:${color}">${m.nota}<span style="font-size:13px;color:var(--text3);font-weight:400"> / 5.0</span></div>
+      <button class="small-btn" onclick="editNota(${id})">Editar nota</button>`;
+  }
+
+  // Actualizar badge en la lista
+  const badge=document.querySelector('#mrow-'+id+' .nota-badge');
+  if(badge){badge.className=nClass(m.nota)+' nota-badge';badge.textContent=m.nota;}
+
+  // Actualizar tag de estado en la lista
+  const row=document.getElementById('mrow-'+id);
+  if(row){
+    const tagEstado=row.querySelector('.tag-aprobada,.tag-reprobada,.tag-cursando,.tag-pendiente');
+    if(tagEstado){
+      const e=m.nota>=3?'aprobada':'reprobada';
+      tagEstado.className='tag tag-'+e;tagEstado.textContent=m.nota>=3?'Aprobada':'Reprobada';
+    }
+  }
+
+  updateAccHeader(m.per);
+  updateAll();
+  if(document.getElementById('view-profesional').classList.contains('active'))renderProfesional();
+}
+function editNota(id){
+  const m=materias.find(x=>x.id===id);if(!m)return;
+  const valorActual=m.nota;
+
+  // 1. Swap la sección de nota inline (panel derecho intacto)
+  const notaSection=document.getElementById('nota-section-'+id);
+  if(notaSection){
+    notaSection.innerHTML=`<div class="nota-widget">
+      <button type="button" tabindex="-1" class="nota-btn" onclick="adjNota(${id},-0.1)">−</button>
+      <input class="nota-inp" id="ni-${id}" type="number" min="1" max="5" step="0.1" value="${valorActual||''}" onkeydown="if(event.key==='Enter'){event.preventDefault();saveNota(${id})}">
+      <button type="button" tabindex="-1" class="nota-btn" onclick="adjNota(${id},0.1)">+</button>
+    </div>
+    <div id="nota-hint-${id}" class="nota-hint">↵ Enter para guardar · Escribe 35 para 3.5</div>`;
+  }
+
+  // 2. Limpiar nota en el modelo
+  m.nota=null;
+  markUnsaved();
+
+  // 3. Actualizar badge en la lista directamente (sin renderMalla)
+  const badge=document.querySelector('#mrow-'+id+' .nota-badge');
+  if(badge){badge.className='n-empty nota-badge';badge.textContent='—';}
+
+  // 4. Actualizar tag de estado en la lista directamente (sin renderMalla)
+  const row=document.getElementById('mrow-'+id);
+  if(row){
+    const tagEstado=row.querySelector('.tag-aprobada,.tag-reprobada,.tag-cursando,.tag-pendiente');
+    if(tagEstado){tagEstado.className='tag tag-pendiente';tagEstado.textContent='Pendiente';}
+  }
+
+  // 5. Actualizar header del acordeón
+  updateAccHeader(m.per);
+
+  // 6. Actualizar stats del dashboard (no toca el panel)
+  updateAll();
+
+  // 6. Focus al input
+  setTimeout(()=>{const inp=document.getElementById('ni-'+id);if(inp){inp.focus();inp.select();}},20);
+}
+function adjElecNota(grupo,cod,delta){
+  const inp=document.getElementById('eni-'+cod);if(!inp)return;
+  let v=parseFloat(inp.value);
+  if(isNaN(v)||v<0.1)v=0;
+  v=Math.round((v+delta)*10)/10;
+  v=Math.max(1,Math.min(5,v));
+  inp.value=v.toFixed(1);
+}
+function saveElecNota(grupo,cod){
+  const inp=document.getElementById('eni-'+cod);if(!inp)return;
+  const v=parseNota(inp.value);
+  if(v===null){showNotaError('e'+cod,'Nota inválida. Rango: 1.0 – 5.0 (ej: 35 = 3.5)');return;}
+  // Store only one nota per grupo
+  const gd=electivosData[grupo];
+  if(gd){gd.opciones.forEach(op=>{delete electivosNotas[grupo+':::'+op.cod];});}
+  electivosNotas[grupo+':::'+cod]=v;
+  markUnsaved();
+  // Update mat-row badge and tag in elec-block
+  const sg2=grupo.replace(/'/g,'&#39;');
+  const elecRow=document.querySelector(`.elec-block[data-grupo="${sg2}"] .mat-row[data-cod="${cod}"]`);
+  if(elecRow){
+    const badge=elecRow.querySelector('.nota-badge');
+    if(badge){badge.className=nClass(v)+' nota-badge';badge.textContent=v;}
+    const tagE=elecRow.querySelector('.tag-aprobada,.tag-reprobada,.tag-pendiente');
+    if(tagE){tagE.className='tag tag-'+(v>=3?'aprobada':'reprobada');tagE.textContent=v>=3?'Aprobada':'Reprobada';}
+  }
+  const gper=gd?gd.per:null;
+  if(gper)updateAccHeader(gper);
+  updateAll();
+  if(document.getElementById('view-profesional').classList.contains('active'))renderProfesional();
+  showElecDetail(grupo,cod);
+}
+function editElecNota(grupo,cod){
+  const nKey=grupo+':::'+cod;
+  const valorActual=electivosNotas[nKey]!==undefined?electivosNotas[nKey]:'';
+  const notaSection=document.getElementById('enota-section-'+cod);
+  if(!notaSection){
+    delete electivosNotas[nKey];
+    markUnsaved();showElecDetail(grupo,cod);
+    setTimeout(()=>{const inp=document.getElementById('eni-'+cod);if(inp){inp.value='';inp.focus();}},30);
+    return;
+  }
+  notaSection.innerHTML=`<div class="nota-widget">
+    <button type="button" tabindex="-1" class="nota-btn" onclick="adjElecNota('${grupo.replace(/'/g,"\\'")}','${cod}',-0.1)">−</button>
+    <input class="nota-inp" id="eni-${cod}" type="number" min="1" max="5" step="0.1" value="${valorActual}" onkeydown="if(event.key==='Enter'){event.preventDefault();saveElecNota('${grupo.replace(/'/g,"\\'")}','${cod}')}">
+    <button type="button" tabindex="-1" class="nota-btn" onclick="adjElecNota('${grupo.replace(/'/g,"\\'")}','${cod}',0.1)">+</button>
+  </div>
+  <div id="nota-hint-e${cod}" class="nota-hint">↵ Enter para guardar · Escribe 35 para 3.5</div>`;
+  delete electivosNotas[nKey];
+  markUnsaved();
+  setTimeout(()=>{const inp=document.getElementById('eni-'+cod);if(inp){inp.focus();inp.select();}},20);
+}
+
+/* ── PERIOD ACCORDION ── */
+function togglePer(section,p){
+  const acc=document.querySelector(`.per-group[data-section="${section}"][data-per="${p}"]`);
+  const body=acc?acc.querySelector('.per-body'):null;
+  const arrow=acc?acc.querySelector('.per-arrow'):null;
+  if(!acc)return;
+
+  if(openPers[section].has(p)){
+    // CERRAR: colapsar hacia arriba sin re-renderizar
+    openPers[section].delete(p);
+    if(body){
+      body.style.maxHeight=body.scrollHeight+'px';
+      body.style.opacity='1';
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        body.style.maxHeight='0';
+        body.style.opacity='0';
+      }));
+      setTimeout(()=>{body.style.display='none';},360);
+    }
+    if(arrow)arrow.classList.add('closed');
+  } else {
+    // ABRIR: mostrar y expandir hacia abajo sin re-renderizar
+    openPers[section].add(p);
+    if(body){
+      body.style.display='';
+      body.style.transition='none';
+      body.style.maxHeight='0';
+      body.style.opacity='0';
+      body.getBoundingClientRect();
+      body.style.transition='';
+      body.style.maxHeight=body.scrollHeight+'px';
+      body.style.opacity='1';
+      setTimeout(()=>{body.style.maxHeight='5000px';},390);
+    }
+    if(arrow)arrow.classList.remove('closed');
+  }
+}
+function perHeader(section,p,label,count){
+  const isOpen=openPers[section].has(p);
+  return `<div class="per-group">
+    <div class="per-header" onclick="togglePer('${section}',${p})">
+      <div>${label} <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:8px">${count} materias</span></div>
+      <span class="per-arrow ${isOpen?'':'closed'}">▼</span>
+    </div>
+    ${isOpen?'<BODY>':''}
+  </div>`;
+}
+
+/* ── PERFIL PROFESIONAL ── */
+const tlData=[
+  {rank:"Estudiante Inicial",icon:"1",desc:"Fundamentos de economía, comunicación y herramientas digitales para trabajo en entornos virtuales",credits:"Periodos 1–2 · 36 créditos",periodos:[1,2],
+   skills:["Comunicación profesional","Herramientas digitales","Pensamiento lógico","Economía básica"],
+   logro:"Bases sólidas para entender el mundo empresarial y digital"},
+  {rank:"Explorador de Negocios",icon:"2",desc:"Investigación cualitativa y cuantitativa, creatividad digital, legislación comercial e inglés intermedio",credits:"Periodos 3–4 · 36 créditos",periodos:[3,4],
+   skills:["Investigación de mercados","Creatividad digital","Marco legal","Inglés B1"],
+   logro:"Capacidad de investigar, crear contenido y operar legalmente"},
+  {rank:"Especialista en Formación",icon:"3",desc:"Comportamiento del consumidor, modelos de negocio digital, e-commerce, logística y marketing sostenible",credits:"Periodos 5–6 · 36 créditos",periodos:[5,6],
+   skills:["Consumer insights","E-commerce","Modelos digitales","Logística","ESG"],
+   logro:"Perfil listo para roles junior en marketing y negocios digitales"},
+  {rank:"Estratega Digital",icon:"4",desc:"Marketing digital integral, branding, Business Intelligence e internacionalización de negocios",credits:"Periodo 7 · 18 créditos",periodos:[7],
+   skills:["Marketing digital","Branding","Power BI","Marketing internacional"],
+   logro:"Perfil competitivo para roles de especialista y estratega digital"},
+  {rank:"Profesional en Marketing y Negocios Digitales",icon:"★",desc:"Plan de marketing completo, innovación digital, publicidad 360° y evaluación de proyectos de negocio",credits:"Periodo 8 · 18 créditos · Titulación",periodos:[8],
+   skills:["Plan de marketing","Innovación digital","Publicidad 360°","Gestión de proyectos"],
+   logro:"Profesional certificado listo para el mercado laboral global"},
+];
+
+function calcTlState(etapa){
+  const pers=etapa.periodos;
+  const mats=materias.filter(m=>pers.includes(m.per));
+  // Include selected electivas in these periods
+  const elecs=getElectivos().filter(e=>pers.includes(e.per));
+  const total=mats.length+elecs.length;
+  if(total===0)return{state:'future',apro:0,total:0,pct:0};
+  const aproMat=mats.filter(m=>m.nota!==null&&m.nota>=3).length;
+  const aproElec=elecs.filter(e=>{const n=electivosNotas[e.grupo+':::'+e.cod];return n!==undefined&&n>=3;}).length;
+  const apro=aproMat+aproElec;
+  const pct=Math.round((apro/total)*100);
+  if(pct===100)return{state:'done',apro,total,pct};
+  if(apro>0)return{state:'now',apro,total,pct};
+  return{state:'future',apro,total,pct};
+}
+
+function renderProfesional(){
+  // Calcular estados reales
+  const estados=tlData.map(e=>calcTlState(e));
+  // Ajustar: la primera etapa con pct>0 y <100 es "now", las anteriores "done", las siguientes "future"
+  // pero si ninguna tiene nada, todas son "future"
+  let foundNow=false;
+  const statesFinal=estados.map((s,i)=>{
+    if(s.state==='done')return s;
+    if(!foundNow&&s.apro>0){foundNow=true;return{...s,state:'now'};}
+    if(!foundNow&&i>0&&estados[i-1].state==='done'){foundNow=true;return{...s,state:'now'};}
+    return{...s,state:'future'};
+  });
+  // Si todas son future (0 notas), marcar la primera como "now"
+  if(statesFinal.every(s=>s.state==='future')){statesFinal[0]={...statesFinal[0],state:'now'};}
+
+  let th='';
+  tlData.forEach((r,i)=>{
+    const s=statesFinal[i];
+    const lineState=i<tlData.length-1?s.state:'';
+    const badgeText=s.state==='done'?`✓ Completado (${s.apro}/${s.total})`:s.state==='now'?`● En curso · ${s.apro}/${s.total} aprobadas`:`○ Pendiente`;
+    const progBar=s.total>0?`<div style="height:3px;background:var(--bg4);border-radius:2px;overflow:hidden;margin:6px 0 4px">
+      <div style="height:100%;width:${s.pct}%;background:${s.state==='done'?'linear-gradient(90deg,var(--unad-gold),#FFD97A)':s.state==='now'?'linear-gradient(90deg,var(--unad-blue),var(--unad-cyan))':'var(--border2)'};border-radius:2px;transition:width 0.5s cubic-bezier(0.4,0,0.2,1)"></div>
+    </div>
+    <div style="font-size:10px;color:var(--text3);margin-bottom:6px">${s.pct}% completado de esta etapa</div>`:'';
+    th+=`<div class="tl-item">
+      <div class="tl-left">
+        <div class="tl-dot ${s.state}">${r.icon}</div>
+        ${lineState?`<div class="tl-line ${lineState}"></div>`:''}
+      </div>
+      <div class="tl-body">
+        <div class="tl-badge ${s.state}">${badgeText}</div>
+        <div class="tl-rank">${r.rank}</div>
+        <div class="tl-desc">${r.desc}</div>
+        <div class="tl-creds">${r.credits}</div>
+        ${progBar}
+        <div style="font-size:11px;color:${s.state==='done'?'var(--success)':s.state==='now'?'var(--unad-blue)':'var(--text3)'};margin-bottom:6px;font-weight:500">▸ ${r.logro}</div>
+        <div class="tl-skills">${r.skills.map(sk=>`<span class="tl-skill">${sk}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('timelineEl').innerHTML=th;
+  renderLinkedin();
+}
+function renderLinkedin(){
+  const q=(document.getElementById('liSearch')||{}).value||'';
+  const sq=q.toLowerCase().trim();
+  const all=getAllMats();
+  let html='';
+  let found=false;
+  periodos.forEach(p=>{
+    let ms=all.filter(m=>m.per===p&&m.li);
+    if(sq)ms=ms.filter(m=>m.nombre.toLowerCase().includes(sq)||m.li.toLowerCase().includes(sq));
+    if(!ms.length)return;
+    found=true;
+    const isOpen=sq?true:openPers.li.has(p);
+    html+=`<div class="per-group" data-section="li" data-per="${p}">
+      <div class="per-header" onclick="togglePer('li',${p})">
+        <div>Periodo ${p} <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:8px">${ms.length} materias</span></div>
+        <span class="per-arrow ${isOpen?'':'closed'}">▼</span>
+      </div>
+      <div class="per-body" style="${isOpen?'max-height:5000px;opacity:1':'display:none;max-height:0;opacity:0'}">`;
+    ms.forEach((m,i)=>{
+        const uid=m.esElec?(m.grupo+m.cod).replace(/\W/g,'_'):`m${m.id}`;
+        html+=`<div class="li-card">
+          <div class="li-mat ${m.esElec?'elec':''}">${m.nombre}${m.esElec?' · Electiva':''}</div>
+          <div class="li-text" id="lt-${uid}">${m.li}</div>
+          <button class="copy-btn" onclick="copyLi('lt-${uid}',this)">Copiar texto</button>
+        </div>`;
+      });
+      html+=`</div></div>`;
+  });
+  if(!found)html=`<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">No se encontraron resultados para "${sq}"</div>`;
+  document.getElementById('linkedinCards').innerHTML=html;
+}
+function copyLi(id,btn){
+  const el=document.getElementById(id);if(!el)return;
+  navigator.clipboard.writeText(el.textContent).then(()=>{btn.textContent='✓ Copiado';setTimeout(()=>btn.textContent='Copiar texto',2000);});
+}
+
+/* ── SALIDA LABORAL ── */
+function renderSalida(){
+  const q=(document.getElementById('salidaSearch')||{}).value||'';
+  const sq=q.toLowerCase().trim();
+  const all=getAllMats();
+  let html='';
+  let found=false;
+  periodos.forEach(p=>{
+    let ms=all.filter(m=>m.per===p&&m.sal);
+    if(sq)ms=ms.filter(m=>m.nombre.toLowerCase().includes(sq)||m.sal.toLowerCase().includes(sq)||(m.sk||[]).some(s=>s.toLowerCase().includes(sq)));
+    if(!ms.length)return;
+    found=true;
+    const isOpen=sq?true:openPers.sal.has(p);
+    html+=`<div class="per-group" data-section="sal" data-per="${p}">
+      <div class="per-header" onclick="togglePer('sal',${p})">
+        <div>Periodo ${p} <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:8px">${ms.length} materias</span></div>
+        <span class="per-arrow ${isOpen?'':'closed'}">▼</span>
+      </div>
+      <div class="per-body" style="${isOpen?'max-height:5000px;opacity:1':'display:none;max-height:0;opacity:0'}">`;
+    ms.forEach(m=>{
+        html+=`<div class="sal-card">
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:8px">${m.nombre}${m.esElec?'<span class="tag tag-electiva">Electiva</span>':''}</div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:6px;line-height:1.4">${m.d}</div>
+            <div class="sal-roles"><div class="sal-roles-lbl">Roles laborales</div><div style="font-size:12px;color:var(--text)">${m.sal}</div></div>
+            ${m.sk?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">${m.sk.slice(0,4).map(s=>`<span class="chip">${s}</span>`).join('')}</div>`:''}
+          </div>
+          <div style="text-align:right;flex-shrink:0"><div style="font-size:9px;color:var(--text3)">Per.</div><div style="font-size:20px;font-weight:700;font-family:'IBM Plex Mono';color:var(--text3)">${m.per}</div></div>
+        </div>`;
+      });
+      html+=`</div></div>`;
+  });
+  if(!found)html=`<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">No se encontraron resultados para "${sq}"</div>`;
+  document.getElementById('salidaList').innerHTML=html;
+}
+
+/* ── PORTAFOLIO ── */
+function copyPrompt(txt,btn){
+  navigator.clipboard.writeText(txt).then(()=>{
+    btn.textContent='✓ Prompt copiado';
+    btn.style.background='rgba(0,168,107,0.1)';
+    btn.style.borderColor='var(--success)';
+    btn.style.color='var(--success)';
+    setTimeout(()=>{btn.textContent='🤖 Copiar prompt para IA';btn.style.background='';btn.style.borderColor='';btn.style.color='';},2500);
+  });
+}
+function renderPortafolio(){
+  const q=(document.getElementById('portaSearch')||{}).value||'';
+  const sq=q.toLowerCase().trim();
+  const all=getAllMats().filter(m=>m.po);
+  let html='';
+  let found=false;
+  periodos.forEach(p=>{
+    let ms=all.filter(m=>m.per===p);
+    if(sq)ms=ms.filter(m=>m.nombre.toLowerCase().includes(sq)||m.po.toLowerCase().includes(sq));
+    if(!ms.length)return;
+    found=true;
+    const isOpen=sq?true:openPers.po.has(p);
+    html+=`<div class="per-group" data-section="po" data-per="${p}">
+      <div class="per-header" onclick="togglePer('po',${p})">
+        <div>Periodo ${p} <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:8px">${ms.length} proyectos</span></div>
+        <span class="per-arrow ${isOpen?'':'closed'}">▼</span>
+      </div>
+      <div class="per-body" style="${isOpen?'max-height:5000px;opacity:1':'display:none;max-height:0;opacity:0'}">`;
+    ms.forEach(m=>{
+        const promptEsc=(m.prompt||'').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        html+=`<div class="por-card">
+          <div class="por-mat ${m.esElec?'elec':'oblig'}">${m.nombre}${m.esElec?' · Electiva':''}</div>
+          <div style="font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px">${m.po}</div>
+          <div style="margin-bottom:10px;font-size:10px;color:var(--text3);display:flex;gap:8px;flex-wrap:wrap">
+            ${m.tipo?m.tipo.map(t=>`<span>#${t}</span>`).join(''):''}${m.cr?`<span>${m.cr} créditos</span>`:''}
+          </div>
+          ${m.prompt?`<button class="copy-btn" style="font-size:11px;padding:5px 12px" onclick="copyPrompt('${promptEsc}',this)">🤖 Copiar prompt para IA</button>`:''}
+        </div>`;
+      });
+      html+=`</div></div>`;
+  });
+  if(!found)html=`<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">No se encontraron resultados para "${sq}"</div>`;
+  document.getElementById('portafolioList').innerHTML=html;
+}
+
+/* ── CONFIG ── */
+function toggleDark(on){
+  darkMode=on;
+  document.body.classList.toggle('dark',on);
+  markUnsaved();
+}
+function saveUsername(){
+  const v=document.getElementById('cfgName').value.trim();
+  if(!v)return;
+  username=v;
+  document.getElementById('greetName').textContent=username;
+  markUnsaved();
+  const btn=event.target;
+  btn.textContent='✓ Guardado';btn.classList.add('saved');
+  setTimeout(()=>{btn.textContent='Guardar nombre';btn.classList.remove('saved');},2000);
+}
+function previewName(){
+  const v=document.getElementById('cfgName').value.trim();
+  if(v)document.getElementById('greetName').textContent=v;
+}
+function focusNameEdit(){
+  showViewGear();
+  setTimeout(()=>{const inp=document.getElementById('cfgName');if(inp){inp.focus();inp.select();}},100);
+}
+
+/* ── UX: KEYBOARD ── */
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.mat-row').forEach(r=>r.classList.remove('selected'));
+    const dp=document.getElementById('detailPanel');
+    if(dp)dp.innerHTML=`<div class="detail-panel"><div class="empty-panel"><div style="font-size:32px;opacity:0.15;margin-bottom:10px">📋</div><div style="font-size:13px;line-height:1.6">Selecciona una materia<br>para ver su guía completa</div></div></div>`;
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();saveData();}
+  // Enter desde cualquier lugar dentro del detail panel guarda la nota activa
+  if(e.key==='Enter'&&!e.ctrlKey&&!e.metaKey){
+    const dp=document.getElementById('detailPanel');
+    if(!dp)return;
+    // Si el foco está en un nota-btn, buscar el input activo y guardar
+    if(e.target.classList.contains('nota-btn')){
+      e.preventDefault();
+      const inp=dp.querySelector('.nota-inp');
+      if(inp){
+        // Extraer el id de guardado del onkeydown del input
+        const kd=inp.getAttribute('onkeydown')||'';
+        const matchN=kd.match(/saveNota\((\d+)\)/);
+        const matchE=kd.match(/saveElecNota\('([^']+)','([^']+)'\)/);
+        if(matchN)saveNota(parseInt(matchN[1]));
+        else if(matchE)saveElecNota(matchE[1],matchE[2]);
+      }
+    }
+  }
+});
+
+/* ── UX: CLICK OUTSIDE PANEL ── */
+document.getElementById('mainContent').addEventListener('click',e=>{
+  if(document.getElementById('view-malla').classList.contains('active')){
+    if(e.target.closest('#detailPanel'))return;
+    if(e.target.closest('.mat-row'))return;
+    if(e.target.closest('.elec-block'))return;
+    if(e.target.closest('.elec-opt'))return;
+    if(e.target.closest('.nota-btn'))return;
+    if(e.target.closest('.small-btn'))return;
+    if(e.target.closest('.nota-inp'))return;
+    if(e.target.closest('.malla-acc-header'))return;
+    if(e.target.closest('.malla-acc-body'))return;
+    document.querySelectorAll('.mat-row').forEach(r=>r.classList.remove('selected'));
+    const dp=document.getElementById('detailPanel');
+    if(dp)dp.innerHTML=`<div class="detail-panel"><div class="empty-panel"><div style="font-size:32px;opacity:0.15;margin-bottom:10px">📋</div><div style="font-size:13px;line-height:1.6">Selecciona una materia<br>para ver su guía completa</div></div></div>`;
+  }
+});
+
+/* ── INIT ── */
+loadData();
+renderMalla();
+renderProfesional();
+renderSalida();
+renderPortafolio();
+updateAll();
+
+// Move detailPanel into malla-grid on desktop so it works as a grid column
+// On mobile it stays at body level as a fixed overlay
+(function(){
+  const dp=document.getElementById('detailPanel');
+  const grid=document.querySelector('.malla-grid');
+  if(!dp||!grid)return;
+  if(window.innerWidth>768){
+    grid.appendChild(dp);
+  }
+  window.addEventListener('resize',()=>{
+    if(window.innerWidth>768&&dp.parentElement!==grid){
+      grid.appendChild(dp);
+    } else if(window.innerWidth<=768&&dp.parentElement===grid){
+      document.body.appendChild(dp);
+    }
+  });
+})();
+
+/* ── MOBILE PWA ── */
+function setBottomNav(id){
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.bn-more-item').forEach(b=>b.classList.remove('active'));
+  const mainIds=['dashboard','malla','profesional'];
+  if(mainIds.includes(id)){
+    const btn=document.getElementById('bn-'+id);
+    if(btn)btn.classList.add('active');
+  } else {
+    document.getElementById('bn-more').classList.add('active');
+    const mItem=document.getElementById('bnm-'+id);
+    if(mItem)mItem.classList.add('active');
+  }
+}
+function toggleMoreMenu(){
+  document.getElementById('moreMenu').classList.toggle('open');
+}
+function closeMoreMenu(){
+  document.getElementById('moreMenu').classList.remove('open');
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('.bn-more'))closeMoreMenu();
+});
+
+function mobileOpenPanel(){
+  if(window.innerWidth>768)return;
+  const dp=document.getElementById('detailPanel');
+  if(!dp)return;
+  dp.classList.add('mobile-open');
+  document.body.classList.add('panel-open');
+  requestAnimationFrame(()=>{ dp.scrollTop=0; });
+}
+function mobileClosePanelOrBack(){
+  const dp=document.getElementById('detailPanel');
+  if(!dp||!dp.classList.contains('mobile-open'))return;
+  dp.classList.remove('mobile-open');
+  document.body.classList.remove('panel-open');
+  document.querySelectorAll('.mat-row').forEach(r=>r.classList.remove('selected'));
+}
+
+// iOS swipe-back from left edge
+(function(){
+  let sx=0,sy=0,active=false;
+  document.addEventListener('touchstart',e=>{
+    sx=e.touches[0].clientX; sy=e.touches[0].clientY;
+    active=sx<30;
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(!active)return; active=false;
+    const dx=e.changedTouches[0].clientX-sx;
+    const dy=Math.abs(e.changedTouches[0].clientY-sy);
+    if(dx>60&&dy<80){
+      const dp=document.getElementById('detailPanel');
+      if(dp&&dp.classList.contains('mobile-open'))mobileClosePanelOrBack();
+    }
+  },{passive:true});
+})();
+
+// Patch selMat/selElec to open panel as overlay on mobile
+const _selMatOrig=selMat;
+window.selMat=function(id){ _selMatOrig(id); mobileOpenPanel(); };
+const _selElecOrig=selElec;
+window.selElec=function(grupo,cod){ _selElecOrig(grupo,cod); mobileOpenPanel(); };
+
+// Service Worker
+if('serviceWorker' in navigator){
+  const sw=`const C='lu1';self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.add('.'))));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('.')))))`;
+  navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'}))).catch(()=>{});
+}
+</script>
+</body>
+</html>
