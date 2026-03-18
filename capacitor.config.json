@@ -1,5 +1,10 @@
 {
   "appId": "io.leanup.app",
   "appName": "LeanUp",
-  "webDir": "www"
+  "webDir": "www",
+  "backgroundColor": "#00000000",
+  "ios": {
+    "backgroundColor": "#00000000",
+    "contentInset": "always"
+  }
 }
