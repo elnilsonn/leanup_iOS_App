@@ -313,6 +313,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
             }
             self.rootVC = rootVC
             self.capacitorWebView = wv
+
+            // ── Full-screen edge-to-edge (content behind status bar, like App Store) ──
+            rootVC.edgesForExtendedLayout = .all
+            rootVC.extendedLayoutIncludesOpaqueBars = true
+            // Prevent the scroll view from automatically adding top inset for status bar
+            wv.scrollView.contentInsetAdjustmentBehavior = .never
+            // Stretch the WebView's frame to cover the full screen including status bar area
+            if let superview = wv.superview {
+                wv.translatesAutoresizingMaskIntoConstraints = false
+                NSLayoutConstraint.deactivate(wv.constraints)
+                NSLayoutConstraint.activate([
+                    wv.topAnchor.constraint(equalTo: superview.topAnchor),
+                    wv.leadingAnchor.constraint(equalTo: superview.leadingAnchor),
+                    wv.trailingAnchor.constraint(equalTo: superview.trailingAnchor),
+                    wv.bottomAnchor.constraint(equalTo: superview.bottomAnchor),
+                ])
+            }
+
             self.injectEnhancements(into: wv)
             self.mountTabBar(on: rootVC)
             self.mountBackButton(on: rootVC)
