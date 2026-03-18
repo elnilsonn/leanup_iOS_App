@@ -25,6 +25,7 @@ private struct LiquidGlassTabBar: View {
     @Binding var active: String
     @Namespace private var ns
     @State private var draggedIndex: Int? = nil
+    @State private var pressingTab: String? = nil
     @Environment(\.colorScheme) private var scheme
 
     private let tabs: [LUTab] = [
@@ -93,10 +94,12 @@ private struct LiquidGlassTabBar: View {
         HStack(spacing: 0) {
             ForEach(tabs) { tab in
                 let isActive = shown == tab.id
+                let isPressing = pressingTab == tab.id
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.76)) {
                         active = tab.id
                         draggedIndex = nil
+                        pressingTab = nil
                     }
                     onSelect(tab.id)
                 } label: {
@@ -104,13 +107,36 @@ private struct LiquidGlassTabBar: View {
                         if isActive {
                             glassBubble(width: bubbleW)
                                 .matchedGeometryEffect(id: "bubble", in: ns)
+                                .scaleEffect(isPressing ? 1.20 : 1.0)
                         }
                         tabLabel(tab, isActive: isActive)
                     }
                     .frame(maxWidth: .infinity)
                     .frame(height: 52)
+                    .scaleEffect(isPressing ? 1.12 : 1.0)
+                    .animation(
+                        isPressing
+                            ? .spring(response: 0.12, dampingFraction: 0.50)
+                            : .spring(response: 0.38, dampingFraction: 0.72),
+                        value: isPressing
+                    )
                 }
                 .buttonStyle(.plain)
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { _ in
+                            if pressingTab != tab.id {
+                                withAnimation(.spring(response: 0.10, dampingFraction: 0.48)) {
+                                    pressingTab = tab.id
+                                }
+                            }
+                        }
+                        .onEnded { _ in
+                            withAnimation(.spring(response: 0.38, dampingFraction: 0.72)) {
+                                pressingTab = nil
+                            }
+                        }
+                )
             }
         }
     }
@@ -320,6 +346,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 /* 1. Hide ENTIRE topbar — buttons will be moved to body */
                 .topbar { display: none !important; }
 
+                /* FIX 1: Remove top safe-area gap — we overlay natively */
+                .main { padding-top: 0 !important; }
+
+                /* FIX 2: Large iOS-Settings-style glass buttons */
+                .topbar-glass-btn {
+                    width: 52px !important;
+                    height: 52px !important;
+                    border-radius: 50% !important;
+                    font-size: 20px !important;
+                }
+
                 /* Override the detail-panel topbar-padding (was topbar 56px + safe) */
                 @media (max-width: 768px) {
                     #detailPanel { padding-top: calc(env(safe-area-inset-top) + 12px) !important; }
@@ -350,9 +387,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 sv.dataset.f = rs.dataset.f = '1';
                 document.body.appendChild(rs);
                 document.body.appendChild(sv);
-                var t = 'calc(env(safe-area-inset-top) + 10px)';
-                sv.style.cssText += ';position:fixed;top:'+t+';right:16px;z-index:600;display:flex';
-                rs.style.cssText += ';position:fixed;top:'+t+';right:62px;z-index:600';
+                var t = 'calc(env(safe-area-inset-top) + 8px)';
+                var glassBtn = [
+                    'width:52px','height:52px','border-radius:50%',
+                    'background:rgba(255,255,255,0.22)',
+                    'backdrop-filter:blur(24px) saturate(180%)',
+                    '-webkit-backdrop-filter:blur(24px) saturate(180%)',
+                    'border:1px solid rgba(255,255,255,0.52)',
+                    'box-shadow:0 4px 20px rgba(0,0,0,0.14),inset 0 1px 0 rgba(255,255,255,0.62)',
+                    'align-items:center','justify-content:center','cursor:pointer'
+                ].join(';');
+                sv.style.cssText = 'position:fixed;top:'+t+';right:16px;z-index:600;display:flex;' + glassBtn;
+                rs.style.cssText = 'position:fixed;top:'+t+';right:76px;z-index:600;display:flex;' + glassBtn;
             }
             document.readyState === 'loading'
                 ? document.addEventListener('DOMContentLoaded', floatButtons)
@@ -371,13 +417,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 ].join(';');
                 document.body.appendChild(topF);
 
-                // 3. Bottom gradient (just above tab bar)
+                // 3. Bottom gradient (at the very bottom, behind tab bar)
                 var botF = document.createElement('div');
                 botF.id = 'lu-bottom-fade';
                 botF.style.cssText = [
                     'position:fixed','left:0','right:0',
-                    'bottom:calc(env(safe-area-inset-bottom) + 60px)',
-                    'height:48px',
+                    'bottom:0',
+                    'height:calc(env(safe-area-inset-bottom) + 100px)',
                     'background:linear-gradient(to bottom, transparent, var(--bg))',
                     'pointer-events:none','z-index:100'
                 ].join(';');
