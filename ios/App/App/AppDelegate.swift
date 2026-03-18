@@ -368,8 +368,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 /* 1. Hide ENTIRE topbar — buttons will be moved to body */
                 .topbar { display: none !important; }
 
-                /* FIX 1: Remove top safe-area gap — we overlay natively */
-                .main { padding-top: 0 !important; }
+                /* FIX 1: Push content below the status bar (clock/battery) + small breathing room */
+                .main { padding-top: calc(env(safe-area-inset-top) + 12px) !important; }
 
                 /* FIX 2: Large iOS-Settings-style glass buttons */
                 .topbar-glass-btn {
