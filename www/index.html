@@ -492,6 +492,8 @@ body.dark .bn-more-item.active svg{color:var(--unad-gold)}
   .topbar-title{font-size:16px;font-weight:700}
   .btn-save{display:none}
   .btn-reset{display:none}
+  /* Exception: Config "Guardar nombre" button must remain visible */
+  .cfg-card .btn-save{display:inline-flex!important;font-size:13px!important}
 
   /* 1. Scroll — content ocupa el espacio restante y hace scroll */
   .content{
@@ -740,7 +742,7 @@ body.dark .bn-more-item.active svg{color:var(--unad-gold)}
         <div class="sect-title"><span class="gold-dot"></span>Perfil de usuario</div>
         <div class="cfg-lbl">Tu nombre</div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <input class="cfg-inp" id="cfgName" type="text" placeholder="Escribe tu nombre..." oninput="previewName()">
+          <input class="cfg-inp" id="cfgName" type="text" placeholder="Escribe tu nombre..." oninput="previewName()" onkeydown="if(event.key==='Enter'){saveUsername();this.blur();}">
           <button class="btn btn-save" onclick="saveUsername()" style="padding:8px 16px">Guardar nombre</button>
         </div>
         <div style="font-size:11px;color:var(--text3);margin-top:6px">Este nombre aparecerá en el saludo del Dashboard</div>
@@ -2050,9 +2052,9 @@ function saveUsername(){
   username=v;
   document.getElementById('greetName').textContent=username;
   saveData();
-  const btn=event.target;
-  btn.textContent='✓ Guardado';btn.classList.add('saved');
-  setTimeout(()=>{btn.textContent='Guardar nombre';btn.classList.remove('saved');},2000);
+  const btn=document.querySelector('#view-config .btn-save');
+  if(btn){btn.textContent='✓ Guardado';btn.classList.add('saved');
+  setTimeout(()=>{btn.textContent='Guardar nombre';btn.classList.remove('saved');},2000);}
 }
 function previewName(){
   const v=document.getElementById('cfgName').value.trim();

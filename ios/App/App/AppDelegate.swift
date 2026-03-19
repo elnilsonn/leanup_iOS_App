@@ -141,7 +141,7 @@ private struct LiquidGlassTabBar: View {
             tabCells(bubbleW: bubbleW)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
-                .glassEffect(in: Capsule())
+                .glassEffect(.clear, in: Capsule())
         } else {
             tabCells(bubbleW: bubbleW)
                 .padding(.horizontal, 10)
@@ -253,15 +253,15 @@ private struct LiquidGlassTabBar: View {
     @ViewBuilder
     private var fallbackBg: some View {
         ZStack {
-            // Very light frosted base — more transparent than before
+            // Very light frosted base — extra transparent
             Capsule()
-                .fill(.thinMaterial)
-                .opacity(0.72)
+                .fill(.ultraThinMaterial)
+                .opacity(0.50)
 
             Capsule()
                 .fill(scheme == .dark
-                      ? Color(red: 0.05, green: 0.09, blue: 0.16).opacity(0.32)
-                      : Color.white.opacity(0.22))
+                      ? Color(red: 0.05, green: 0.09, blue: 0.16).opacity(0.22)
+                      : Color.white.opacity(0.14))
 
             // Minimal specular top-edge highlight
             LinearGradient(
@@ -472,7 +472,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
     private var edgePanGR: UIScreenEdgePanGestureRecognizer?
 
     private var isPanelOpen = false {
-        didSet { animateBackButton(visible: isPanelOpen) }
+        didSet { updateBackButtonVisibility() }
+    }
+    private var isProfileSubViewOpen = false {
+        didSet { updateBackButtonVisibility() }
+    }
+
+    private func updateBackButtonVisibility() {
+        animateBackButton(visible: isPanelOpen || isProfileSubViewOpen)
     }
 
     func application(
@@ -581,22 +588,75 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 * { -webkit-tap-highlight-color: transparent !important; }
                 body, .mat-row, .per-header, .elec-opt, .bn-item, .stat-box,
                 button, a, label, [onclick], .malla-acc-header, .perfil-hub-card,
-                .cfg-card, .card, .stat-card, .toggle-row {
+                .cfg-card, .card, .stat-card, .toggle-row, .sal-card, .por-card,
+                .li-card, .tl-item, .copy-btn, .small-btn, .change-btn, .nota-btn {
                     -webkit-user-select: none !important;
                     user-select: none !important;
                     -webkit-touch-callout: none !important;
                 }
-                input, textarea, .nota-inp {
+                input, textarea, .nota-inp, .cfg-inp, .search-inp {
                     -webkit-user-select: auto !important;
                     user-select: auto !important;
                 }
                 /* pan-y lets the browser scroll without triggering click on items */
                 #mainContent { touch-action: pan-y !important; -webkit-overflow-scrolling: touch !important; }
                 .mat-row, .elec-opt, .per-header, .malla-acc-header { touch-action: manipulation !important; }
-                /* Prevent active state flash during scroll */
+
+                /* ── Disable :hover on touch-only devices (prevents "marking" while scrolling) ── */
+                @media (hover: none) and (pointer: coarse) {
+                    .mat-row:hover {
+                        border-color: var(--border) !important;
+                        border-left-color: transparent !important;
+                        background: var(--bg2) !important;
+                        transform: none !important;
+                    }
+                    .mat-row.selected:hover {
+                        border-color: var(--unad-blue) !important;
+                        border-left-color: var(--unad-gold) !important;
+                        background: rgba(0,70,173,0.04) !important;
+                        transform: translateX(2px) !important;
+                    }
+                    .per-header:hover,
+                    .malla-acc-header:hover {
+                        border-color: var(--border) !important;
+                    }
+                    .perfil-hub-card:hover {
+                        border-color: var(--border) !important;
+                        box-shadow: var(--shadow) !important;
+                    }
+                    .li-card:hover,
+                    .sal-card:hover {
+                        border-color: var(--border) !important;
+                    }
+                    .nav-item:hover {
+                        background: transparent !important;
+                        color: rgba(255,255,255,0.45) !important;
+                    }
+                    .nota-btn:hover {
+                        border-color: var(--border2) !important;
+                        color: var(--text2) !important;
+                        background: var(--bg3) !important;
+                    }
+                    .copy-btn:hover,
+                    .small-btn:hover,
+                    .change-btn:hover {
+                        border-color: var(--border) !important;
+                        color: var(--text2) !important;
+                    }
+                    .elec-opt:hover .elec-name {
+                        color: var(--text2) !important;
+                    }
+                    .cfg-gear-btn:hover {
+                        background: rgba(255,255,255,0.04) !important;
+                        border-color: rgba(255,255,255,0.1) !important;
+                    }
+                }
+
+                /* Prevent active state flash during scroll — longer delay */
                 .mat-row:active, .per-header:active, .elec-opt:active,
-                .malla-acc-header:active, .perfil-hub-card:active {
-                    transition-delay: 120ms !important;
+                .malla-acc-header:active, .perfil-hub-card:active,
+                .sal-card:active, .por-card:active, .li-card:active {
+                    transition-delay: 180ms !important;
                 }
 
                 /* ── Panel slide animation ── */
@@ -801,9 +861,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                     if (dp) {
                         requestAnimationFrame(function() {
                             requestAnimationFrame(function() {
-                                dp.style.transition = 'transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94)';
+                                dp.style.transition = 'transform 0.30s cubic-bezier(0.32,0.72,0,1)';
                                 dp.style.transform  = 'translateX(0)';
-                                setTimeout(function() { dp.style.transition = ''; dp.style.transform = ''; }, 380);
+                                setTimeout(function() { dp.style.transition = ''; dp.style.transform = ''; }, 320);
                             });
                         });
                     }
@@ -813,15 +873,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 window.mobileClosePanelOrBack = function() {
                     var dp = document.getElementById('detailPanel');
                     if (dp && dp.classList.contains('mobile-open')) {
-                        // Animate out to the right, then let the original fn clean up
-                        dp.style.transition = 'transform 0.28s cubic-bezier(0.4,0,1,1)';
+                        // Apple-style fast dismiss: 0.20s with Apple back-gesture curve
+                        dp.style.transition = 'transform 0.20s cubic-bezier(0.32,0.72,0,1)';
                         dp.style.transform  = 'translateX(100%)';
                         var a = arguments;
                         setTimeout(function() {
                             dp.style.transition = '';
                             dp.style.transform  = '';
                             _close.apply(window, a);
-                        }, 280);
+                        }, 220);
                         window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'panelClose' });
                     } else {
                         _close.apply(this, arguments);
@@ -831,6 +891,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
             document.readyState === 'loading'
                 ? document.addEventListener('DOMContentLoaded', patchPanel)
                 : patchPanel();
+
+            // ── 9b. Patch showView — detect profile sub-view navigation ─────
+            function patchShowView() {
+                if (window.__lu_sv_patched) return;
+                if (typeof showView !== 'function') { setTimeout(patchShowView, 250); return; }
+                window.__lu_sv_patched = true;
+                var _sv = window.showView;
+                var profileSubViews = ['profesional', 'salida', 'portafolio'];
+                window.showView = function(id, el) {
+                    // Check if we're entering a profile sub-view
+                    if (profileSubViews.indexOf(id) >= 0) {
+                        window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'subViewOpen' });
+                    } else {
+                        // Navigating away from sub-view (to hub, dashboard, etc.)
+                        window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'subViewClose' });
+                    }
+                    _sv.apply(this, arguments);
+                };
+            }
+            document.readyState === 'loading'
+                ? document.addEventListener('DOMContentLoaded', patchShowView)
+                : patchShowView();
+
+            // ── 9c. Patch showViewGear — close sub-view state ───────────────
+            function patchShowViewGear() {
+                if (window.__lu_svg_patched) return;
+                if (typeof showViewGear !== 'function') { setTimeout(patchShowViewGear, 250); return; }
+                window.__lu_svg_patched = true;
+                var _svg = window.showViewGear;
+                window.showViewGear = function() {
+                    window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'subViewClose' });
+                    _svg.apply(this, arguments);
+                };
+            }
+            document.readyState === 'loading'
+                ? document.addEventListener('DOMContentLoaded', patchShowViewGear)
+                : patchShowViewGear();
 
             // ── 6. Haptic feedback on web elements ──────────────────────────
             function h(s) {
@@ -861,6 +958,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 document.querySelectorAll('[onclick*="copy"], [onclick*="Copy"], .copy-btn, [onclick*="prompt"]').forEach(function(el) {
                     if (!el.dataset.luh) { el.dataset.luh='1';
                         el.addEventListener('click', function() { h('light'); }, true); }
+                });
+                // Perfil hub cards
+                document.querySelectorAll('.perfil-hub-card').forEach(function(el) {
+                    if (!el.dataset.luh) { el.dataset.luh='1';
+                        el.addEventListener('click', function() { h('medium'); }, true); }
                 });
             }
             document.readyState === 'loading'
@@ -948,7 +1050,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         guard backButtonVC == nil, #available(iOS 15.0, *) else { return }
         let host = UIHostingController(
             rootView: GlassBackButton { [weak self] in
-                self?.capacitorWebView?.evaluateJavaScript("mobileClosePanelOrBack()")
+                guard let self else { return }
+                if self.isPanelOpen {
+                    self.capacitorWebView?.evaluateJavaScript("mobileClosePanelOrBack()")
+                } else if self.isProfileSubViewOpen {
+                    self.capacitorWebView?.evaluateJavaScript("showView('perfil-hub',null)")
+                    self.isProfileSubViewOpen = false
+                }
             }
         )
         configure(overlayVC: host)
@@ -1055,6 +1163,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 }
             case "markUnsaved":
                 self.floatButtonsState.resetEnabled = true
+            case "subViewOpen":
+                self.isProfileSubViewOpen = true
+            case "subViewClose":
+                self.isProfileSubViewOpen = false
             case "haptic":
                 self.triggerHaptic(style: body["style"] as? String ?? "medium")
             default: break
@@ -1088,6 +1200,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
 
     // MARK: Tab navigation
     private func handleTab(_ id: String) {
+        // Close profile sub-view state when switching tabs
+        if isProfileSubViewOpen { isProfileSubViewOpen = false }
+        // Close panel if open
+        if isPanelOpen { isPanelOpen = false }
         webGo(id)
     }
 
@@ -1172,48 +1288,80 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
     }
 
     @objc private func handleEdgeSwipe(_ gr: UIScreenEdgePanGestureRecognizer) {
-        guard isPanelOpen, let wv = capacitorWebView else { return }
+        guard let wv = capacitorWebView else { return }
         let tx      = max(0, gr.translation(in: gr.view).x)
         let vx      = gr.velocity(in: gr.view).x
         let screenW = UIScreen.main.bounds.width
 
-        switch gr.state {
-        case .changed:
-            wv.evaluateJavaScript("""
-                var dp = document.getElementById('detailPanel');
-                if (dp && dp.classList.contains('mobile-open')) {
-                    dp.style.transition = 'none';
-                    dp.style.transform  = 'translateX(\(tx)px)';
-                }
-            """)
-
-        case .ended:
-            if vx > 400 || tx > screenW * 0.4 {
-                // Commit dismiss — slide out the remaining distance
-                let dur = max(0.12, Double(screenW - tx) / Double(max(vx, 400)))
+        if isPanelOpen {
+            // ── Panel dismiss (materia detail) ──
+            switch gr.state {
+            case .changed:
                 wv.evaluateJavaScript("""
-                    (function() {
-                        var dp = document.getElementById('detailPanel');
-                        if (!dp) return;
-                        dp.style.transition = 'transform \(String(format:"%.2f", dur))s cubic-bezier(0.25,0.46,0.45,0.94)';
-                        dp.style.transform  = 'translateX(100%)';
-                        setTimeout(function() {
-                            dp.style.transition = ''; dp.style.transform = '';
-                            dp.classList.remove('mobile-open');
-                            document.body.classList.remove('panel-open');
-                            document.querySelectorAll('.mat-row').forEach(function(r) { r.classList.remove('selected'); });
-                            window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'panelClose' });
-                        }, \(Int(dur * 1000)));
-                    })();
+                    var dp = document.getElementById('detailPanel');
+                    if (dp && dp.classList.contains('mobile-open')) {
+                        dp.style.transition = 'none';
+                        dp.style.transform  = 'translateX(\(tx)px)';
+                    }
                 """)
-            } else {
+            case .ended:
+                if vx > 400 || tx > screenW * 0.4 {
+                    let dur = max(0.10, Double(screenW - tx) / Double(max(vx, 500)))
+                    wv.evaluateJavaScript("""
+                        (function() {
+                            var dp = document.getElementById('detailPanel');
+                            if (!dp) return;
+                            dp.style.transition = 'transform \(String(format:"%.2f", dur))s cubic-bezier(0.32,0.72,0,1)';
+                            dp.style.transform  = 'translateX(100%)';
+                            setTimeout(function() {
+                                dp.style.transition = ''; dp.style.transform = '';
+                                dp.classList.remove('mobile-open');
+                                document.body.classList.remove('panel-open');
+                                document.querySelectorAll('.mat-row').forEach(function(r) { r.classList.remove('selected'); });
+                                window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'panelClose' });
+                            }, \(Int(dur * 1000)));
+                        })();
+                    """)
+                } else {
+                    snapPanelBack(wv: wv)
+                }
+            case .cancelled, .failed:
                 snapPanelBack(wv: wv)
+            default: break
             }
 
-        case .cancelled, .failed:
-            snapPanelBack(wv: wv)
-
-        default: break
+        } else if isProfileSubViewOpen {
+            // ── Profile sub-view dismiss (profesional/salida/portafolio → perfil-hub) ──
+            switch gr.state {
+            case .changed:
+                wv.evaluateJavaScript("""
+                    var v = document.querySelector('.view.active');
+                    if (v) { v.style.transition = 'none'; v.style.transform = 'translateX(\(tx)px)'; }
+                """)
+            case .ended:
+                if vx > 400 || tx > screenW * 0.4 {
+                    let dur = max(0.10, Double(screenW - tx) / Double(max(vx, 500)))
+                    wv.evaluateJavaScript("""
+                        (function() {
+                            var v = document.querySelector('.view.active');
+                            if (!v) return;
+                            v.style.transition = 'transform \(String(format:"%.2f", dur))s cubic-bezier(0.32,0.72,0,1)';
+                            v.style.transform = 'translateX(100%)';
+                            setTimeout(function() {
+                                v.style.transition = ''; v.style.transform = '';
+                                showView('perfil-hub', null);
+                                window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'subViewClose' });
+                            }, \(Int(dur * 1000)));
+                        })();
+                    """)
+                    isProfileSubViewOpen = false
+                } else {
+                    snapViewBack(wv: wv)
+                }
+            case .cancelled, .failed:
+                snapViewBack(wv: wv)
+            default: break
+            }
         }
     }
 
@@ -1221,9 +1369,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         wv.evaluateJavaScript("""
             var dp = document.getElementById('detailPanel');
             if (dp) {
-                dp.style.transition = 'transform 0.3s cubic-bezier(0.25,0.46,0.45,0.94)';
+                dp.style.transition = 'transform 0.25s cubic-bezier(0.32,0.72,0,1)';
                 dp.style.transform  = 'translateX(0)';
-                setTimeout(function() { dp.style.transition = ''; dp.style.transform = ''; }, 320);
+                setTimeout(function() { dp.style.transition = ''; dp.style.transform = ''; }, 280);
+            }
+        """)
+    }
+
+    private func snapViewBack(wv: WKWebView) {
+        wv.evaluateJavaScript("""
+            var v = document.querySelector('.view.active');
+            if (v) {
+                v.style.transition = 'transform 0.25s cubic-bezier(0.32,0.72,0,1)';
+                v.style.transform  = 'translateX(0)';
+                setTimeout(function() { v.style.transition = ''; v.style.transform = ''; }, 280);
             }
         """)
     }
