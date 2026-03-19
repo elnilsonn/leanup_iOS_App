@@ -35,10 +35,10 @@ private struct LiquidGlassTabBar: View {
 
     private let dragThreshold: CGFloat = 8  // pt before a touch becomes a drag
     private let tabs: [LUTab] = [
-        LUTab(id: "dashboard",   icon: "house.fill",            label: "Inicio"),
-        LUTab(id: "malla",       icon: "list.bullet.clipboard", label: "Malla"),
-        LUTab(id: "profesional", icon: "person.fill",           label: "Perfil"),
-        LUTab(id: "more",        icon: "ellipsis",              label: "Más"),
+        LUTab(id: "dashboard", icon: "house.fill",            label: "Inicio"),
+        LUTab(id: "malla",     icon: "list.bullet.clipboard", label: "Malla"),
+        LUTab(id: "perfil",    icon: "person.fill",           label: "Perfil"),
+        LUTab(id: "config",    icon: "gearshape.fill",        label: "Config"),
     ]
     var onSelect: (String) -> Void
 
@@ -121,7 +121,6 @@ private struct LiquidGlassTabBar: View {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
                 active = tabs[idx].id
             }
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             onSelect(tabs[idx].id)
         } else {
             // It was a swipe — snap to wherever the finger stopped
@@ -253,22 +252,44 @@ private struct LiquidGlassTabBar: View {
     // MARK: Fallback glass bar background (iOS 15–25)
     @ViewBuilder
     private var fallbackBg: some View {
-        Capsule()
-            .fill(scheme == .dark
-                  ? Color(red: 0.07, green: 0.12, blue: 0.20).opacity(0.88)
-                  : Color.white.opacity(0.70))
-            .background(.ultraThinMaterial, in: Capsule())
-            .overlay(
-                LinearGradient(
-                    colors: [.white.opacity(scheme == .dark ? 0.07 : 0.28), .clear],
-                    startPoint: .topLeading, endPoint: .bottomTrailing
-                ).clipShape(Capsule())
+        ZStack {
+            Capsule()
+                .fill(.ultraThinMaterial)
+
+            Capsule()
+                .fill(scheme == .dark
+                      ? Color(red: 0.07, green: 0.12, blue: 0.20).opacity(0.55)
+                      : Color.white.opacity(0.45))
+
+            // Specular top-edge highlight
+            LinearGradient(
+                stops: [
+                    .init(color: .white.opacity(scheme == .dark ? 0.12 : 0.55), location: 0),
+                    .init(color: .white.opacity(scheme == .dark ? 0.03 : 0.10), location: 0.30),
+                    .init(color: .clear, location: 0.55),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
             )
-            .overlay(Capsule().stroke(
-                scheme == .dark ? Color.white.opacity(0.10) : Color.white.opacity(0.45),
-                lineWidth: 0.5
-            ))
-            .shadow(color: .black.opacity(scheme == .dark ? 0.45 : 0.14), radius: 26, y: 8)
+            .clipShape(Capsule())
+
+            // Rim stroke
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            .white.opacity(scheme == .dark ? 0.20 : 0.65),
+                            .white.opacity(scheme == .dark ? 0.04 : 0.15),
+                            .white.opacity(scheme == .dark ? 0.12 : 0.40),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.5
+                )
+        }
+        .shadow(color: .black.opacity(scheme == .dark ? 0.40 : 0.10), radius: 20, y: 6)
+        .shadow(color: .white.opacity(scheme == .dark ? 0.0 : 0.30), radius: 1, y: -0.5)
     }
 
     private func clamp(_ v: Int, in r: Range<Int>) -> Int { min(max(v, r.lowerBound), r.upperBound - 1) }
@@ -318,11 +339,33 @@ private struct GlassCircleModifier: ViewModifier {
         } else {
             content
                 .background {
-                    Circle()
-                        .fill(scheme == .dark ? Color.white.opacity(0.15) : Color.white.opacity(0.72))
-                        .background(.ultraThinMaterial, in: Circle())
-                        .overlay(Circle().stroke(Color.white.opacity(0.3), lineWidth: 0.5))
-                        .shadow(color: .black.opacity(0.14), radius: 10, y: 3)
+                    ZStack {
+                        Circle().fill(.ultraThinMaterial)
+                        Circle().fill(scheme == .dark
+                            ? Color.white.opacity(0.10)
+                            : Color.white.opacity(0.45))
+                        // Specular highlight
+                        LinearGradient(
+                            stops: [
+                                .init(color: .white.opacity(scheme == .dark ? 0.15 : 0.55), location: 0),
+                                .init(color: .clear, location: 0.45),
+                            ],
+                            startPoint: .top, endPoint: .bottom
+                        ).clipShape(Circle())
+                        // Rim
+                        Circle().stroke(
+                            LinearGradient(
+                                colors: [
+                                    .white.opacity(scheme == .dark ? 0.22 : 0.65),
+                                    .white.opacity(scheme == .dark ? 0.05 : 0.18),
+                                ],
+                                startPoint: .topLeading, endPoint: .bottomTrailing
+                            ),
+                            lineWidth: 0.5
+                        )
+                    }
+                    .shadow(color: .black.opacity(scheme == .dark ? 0.35 : 0.12), radius: 12, y: 3)
+                    .shadow(color: .white.opacity(scheme == .dark ? 0.0 : 0.25), radius: 1, y: -0.5)
                 }
         }
     }
@@ -332,7 +375,7 @@ private struct GlassCircleModifier: ViewModifier {
 // MARK: - AppDelegate
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
+class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, WKNavigationDelegate {
 
     var window: UIWindow?
     private weak var capacitorWebView: WKWebView?
@@ -343,6 +386,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
     private var tabBarHeightConstraint: NSLayoutConstraint?
     private var isCollapsed = false
     private var messageHandlerAdded = false
+    private var hasRestoredData = false
     private var edgePanGR: UIScreenEdgePanGestureRecognizer?
 
     private var isPanelOpen = false {
@@ -390,11 +434,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 superview.layoutIfNeeded()
             }
 
+            wv.navigationDelegate = self
             self.injectEnhancements(into: wv)
             self.mountTabBar(on: rootVC)
             self.mountBackButton(on: rootVC)
             self.addEdgeSwipe(to: wv)
-            self.restoreFromUserDefaults(in: wv)
         }
     }
 
@@ -447,17 +491,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
                 /* ── Fix scroll-selection: remove tap flash, prevent text selection ── */
                 * { -webkit-tap-highlight-color: transparent !important; }
                 body, .mat-row, .per-header, .elec-opt, .bn-item, .stat-box,
-                button, a, label, [onclick] {
+                button, a, label, [onclick], .malla-acc-header, .perfil-hub-card,
+                .cfg-card, .card, .stat-card, .toggle-row {
                     -webkit-user-select: none !important;
                     user-select: none !important;
+                    -webkit-touch-callout: none !important;
                 }
                 input, textarea, .nota-inp {
                     -webkit-user-select: auto !important;
                     user-select: auto !important;
                 }
                 /* pan-y lets the browser scroll without triggering click on items */
-                #mainContent { touch-action: pan-y !important; }
-                .mat-row, .elec-opt, .per-header { touch-action: manipulation !important; }
+                #mainContent { touch-action: pan-y !important; -webkit-overflow-scrolling: touch !important; }
+                .mat-row, .elec-opt, .per-header, .malla-acc-header { touch-action: manipulation !important; }
+                /* Prevent active state flash during scroll */
+                .mat-row:active, .per-header:active, .elec-opt:active,
+                .malla-acc-header:active, .perfil-hub-card:active {
+                    transition-delay: 120ms !important;
+                }
 
                 /* ── Panel slide animation ── */
                 #detailPanel { will-change: transform; }
@@ -483,25 +534,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
             function glassStyle(isDark) {
                 var t = 'calc(env(safe-area-inset-top) + 8px)';
                 var bg = isDark
-                    ? 'rgba(255,255,255,0.10)'
-                    : 'rgba(255,255,255,0.65)';
+                    ? 'rgba(255,255,255,0.08)'
+                    : 'rgba(255,255,255,0.50)';
                 var border = isDark
-                    ? '0.5px solid rgba(255,255,255,0.18)'
-                    : '0.5px solid rgba(255,255,255,0.80)';
+                    ? '0.5px solid rgba(255,255,255,0.15)'
+                    : '0.5px solid rgba(255,255,255,0.70)';
                 var shadow = isDark
-                    ? '0 4px 24px rgba(0,0,0,0.45),inset 0 1px 0 rgba(255,255,255,0.14)'
-                    : '0 4px 20px rgba(0,0,0,0.12),inset 0 1px 0 rgba(255,255,255,0.75)';
+                    ? '0 6px 20px rgba(0,0,0,0.40), 0 0 0 0.5px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.12)'
+                    : '0 4px 16px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(255,255,255,0.50), inset 0 1px 0 rgba(255,255,255,0.70)';
+                var bgImage = isDark
+                    ? 'linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 40%)'
+                    : 'linear-gradient(to bottom, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.10) 40%, transparent 60%)';
                 return [
                     'position:fixed','top:'+t,'z-index:600',
                     'width:52px','height:52px','border-radius:50%',
                     'display:flex','align-items:center','justify-content:center',
                     'cursor:pointer',
                     'background:'+bg,
-                    'backdrop-filter:blur(28px) saturate(180%)',
-                    '-webkit-backdrop-filter:blur(28px) saturate(180%)',
+                    'background-image:'+bgImage,
+                    'backdrop-filter:blur(40px) saturate(200%)',
+                    '-webkit-backdrop-filter:blur(40px) saturate(200%)',
                     'border:'+border,
                     'box-shadow:'+shadow,
-                    'transition:background 0.2s,box-shadow 0.2s'
+                    'transition:transform 0.2s cubic-bezier(0.25,0.46,0.45,0.94),background 0.2s,box-shadow 0.2s'
                 ].join(';');
             }
 
@@ -1023,45 +1078,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler {
 
     // MARK: Tab navigation
     private func handleTab(_ id: String) {
-        if id == "more" { showMoreSheet() } else { webGo(id) }
-    }
-
-    private func showMoreSheet() {
-        guard let rootVC else { return }
-        let sheet = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        sheet.addAction(.init(title: "Salida Laboral",  style: .default) { [weak self] _ in self?.webGo("salida") })
-        sheet.addAction(.init(title: "Portafolio",      style: .default) { [weak self] _ in self?.webGo("portafolio") })
-        sheet.addAction(.init(title: "Configuración",   style: .default) { [weak self] _ in self?.webGo("config") })
-        sheet.addAction(.init(title: "Cancelar",        style: .cancel))
-        rootVC.present(sheet, animated: true)
+        webGo(id)
     }
 
     private func webGo(_ id: String) {
         let js: String
         switch id {
-        case "dashboard":   js = "showView('dashboard',null);setBottomNav('dashboard');"
-        case "malla":       js = "showView('malla',null);setBottomNav('malla');"
-        case "profesional": js = "showView('profesional',null);setBottomNav('profesional');"
-        case "salida":      js = "showView('salida',null);setBottomNav('salida');"
-        case "portafolio":  js = "showView('portafolio',null);setBottomNav('portafolio');"
-        case "config":      js = "showViewGear();"
-        default:            return
+        case "dashboard": js = "showView('dashboard',null);"
+        case "malla":     js = "showView('malla',null);"
+        case "perfil":    js = "showView('perfil-hub',null);"
+        case "config":    js = "showViewGear();"
+        default:          return
         }
         capacitorWebView?.evaluateJavaScript(js)
     }
 
+    // MARK: WKNavigationDelegate — restore data AFTER page finishes loading
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        guard !hasRestoredData else { return }
+        hasRestoredData = true
+        restoreFromUserDefaults(in: webView)
+        // Re-inject enhancements (page may have reloaded)
+        injectEnhancements(into: webView)
+    }
+
     // MARK: Native data backup / restore
-    /// Called once on mount: pushes UserDefaults backup into localStorage so
-    /// loadData() picks it up even after localStorage is wiped by iOS.
+    /// Pushes UserDefaults backup into localStorage so loadData() picks it up
+    /// even after localStorage is wiped by iOS. Retries until loadData exists.
     private func restoreFromUserDefaults(in wv: WKWebView) {
         guard let b64 = UserDefaults.standard.string(forKey: "leanup_v4_backup") else { return }
-        // atob() decodes base64 → the original JSON string
         let js = """
-        (function() {
+        (function restore() {
             try {
+                if (typeof loadData !== 'function') {
+                    setTimeout(restore, 150);
+                    return;
+                }
                 var json = atob('\(b64)');
                 localStorage.setItem('leanup_v4', json);
-                if (typeof loadData          === 'function') loadData();
+                loadData();
                 if (typeof renderMalla       === 'function') renderMalla();
                 if (typeof renderProfesional === 'function') renderProfesional();
                 if (typeof renderSalida      === 'function') renderSalida();
