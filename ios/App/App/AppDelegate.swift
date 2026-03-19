@@ -253,34 +253,34 @@ private struct LiquidGlassTabBar: View {
     @ViewBuilder
     private var fallbackBg: some View {
         ZStack {
+            // Very light frosted base — more transparent than before
             Capsule()
-                .fill(.ultraThinMaterial)
+                .fill(.thinMaterial)
+                .opacity(0.72)
 
             Capsule()
                 .fill(scheme == .dark
-                      ? Color(red: 0.07, green: 0.12, blue: 0.20).opacity(0.55)
-                      : Color.white.opacity(0.45))
+                      ? Color(red: 0.05, green: 0.09, blue: 0.16).opacity(0.32)
+                      : Color.white.opacity(0.22))
 
-            // Specular top-edge highlight
+            // Minimal specular top-edge highlight
             LinearGradient(
                 stops: [
-                    .init(color: .white.opacity(scheme == .dark ? 0.12 : 0.55), location: 0),
-                    .init(color: .white.opacity(scheme == .dark ? 0.03 : 0.10), location: 0.30),
-                    .init(color: .clear, location: 0.55),
+                    .init(color: .white.opacity(scheme == .dark ? 0.08 : 0.30), location: 0),
+                    .init(color: .clear, location: 0.40),
                 ],
                 startPoint: .top,
                 endPoint: .bottom
             )
             .clipShape(Capsule())
 
-            // Rim stroke
+            // Thin rim stroke
             Capsule()
                 .stroke(
                     LinearGradient(
                         colors: [
-                            .white.opacity(scheme == .dark ? 0.20 : 0.65),
-                            .white.opacity(scheme == .dark ? 0.04 : 0.15),
-                            .white.opacity(scheme == .dark ? 0.12 : 0.40),
+                            .white.opacity(scheme == .dark ? 0.14 : 0.50),
+                            .white.opacity(scheme == .dark ? 0.03 : 0.10),
                         ],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
@@ -288,8 +288,8 @@ private struct LiquidGlassTabBar: View {
                     lineWidth: 0.5
                 )
         }
-        .shadow(color: .black.opacity(scheme == .dark ? 0.40 : 0.10), radius: 20, y: 6)
-        .shadow(color: .white.opacity(scheme == .dark ? 0.0 : 0.30), radius: 1, y: -0.5)
+        .shadow(color: .black.opacity(scheme == .dark ? 0.30 : 0.07), radius: 16, y: 4)
+        .shadow(color: .white.opacity(scheme == .dark ? 0.0 : 0.20), radius: 1, y: -0.5)
     }
 
     private func clamp(_ v: Int, in r: Range<Int>) -> Int { min(max(v, r.lowerBound), r.upperBound - 1) }
@@ -372,10 +372,90 @@ private struct GlassCircleModifier: ViewModifier {
 }
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// MARK: - Native Float Buttons (Save / Reset)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+/// Shared state updated from AppDelegate, observed by SwiftUI
+private class FloatButtonsState: ObservableObject {
+    @Published var resetEnabled: Bool = false
+    @Published var saveFlash: Bool    = false
+}
+
+@available(iOS 15.0, *)
+private struct GlassFloatButtons: View {
+    @ObservedObject var state: FloatButtonsState
+    var onSave:  () -> Void
+    var onReset: () -> Void
+
+    var body: some View {
+        HStack(spacing: 8) {
+            // Reset — left of save
+            GlassCircleAction(
+                icon: "arrow.counterclockwise",
+                dimmed: !state.resetEnabled
+            ) { onReset() }
+
+            // Save — rightmost
+            GlassCircleAction(
+                icon: state.saveFlash ? "checkmark" : "square.and.arrow.down",
+                accentGreen: state.saveFlash,
+                dimmed: false
+            ) { onSave() }
+        }
+    }
+}
+
+/// One circular glass action button — press scale + haptic + glass
+@available(iOS 15.0, *)
+private struct GlassCircleAction: View {
+    let icon:        String
+    var accentGreen: Bool = false
+    let dimmed:      Bool
+    let action:      () -> Void
+
+    @Environment(\.colorScheme) private var scheme
+    @State private var pressing = false
+
+    private var iconColor: Color {
+        if accentGreen { return Color(red: 0, green: 0.66, blue: 0.42) }
+        return scheme == .dark
+            ? Color(red: 0, green: 0.61, blue: 0.77)   // unad-cyan
+            : Color(red: 0, green: 0.27, blue: 0.68)   // unad-blue
+    }
+
+    var body: some View {
+        Image(systemName: icon)
+            .font(.system(size: 17, weight: .semibold))
+            .foregroundStyle(iconColor.opacity(dimmed ? 0.28 : 1.0))
+            .frame(width: 48, height: 48)
+            .contentShape(Circle())
+            .scaleEffect(pressing ? 0.84 : 1.0)
+            .animation(
+                pressing
+                    ? .spring(response: 0.15, dampingFraction: 0.62)
+                    : .spring(response: 0.30, dampingFraction: 0.78),
+                value: pressing
+            )
+            .animation(.easeInOut(duration: 0.18), value: dimmed)
+            .modifier(GlassCircleModifier(scheme: scheme))
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in if !pressing { pressing = true } }
+                    .onEnded { _ in
+                        pressing = false
+                        guard !dimmed else { return }
+                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        action()
+                    }
+            )
+    }
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 // MARK: - AppDelegate
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, WKNavigationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
 
     var window: UIWindow?
     private weak var capacitorWebView: WKWebView?
@@ -383,6 +463,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
 
     private var tabBarVC: UIViewController?
     private var backButtonVC: UIViewController?
+    private var floatButtonsVC: UIViewController?
+    private let floatButtonsState = FloatButtonsState()
     private var tabBarHeightConstraint: NSLayoutConstraint?
     private var isCollapsed = false
     private var messageHandlerAdded = false
@@ -435,10 +517,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
             }
 
             wv.navigationDelegate = self
+            wv.uiDelegate = self
             self.injectEnhancements(into: wv)
             self.mountTabBar(on: rootVC)
             self.mountBackButton(on: rootVC)
+            self.mountFloatButtons(on: rootVC)
             self.addEdgeSwipe(to: wv)
+            // Restore now in case page already finished loading before delegate was set
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.8) { [weak self] in
+                guard let self else { return }
+                self.restoreFromUserDefaults(in: wv)
+            }
         }
     }
 
@@ -530,93 +619,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
             `;
             (document.head || document.documentElement).appendChild(s);
 
-            // ── 1. Native floating glass buttons (created fresh, no topbar dependency) ──
-            function glassStyle(isDark) {
-                var t = 'calc(env(safe-area-inset-top) + 8px)';
-                var bg = isDark
-                    ? 'rgba(255,255,255,0.08)'
-                    : 'rgba(255,255,255,0.50)';
-                var border = isDark
-                    ? '0.5px solid rgba(255,255,255,0.15)'
-                    : '0.5px solid rgba(255,255,255,0.70)';
-                var shadow = isDark
-                    ? '0 6px 20px rgba(0,0,0,0.40), 0 0 0 0.5px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.12)'
-                    : '0 4px 16px rgba(0,0,0,0.08), 0 0 0 0.5px rgba(255,255,255,0.50), inset 0 1px 0 rgba(255,255,255,0.70)';
-                var bgImage = isDark
-                    ? 'linear-gradient(to bottom, rgba(255,255,255,0.08) 0%, transparent 40%)'
-                    : 'linear-gradient(to bottom, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.10) 40%, transparent 60%)';
-                return [
-                    'position:fixed','top:'+t,'z-index:600',
-                    'width:52px','height:52px','border-radius:50%',
-                    'display:flex','align-items:center','justify-content:center',
-                    'cursor:pointer',
-                    'background:'+bg,
-                    'background-image:'+bgImage,
-                    'backdrop-filter:blur(40px) saturate(200%)',
-                    '-webkit-backdrop-filter:blur(40px) saturate(200%)',
-                    'border:'+border,
-                    'box-shadow:'+shadow,
-                    'transition:transform 0.2s cubic-bezier(0.25,0.46,0.45,0.94),background 0.2s,box-shadow 0.2s'
-                ].join(';');
-            }
-
-            function updateBtnStyle(btn, isDark, extraRight) {
-                var base = glassStyle(isDark);
-                btn.style.cssText = base + ';right:' + extraRight;
-            }
-
-            function floatButtons() {
-                if (document.getElementById('lu-save-btn')) return;
-                var isDark = document.body.classList.contains('dark');
-                var iconColor = isDark ? '#009DC4' : '#0046AD';
-
-                // Save button
-                var sv = document.createElement('button');
-                sv.id = 'lu-save-btn';
-                sv.type = 'button';
-                sv.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+iconColor+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>';
-                sv.onclick = function() {
-                    if (typeof saveData === 'function') saveData();
-                };
-                updateBtnStyle(sv, isDark, '16px');
-                document.body.appendChild(sv);
-
-                // Reset button
-                var rs = document.createElement('button');
-                rs.id = 'lu-reset-btn';
-                rs.type = 'button';
-                rs.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="'+iconColor+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.51"/></svg>';
-                rs.onclick = function() {
-                    if (typeof resetChanges === 'function') resetChanges();
-                };
-                rs.style.opacity = '0.4';
-                updateBtnStyle(rs, isDark, '76px');
-                rs.style.opacity = '0.4';
-                rs.style.pointerEvents = 'none';
-                document.body.appendChild(rs);
-
-                // Keep original hidden buttons in sync (saveData checks them by id)
+            // ── 1. Hide original web buttons (replaced by native SwiftUI buttons) ──
+            function hideWebButtons() {
                 var origSv = document.getElementById('glassSaveBtn');
                 var origRs = document.getElementById('glassResetBtn');
                 if (origSv) origSv.style.display = 'none';
                 if (origRs) origRs.style.display = 'none';
-
-                // Expose helpers so saveData/resetChanges can still control state
-                window.__lu_setSaveState = function(saved) {
-                    if (saved) {
-                        sv.style.color = 'var(--success)';
-                        rs.style.opacity = '0.4';
-                        rs.style.pointerEvents = 'none';
-                    } else {
-                        sv.style.color = '';
-                        rs.style.opacity = '1';
-                        rs.style.pointerEvents = 'auto';
-                    }
-                };
             }
             document.readyState === 'loading'
-                ? document.addEventListener('DOMContentLoaded', floatButtons)
-                : floatButtons();
+                ? document.addEventListener('DOMContentLoaded', hideWebButtons)
+                : hideWebButtons();
 
             // ── 2. Gradients — update color dynamically with dark mode ──────
             function getGradientColor(isDark) {
@@ -632,22 +644,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 var bgC = isDark ? 'rgba(13,20,32,1)' : 'rgba(240,244,250,1)';
                 if (topF) topF.style.background = 'linear-gradient(to bottom, '+c+' 0%, transparent 100%)';
                 if (botF) botF.style.background = 'linear-gradient(to bottom, transparent, '+bgC+')';
-
-                // Also update floating buttons color
-                var sv = document.getElementById('lu-save-btn');
-                var rs = document.getElementById('lu-reset-btn');
-                if (sv) updateBtnStyle(sv, isDark, '16px');
-                if (rs) {
-                    var wasDisabled = rs.style.pointerEvents === 'none';
-                    updateBtnStyle(rs, isDark, '76px');
-                    if (wasDisabled) { rs.style.opacity='0.4'; rs.style.pointerEvents='none'; }
-                }
-                var iconColor = isDark ? '#009DC4' : '#0046AD';
-                [sv, rs].forEach(function(b) {
-                    if (b) b.querySelectorAll('svg').forEach(function(s) {
-                        s.setAttribute('stroke', iconColor);
-                    });
-                });
             }
             function addGradients() {
                 if (document.getElementById('lu-top-fade')) return;
@@ -698,39 +694,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
 
                 window.saveData = function() {
                     _save.apply(this, arguments);
-                    // Backup to native UserDefaults right after every explicit save
+                    // Backup to native UserDefaults — also triggers save flash on native button
                     try {
                         var raw = localStorage.getItem('leanup_v4');
                         if (raw) window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'save', data: raw });
                     } catch(e) {}
-                    var sv = document.getElementById('lu-save-btn');
-                    var rs = document.getElementById('lu-reset-btn');
-                    // Green success flash on save button
-                    if (sv) {
-                        var isDark = document.body.classList.contains('dark');
-                        sv.style.background = 'rgba(0,168,107,0.22)';
-                        var svgEl = sv.querySelector('svg');
-                        if (svgEl) svgEl.setAttribute('stroke', '#00a86b');
-                        setTimeout(function() {
-                            updateBtnStyle(sv, isDark, '16px');
-                            if (svgEl) svgEl.setAttribute('stroke', isDark ? '#009DC4' : '#0046AD');
-                        }, 1500);
-                    }
-                    if (rs) { rs.style.opacity='0.4'; rs.style.pointerEvents='none'; }
                 };
 
                 window.resetChanges = function() {
                     _reset.apply(this, arguments);
-                    var rs = document.getElementById('lu-reset-btn');
-                    if (rs) { rs.style.opacity='0.4'; rs.style.pointerEvents='none'; }
                 };
             }
             document.readyState === 'loading'
                 ? document.addEventListener('DOMContentLoaded', patchSaveReset)
                 : patchSaveReset();
 
-            // ── 3b. Patch markUnsaved to enable lu-reset-btn ────────────────
-            // The HTML uses markUnsaved() (NOT markDirty) — patch the right fn.
+            // ── 3b. Patch markUnsaved → notify native reset button ──────────
             function patchMarkUnsaved() {
                 if (window.__lu_mu_patched) return;
                 if (typeof markUnsaved !== 'function') { setTimeout(patchMarkUnsaved, 250); return; }
@@ -738,8 +717,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 var _mu = window.markUnsaved;
                 window.markUnsaved = function() {
                     _mu.apply(this, arguments);
-                    var rs = document.getElementById('lu-reset-btn');
-                    if (rs) { rs.style.opacity='1'; rs.style.pointerEvents='auto'; }
+                    window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'markUnsaved' });
                 };
             }
             document.readyState === 'loading'
@@ -859,11 +837,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'haptic', style: s });
             }
             function addWebHaptics() {
-                // Period accordion headers (malla)
-                document.querySelectorAll('.per-header, .periodo-header').forEach(function(el) {
-                    if (!el.dataset.luh) { el.dataset.luh='1';
-                        el.addEventListener('click', function() { h('rigid'); }, true); }
-                });
+                // Period accordion headers — no haptic (too frequent, annoying)
                 // Course rows (tap on a materia)
                 document.querySelectorAll('.mat-row').forEach(function(el) {
                     if (!el.dataset.luh) { el.dataset.luh='1';
@@ -997,6 +971,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         backButtonVC = host
     }
 
+    // MARK: Mount float buttons (save + reset) — top-right, native glass
+    private func mountFloatButtons(on rootVC: UIViewController) {
+        guard floatButtonsVC == nil, #available(iOS 15.0, *) else { return }
+        let state = floatButtonsState
+        let host = UIHostingController(
+            rootView: GlassFloatButtons(state: state) { [weak self] in
+                self?.capacitorWebView?.evaluateJavaScript("saveData()")
+            } onReset: { [weak self] in
+                self?.capacitorWebView?.evaluateJavaScript("resetChanges()")
+            }
+        )
+        configure(overlayVC: host)
+        rootVC.addChild(host)
+        rootVC.view.addSubview(host.view)
+        host.didMove(toParent: rootVC)
+
+        host.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            host.view.topAnchor.constraint(
+                equalTo: rootVC.view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            host.view.trailingAnchor.constraint(
+                equalTo: rootVC.view.trailingAnchor, constant: -16),
+            host.view.widthAnchor.constraint(equalToConstant: 104),  // 48+8+48
+            host.view.heightAnchor.constraint(equalToConstant: 48),
+        ])
+        floatButtonsVC = host
+    }
+
     private func configure(overlayVC: UIViewController) {
         overlayVC.view.backgroundColor = .clear
         overlayVC.view.isOpaque = false
@@ -1045,6 +1047,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                     let b64 = Data(data.utf8).base64EncodedString()
                     UserDefaults.standard.set(b64, forKey: "leanup_v4_backup")
                 }
+                // Flash save button green, disable reset
+                self.floatButtonsState.saveFlash    = true
+                self.floatButtonsState.resetEnabled = false
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+                    self?.floatButtonsState.saveFlash = false
+                }
+            case "markUnsaved":
+                self.floatButtonsState.resetEnabled = true
             case "haptic":
                 self.triggerHaptic(style: body["style"] as? String ?? "medium")
             default: break
@@ -1093,6 +1103,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         capacitorWebView?.evaluateJavaScript(js)
     }
 
+    // MARK: WKUIDelegate — native confirm() dialog so resetChanges() works
+    func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(.init(title: "Cancelar", style: .cancel) { _ in completionHandler(false) })
+        alert.addAction(.init(title: "Reiniciar", style: .destructive) { _ in completionHandler(true) })
+        rootVC?.present(alert, animated: true)
+    }
+
     // MARK: WKNavigationDelegate — restore data AFTER page finishes loading
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard !hasRestoredData else { return }
@@ -1110,10 +1129,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         let js = """
         (function restore() {
             try {
+                if (window.__lu_restored) return;
                 if (typeof loadData !== 'function') {
                     setTimeout(restore, 150);
                     return;
                 }
+                window.__lu_restored = true;
                 var json = atob('\(b64)');
                 localStorage.setItem('leanup_v4', json);
                 loadData();
