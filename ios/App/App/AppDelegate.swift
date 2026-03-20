@@ -85,9 +85,9 @@ private struct LiquidGlassTabBar: View {
         let idx = clamp(Int(v.location.x / tabW), in: 0..<tabs.count)
 
         if isDragging {
-            // Dragging — update preview silently (no haptic while sliding)
+            // Dragging — bubble follows finger in near real-time (very fast spring)
             if draggedIndex != idx {
-                withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) {
+                withAnimation(.spring(response: 0.14, dampingFraction: 0.78)) {
                     draggedIndex = idx
                 }
             }
@@ -135,19 +135,13 @@ private struct LiquidGlassTabBar: View {
     // MARK: Bar container (iOS 26 vs fallback)
     @ViewBuilder
     private func barView(bubbleW: CGFloat) -> some View {
-        if #available(iOS 26.0, *) {
-            // Single glass surface for the whole bar.
-            // The active-tab bubble must NOT be glass (no nested glass).
-            tabCells(bubbleW: bubbleW)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 3)
-                .glassEffect(.regular, in: Capsule())
-        } else {
-            tabCells(bubbleW: bubbleW)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 3)
-                .background { fallbackBg }
-        }
+        // iOS 26: Use manual frosted background (NOT .glassEffect on the bar).
+        // This allows the active bubble to use .glassEffect() without nesting.
+        // The bubble gets real Liquid Glass with glassEffectID morphing.
+        tabCells(bubbleW: bubbleW)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 3)
+            .background { fallbackBg }
     }
 
     // MARK: Tab cells — plain ZStack rows; gesture lives at bar level
@@ -160,15 +154,32 @@ private struct LiquidGlassTabBar: View {
 
                 ZStack {
                     if isActive {
-                        activeTabBubble(width: bubbleW)
-                            .matchedGeometryEffect(id: "bubble", in: ns)
-                            .scaleEffect(isPressing ? 1.16 : 1.0)
-                            .animation(
-                                isPressing
-                                    ? .spring(response: 0.15, dampingFraction: 0.6)
-                                    : .spring(response: 0.3,  dampingFraction: 0.82),
-                                value: isPressing
-                            )
+                        if #available(iOS 26.0, *) {
+                            // Real Liquid Glass bubble: bar is manual material (not glass),
+                            // so bubble can be glass without nesting violation.
+                            // glassEffectID makes the bubble MORPH between tab positions.
+                            Color.clear
+                                .frame(width: bubbleW, height: 44)
+                                .glassEffect(.regular, in: Capsule())
+                                .glassEffectID("bubble", in: ns)
+                                .scaleEffect(isPressing ? 1.10 : 1.0)
+                                .animation(
+                                    isPressing
+                                        ? .spring(response: 0.15, dampingFraction: 0.6)
+                                        : .spring(response: 0.28, dampingFraction: 0.78),
+                                    value: isPressing
+                                )
+                        } else {
+                            activeTabBubble(width: bubbleW)
+                                .matchedGeometryEffect(id: "bubble", in: ns)
+                                .scaleEffect(isPressing ? 1.16 : 1.0)
+                                .animation(
+                                    isPressing
+                                        ? .spring(response: 0.15, dampingFraction: 0.6)
+                                        : .spring(response: 0.3,  dampingFraction: 0.82),
+                                    value: isPressing
+                                )
+                        }
                     }
                     tabLabel(tab, isActive: isActive, isPressing: isPressing)
                 }
@@ -253,19 +264,20 @@ private struct LiquidGlassTabBar: View {
         .animation(.spring(response: 0.15, dampingFraction: 0.65), value: isPressing)
     }
 
-    // MARK: Fallback glass bar background (iOS 15–25)
+    // MARK: Frosted bar background — used for ALL iOS versions now
+    // (iOS 26 no longer uses .glassEffect() on the bar — that's reserved for the bubble)
     @ViewBuilder
     private var fallbackBg: some View {
         ZStack {
-            // Very light frosted base — extra transparent
+            // Frosted base at 55% opacity
             Capsule()
                 .fill(.ultraThinMaterial)
-                .opacity(0.60)
+                .opacity(0.55)
 
             Capsule()
                 .fill(scheme == .dark
-                      ? Color(red: 0.05, green: 0.09, blue: 0.16).opacity(0.22)
-                      : Color.white.opacity(0.14))
+                      ? Color(red: 0.05, green: 0.09, blue: 0.16).opacity(0.20)
+                      : Color.white.opacity(0.12))
 
             // Minimal specular top-edge highlight
             LinearGradient(
@@ -875,15 +887,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 window.mobileClosePanelOrBack = function() {
                     var dp = document.getElementById('detailPanel');
                     if (dp && dp.classList.contains('mobile-open')) {
-                        // Apple-style dismiss: 0.32s with Apple back-gesture curve
-                        dp.style.transition = 'transform 0.32s cubic-bezier(0.32,0.72,0,1)';
+                        // Apple-style dismiss: 0.40s with Apple back-gesture curve
+                        dp.style.transition = 'transform 0.40s cubic-bezier(0.32,0.72,0,1)';
                         dp.style.transform  = 'translateX(100%)';
                         var a = arguments;
                         setTimeout(function() {
                             dp.style.transition = '';
                             dp.style.transform  = '';
                             _close.apply(window, a);
-                        }, 340);
+                        }, 420);
                         window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'panelClose' });
                     } else {
                         _close.apply(this, arguments);
@@ -907,7 +919,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                     var isSubView = profileSubViews.indexOf(id) >= 0;
 
                     if (isSubView) {
-                        // Entering sub-view: call _sv (activates view), then slide in from right
+                        // Entering sub-view: same animation as panel open (0.30s)
                         _sv.apply(this, arguments);
                         var newView = document.getElementById('view-' + id);
                         if (newView) {
@@ -915,31 +927,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                             newView.style.transition = 'none';
                             requestAnimationFrame(function() {
                                 requestAnimationFrame(function() {
-                                    newView.style.transition = 'transform 0.32s cubic-bezier(0.25,0.46,0.45,0.94)';
+                                    newView.style.transition = 'transform 0.30s cubic-bezier(0.32,0.72,0,1)';
                                     newView.style.transform  = 'translateX(0)';
                                     setTimeout(function() {
                                         newView.style.transition = '';
                                         newView.style.transform  = '';
-                                    }, 340);
+                                    }, 320);
                                 });
                             });
                         }
                         _isSubViewActive = true;
                         window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'subViewOpen' });
                     } else {
-                        // Leaving sub-view: animate out if not already handled by edge swipe
+                        // Leaving sub-view: same animation as panel close (0.40s)
                         if (_isSubViewActive && !window.__lu_noSubViewAnim) {
                             var curView = document.querySelector('.view.active');
                             _isSubViewActive = false;
                             if (curView) {
-                                curView.style.transition = 'transform 0.32s cubic-bezier(0.32,0.72,0,1)';
+                                curView.style.transition = 'transform 0.40s cubic-bezier(0.32,0.72,0,1)';
                                 curView.style.transform  = 'translateX(100%)';
                                 var args = arguments;
                                 setTimeout(function() {
                                     curView.style.transition = '';
                                     curView.style.transform  = '';
                                     _sv.apply(window, args);
-                                }, 320);
+                                }, 420);
                             } else {
                                 _sv.apply(this, arguments);
                             }
@@ -1282,7 +1294,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                     return;
                 }
                 window.__lu_restored = true;
-                var json = atob('\(b64)');
+                // Correct UTF-8 decode: atob() returns Latin-1 bytes, TextDecoder converts to proper Unicode
+                // Without this, accented chars in electiva group names (ó, é, etc.) become garbled
+                // and electivosSeleccionados/electivosNotas keys don't match on restore.
+                var bytes = Uint8Array.from(atob('\(b64)'), function(c) { return c.charCodeAt(0); });
+                var json = new TextDecoder('utf-8').decode(bytes);
                 localStorage.setItem('leanup_v4', json);
                 loadData();
                 if (typeof renderMalla       === 'function') renderMalla();
