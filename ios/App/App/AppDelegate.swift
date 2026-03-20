@@ -68,10 +68,13 @@ private struct LiquidGlassTabBar: View {
                 )
                 .onAppear {
                     guard !hasAppeared else { return }
-                    // Set position immediately (no animation) before marking appeared
+                    // Set position immediately, then mark appeared after two frames
+                    // to guarantee the bubble renders at the correct position
                     bubbleCenterX = tabCenter(activeIndex, contentW: contentW)
-                    // Mark appeared on next frame so the bubble renders at the right position
-                    DispatchQueue.main.async { hasAppeared = true }
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                        bubbleCenterX = tabCenter(activeIndex, contentW: contentW)
+                        hasAppeared = true
+                    }
                 }
         }
         .frame(height: 58)
@@ -327,7 +330,7 @@ private struct GlassCircleModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
-            content.glassEffect(in: Circle())
+            content.glassEffect(.regular.interactive(true), in: .circle)
         } else {
             content
                 .background {
@@ -902,8 +905,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 function getBg() {
                     return document.body.classList.contains('dark') ? '#0d1420' : '#F0F4FA';
                 }
+                // Apple push/pop curve (matches UINavigationController)
+                var appleCurve = 'cubic-bezier(0.28,0.11,0.32,1)';
+                var pushDur = '0.45s';
+                var popDur  = '0.42s';
                 function fixedBase(bg) {
                     return 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;background:' + bg + ';animation:none;';
+                }
+                // Dimming overlay on hub during push (Apple uses ~8% black overlay on the outgoing view)
+                function addDim(el) {
+                    var d = document.createElement('div');
+                    d.className = 'lu-push-dim';
+                    d.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0);transition:background ' + pushDur + ' ' + appleCurve + ';pointer-events:none;z-index:999;';
+                    el.appendChild(d);
+                    requestAnimationFrame(function(){ d.style.background = 'rgba(0,0,0,0.08)'; });
+                    return d;
+                }
+                // Edge shadow on the incoming view (Apple nav transition has left-edge shadow)
+                function addEdgeShadow(el) {
+                    var s = document.createElement('div');
+                    s.className = 'lu-edge-shadow';
+                    s.style.cssText = 'position:absolute;top:0;left:-20px;width:20px;bottom:0;background:linear-gradient(to right,transparent,rgba(0,0,0,0.12));pointer-events:none;z-index:1000;';
+                    el.appendChild(s);
+                    return s;
+                }
+                function cleanupExtras() {
+                    document.querySelectorAll('.lu-push-dim,.lu-edge-shadow').forEach(function(e){ e.remove(); });
                 }
 
                 window.showView = function(id, el) {
@@ -920,30 +947,28 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                         if (newView && hubView) {
                             var bg = getBg();
                             var fb = fixedBase(bg);
-                            // Position new view offscreen with animation:none BEFORE _sv
                             newView.style.cssText = fb + 'z-index:202;transform:translateX(100%)';
-                            _sv.apply(this, [id, el]); // hub loses .active, newView gets .active
-                            // Hub needs display:block (lost .active → display:none from CSS)
+                            _sv.apply(this, [id, el]);
                             hubView.style.cssText = fb + 'z-index:201;transform:translateX(0)';
-                            void newView.offsetWidth; // force reflow
-                            var trans = 'transform 0.38s cubic-bezier(0.32,0.72,0,1)';
+                            addEdgeShadow(newView);
+                            var dimEl = addDim(hubView);
+                            void newView.offsetWidth;
+                            var trans = 'transform ' + pushDur + ' ' + appleCurve;
                             newView.style.transition = trans;
                             newView.style.transform  = 'translateX(0)';
                             hubView.style.transition = trans;
                             hubView.style.transform  = 'translateX(-33%)';
                             setTimeout(function() {
-                                // newView has .active → CSS gives display:block
-                                // Keep animation:none to prevent fadeSlideIn flash
+                                cleanupExtras();
                                 newView.style.cssText = 'animation:none';
                                 hubView.style.cssText = '';
-                                // Remove animation:none after browser paints the settled state
                                 requestAnimationFrame(function() {
                                     requestAnimationFrame(function() {
                                         newView.style.animation = '';
                                         _animating = false;
                                     });
                                 });
-                            }, 400);
+                            }, 470);
                         } else {
                             _sv.apply(this, [id, el]);
                             _animating = false;
@@ -962,31 +987,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                         _isSubViewActive = false;
                         if (curView && hubView2 && curView !== hubView2
                                 && profileSubViewIds.indexOf(curView.id) >= 0) {
-                            if (_animating) return; // prevent double-tap
+                            if (_animating) return;
                             _animating = true;
                             var bg2 = getBg();
                             var fb2 = fixedBase(bg2);
                             curView.style.cssText  = fb2 + 'z-index:202;transform:translateX(0)';
                             hubView2.style.cssText = fb2 + 'z-index:201;transform:translateX(-33%)';
+                            addEdgeShadow(curView);
+                            var dimEl2 = addDim(hubView2);
+                            if (dimEl2) { dimEl2.style.background = 'rgba(0,0,0,0.08)'; dimEl2.style.transition = 'none'; }
                             void curView.offsetWidth;
-                            var trans2 = 'transform 0.38s cubic-bezier(0.32,0.72,0,1)';
+                            var trans2 = 'transform ' + popDur + ' ' + appleCurve;
                             curView.style.transition  = trans2;
                             curView.style.transform   = 'translateX(100%)';
                             hubView2.style.transition = trans2;
                             hubView2.style.transform  = 'translateX(0)';
+                            if (dimEl2) { requestAnimationFrame(function(){ dimEl2.style.transition = 'background ' + popDur + ' ' + appleCurve; dimEl2.style.background = 'rgba(0,0,0,0)'; }); }
                             var args = arguments;
                             setTimeout(function() {
-                                // Hub gets animation:none inline to prevent fadeSlideIn
+                                cleanupExtras();
                                 hubView2.style.cssText = 'animation:none';
-                                _sv.apply(window, args); // hub gets .active
-                                curView.style.cssText = ''; // curView lost .active → display:none
+                                _sv.apply(window, args);
+                                curView.style.cssText = '';
                                 requestAnimationFrame(function() {
                                     requestAnimationFrame(function() {
                                         hubView2.style.animation = '';
                                         _animating = false;
                                     });
                                 });
-                            }, 400);
+                            }, 440);
                         } else {
                             _sv.apply(this, arguments);
                         }
@@ -1221,18 +1250,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         overlayVC.view.isOpaque = false
     }
 
-    // MARK: Back button animation
+    // MARK: Back button animation — Apple-style materialize (scale + opacity + spring)
     private func animateBackButton(visible: Bool) {
         guard let bvc = backButtonVC else { return }
         DispatchQueue.main.async {
-            if visible { bvc.view.isHidden = false }
+            if visible {
+                bvc.view.isHidden = false
+                bvc.view.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+                bvc.view.alpha = 0
+            }
             UIView.animate(
-                withDuration: 0.25, delay: 0,
-                usingSpringWithDamping: 0.8, initialSpringVelocity: 0.5
+                withDuration: visible ? 0.42 : 0.25, delay: 0,
+                usingSpringWithDamping: visible ? 0.68 : 0.9,
+                initialSpringVelocity: visible ? 0.6 : 0
             ) {
                 bvc.view.alpha = visible ? 1 : 0
+                bvc.view.transform = visible
+                    ? .identity
+                    : CGAffineTransform(scaleX: 0.01, y: 0.01)
             } completion: { _ in
-                if !visible { bvc.view.isHidden = true }
+                if !visible {
+                    bvc.view.isHidden = true
+                    bvc.view.transform = .identity
+                }
             }
         }
     }
@@ -1491,12 +1531,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                             var hub = document.getElementById('view-perfil-hub');
                             if (!v || v === hub) return;
                             var d = '\(String(format:"%.2f", dur))s';
-                            var c = 'cubic-bezier(0.32,0.72,0,1)';
-                            // Animate v out, hub in — hub already has display:block from .began
+                            var c = 'cubic-bezier(0.28,0.11,0.32,1)';
                             v.style.transition = 'transform ' + d + ' ' + c;
                             v.style.transform = 'translateX(100%)';
                             hub.style.transition = 'transform ' + d + ' ' + c;
                             hub.style.transform = 'translateX(0)';
+                            document.querySelectorAll('.lu-push-dim,.lu-edge-shadow').forEach(function(e){ e.remove(); });
                             setTimeout(function() {
                                 hub.style.cssText = 'animation:none';
                                 window.__lu_noSubViewAnim = true;
@@ -1541,7 +1581,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 var v = document.querySelector('.view.active');
                 var hub = document.getElementById('view-perfil-hub');
                 if (!v || v === hub) return;
-                var d = '0.30s', c = 'cubic-bezier(0.32,0.72,0,1)';
+                var d = '0.30s', c = 'cubic-bezier(0.28,0.11,0.32,1)';
                 v.style.transition = 'transform ' + d + ' ' + c;
                 v.style.transform = 'translateX(0)';
                 hub.style.transition = 'transform ' + d + ' ' + c;

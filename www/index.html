@@ -777,7 +777,7 @@ body.dark .bn-more-item.active svg{color:var(--unad-gold)}
         <div style="margin-top:16px">
           <div class="cfg-lbl">Contacto</div>
           <a class="contact-btn c-wa" href="https://wa.me/34645568327" target="_blank">💬 WhatsApp</a>
-          <a class="contact-btn c-mail" href="https://mail.google.com/mail/?view=cm&to=nsolisasprilla@icloud.com&su=Contacto%20desde%20LeanUp" target="_blank">✉️ Correo electrónico</a>
+          <a class="contact-btn c-mail" href="#" onclick="openEmail(event)">✉️ Correo electrónico</a>
         </div>
       </div>
     </div>
@@ -2138,6 +2138,41 @@ function applyTheme(mode){
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',function(e){
   if(themeMode==='system') applyTheme('system');
 });
+// Swipe support for theme selector
+(function(){
+  var themes=['light','dark','system'];
+  var sel=null,sx=0,curIdx=0;
+  function h(s){try{window.webkit?.messageHandlers?.nativeUI?.postMessage({event:'haptic',style:s});}catch(e){}}
+  function getIdx(){return themes.indexOf(themeMode);}
+  document.addEventListener('touchstart',function(e){
+    sel=e.target.closest('.theme-selector');
+    if(!sel)return;
+    sx=e.touches[0].clientX;
+    curIdx=getIdx();
+  },{passive:true});
+  document.addEventListener('touchmove',function(e){
+    if(!sel)return;
+    var dx=e.touches[0].clientX-sx;
+    var step=sel.offsetWidth/themes.length;
+    var newIdx=Math.max(0,Math.min(themes.length-1,curIdx+Math.round(-dx/step)));
+    if(newIdx!==getIdx()){
+      h('selection');
+      setTheme(themes[newIdx]);
+    }
+  },{passive:true});
+  document.addEventListener('touchend',function(){sel=null;},{passive:true});
+})();
+function openEmail(e){
+  e.preventDefault();
+  var isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(/Macintosh/.test(navigator.userAgent)&&'ontouchend' in document);
+  if(isIOS||window.webkit?.messageHandlers?.nativeUI){
+    // iOS: open native Mail app
+    window.location.href='mailto:nsolisasprilla@icloud.com?subject=Contacto%20desde%20LeanUp';
+  } else {
+    // Windows/web: open Gmail compose
+    window.open('https://mail.google.com/mail/?view=cm&to=nsolisasprilla@icloud.com&su=Contacto%20desde%20LeanUp','_blank');
+  }
+}
 function saveUsername(){
   const v=document.getElementById('cfgName').value.trim();
   if(!v)return;
