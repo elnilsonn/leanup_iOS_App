@@ -23,17 +23,18 @@ private struct LUTab: Identifiable, Equatable {
 @available(iOS 15.0, *)
 private struct LiquidGlassTabBar: View {
     @Binding var active: String
-    @Namespace private var ns
 
     // Gesture state — single unified recognizer handles tap AND swipe
-    @State private var draggedIndex: Int? = nil
     @State private var pressingTab: String? = nil
     @State private var gestureStartX: CGFloat? = nil
     @State private var isDragging = false
+    @State private var bubbleCenterX: CGFloat = 0
+    @State private var hasAppeared = false
 
     @Environment(\.colorScheme) private var scheme
 
     private let dragThreshold: CGFloat = 8  // pt before a touch becomes a drag
+    private let innerPad: CGFloat = 10
     private let tabs: [LUTab] = [
         LUTab(id: "dashboard", icon: "house.fill",            label: "Inicio"),
         LUTab(id: "malla",     icon: "list.bullet.clipboard", label: "Malla"),
@@ -42,57 +43,60 @@ private struct LiquidGlassTabBar: View {
     ]
     var onSelect: (String) -> Void
 
-    private var shown: String {
-        draggedIndex.map { tabs[$0].id } ?? active
+    private var activeIndex: Int {
+        tabs.firstIndex(where: { $0.id == active }) ?? 0
+    }
+
+    private func tabCenter(_ idx: Int, contentW: CGFloat) -> CGFloat {
+        let tabW = contentW / CGFloat(tabs.count)
+        return tabW * (CGFloat(idx) + 0.5)
     }
 
     // MARK: Body
     var body: some View {
         GeometryReader { geo in
-            let totalW  = geo.size.width
-            let tabW    = totalW / CGFloat(tabs.count)
-            let innerPad: CGFloat = 10
-            let bubbleW = (totalW - innerPad * 2) / CGFloat(tabs.count) - 8
+            let totalW   = geo.size.width
+            let contentW = totalW - innerPad * 2
+            let tabW     = contentW / CGFloat(tabs.count)
+            let bubbleW  = tabW - 8
 
             barView(bubbleW: bubbleW)
-                // highPriorityGesture: takes over from any child Button taps
-                // so we have one clean unified recognizer for the whole bar.
                 .highPriorityGesture(
                     DragGesture(minimumDistance: 0, coordinateSpace: .local)
-                        .onChanged { v in onDragChanged(v, tabW: tabW) }
-                        .onEnded   { v in onDragEnded(v, tabW: tabW)   }
+                        .onChanged { v in onDragChanged(v, contentW: contentW, tabW: tabW) }
+                        .onEnded   { v in onDragEnded(v, contentW: contentW, tabW: tabW)   }
                 )
+                .onAppear {
+                    guard !hasAppeared else { return }
+                    hasAppeared = true
+                    bubbleCenterX = tabCenter(activeIndex, contentW: contentW)
+                }
         }
         .frame(height: 58)
         .padding(.horizontal, 16)
     }
 
     // MARK: Unified drag/tap handler — onChanged
-    private func onDragChanged(_ v: DragGesture.Value, tabW: CGFloat) {
-        // Record where the touch started
+    private func onDragChanged(_ v: DragGesture.Value, contentW: CGFloat, tabW: CGFloat) {
         if gestureStartX == nil { gestureStartX = v.location.x }
 
         let dx = v.location.x - (gestureStartX ?? v.location.x)
 
-        // Promote to drag once threshold is exceeded
         if !isDragging && abs(dx) > dragThreshold {
             isDragging = true
             withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
-                pressingTab = nil   // clear press highlight when drag begins
+                pressingTab = nil
             }
         }
 
-        let idx = clamp(Int(v.location.x / tabW), in: 0..<tabs.count)
-
         if isDragging {
-            // Dragging — bubble follows finger in near real-time (very fast spring)
-            if draggedIndex != idx {
-                withAnimation(.spring(response: 0.14, dampingFraction: 0.78)) {
-                    draggedIndex = idx
-                }
-            }
+            // Bubble follows finger directly — no animation for instant tracking
+            let contentX = v.location.x - innerPad
+            let halfTab  = tabW / 2
+            bubbleCenterX = max(halfTab, min(contentX, contentW - halfTab))
         } else {
-            // Still a press — highlight the touched tab
+            let contentX = v.location.x - innerPad
+            let idx = clamp(Int(contentX / tabW), in: 0..<tabs.count)
             let tabId = tabs[idx].id
             if pressingTab != tabId {
                 withAnimation(.spring(response: 0.15, dampingFraction: 0.65)) {
@@ -103,153 +107,120 @@ private struct LiquidGlassTabBar: View {
     }
 
     // MARK: Unified drag/tap handler — onEnded
-    private func onDragEnded(_ v: DragGesture.Value, tabW: CGFloat) {
+    private func onDragEnded(_ v: DragGesture.Value, contentW: CGFloat, tabW: CGFloat) {
         let startX = gestureStartX ?? v.location.x
         let dx     = abs(v.location.x - startX)
 
-        // Reset tracking state
         gestureStartX = nil
         isDragging    = false
-        withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
-            draggedIndex = nil
-            pressingTab  = nil
+
+        let idx: Int
+        if dx < dragThreshold {
+            let contentX = startX - innerPad
+            idx = clamp(Int(contentX / tabW), in: 0..<tabs.count)
+        } else {
+            let contentX = v.location.x - innerPad
+            idx = clamp(Int(contentX / tabW), in: 0..<tabs.count)
         }
 
-        if dx < dragThreshold {
-            // It was a tap — use the START position (finger didn't move)
-            let idx = clamp(Int(startX / tabW), in: 0..<tabs.count)
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
-                active = tabs[idx].id
-            }
-            onSelect(tabs[idx].id)
-        } else {
-            // It was a swipe — snap to wherever the finger stopped
-            let idx = clamp(Int(v.location.x / tabW), in: 0..<tabs.count)
-            withAnimation(.spring(response: 0.3, dampingFraction: 0.82)) {
-                active = tabs[idx].id
-            }
-            onSelect(tabs[idx].id)
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+            active = tabs[idx].id
+            pressingTab = nil
+            bubbleCenterX = tabCenter(idx, contentW: contentW)
         }
+        onSelect(tabs[idx].id)
     }
 
     // MARK: Bar container (iOS 26 vs fallback)
     @ViewBuilder
     private func barView(bubbleW: CGFloat) -> some View {
         if #available(iOS 26.0, *) {
-            tabCells(bubbleW: bubbleW)
+            tabContent(bubbleW: bubbleW)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .glassEffect(.regular, in: Capsule())
         } else {
-            tabCells(bubbleW: bubbleW)
+            tabContent(bubbleW: bubbleW)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .background { fallbackBg }
         }
     }
 
-    // MARK: Tab cells — plain ZStack rows; gesture lives at bar level
+    // MARK: Tab content — single bubble positioned via continuous offset + icons
     @ViewBuilder
-    private func tabCells(bubbleW: CGFloat) -> some View {
-        HStack(spacing: 0) {
-            ForEach(tabs) { tab in
-                let isActive   = shown == tab.id
-                let isPressing = pressingTab == tab.id
-
-                ZStack {
-                    if isActive {
-                        if #available(iOS 26.0, *) {
-                            // Real Liquid Glass bubble: bar is manual material (not glass),
-                            // so bubble can be glass without nesting violation.
-                            // glassEffectID makes the bubble MORPH between tab positions.
-                            Color.clear
-                                .frame(width: bubbleW, height: 44)
-                                .glassEffect(.regular, in: Capsule())
-                                .glassEffectID("bubble", in: ns)
-                                .scaleEffect(isPressing ? 1.10 : 1.0)
-                                .animation(
-                                    isPressing
-                                        ? .spring(response: 0.15, dampingFraction: 0.6)
-                                        : .spring(response: 0.28, dampingFraction: 0.78),
-                                    value: isPressing
-                                )
-                        } else {
-                            activeTabBubble(width: bubbleW)
-                                .matchedGeometryEffect(id: "bubble", in: ns)
-                                .scaleEffect(isPressing ? 1.16 : 1.0)
-                                .animation(
-                                    isPressing
-                                        ? .spring(response: 0.15, dampingFraction: 0.6)
-                                        : .spring(response: 0.3,  dampingFraction: 0.82),
-                                    value: isPressing
-                                )
-                        }
-                    }
-                    tabLabel(tab, isActive: isActive, isPressing: isPressing)
+    private func tabContent(bubbleW: CGFloat) -> some View {
+        ZStack {
+            // Bubble — follows finger directly during drag, springs to tab on release
+            Group {
+                if #available(iOS 26.0, *) {
+                    // White filled capsule — bar already has .glassEffect, no nesting
+                    Capsule()
+                        .fill(scheme == .dark
+                              ? Color.white.opacity(0.22)
+                              : Color.white.opacity(0.82))
+                        .shadow(color: .black.opacity(0.10), radius: 4, y: 2)
+                        .frame(width: bubbleW, height: 44)
+                } else {
+                    activeTabBubble(width: bubbleW)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .contentShape(Rectangle())
-                // Accessibility: screen readers can still activate each tab
-                .accessibilityLabel(tab.label)
-                .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
-                .accessibilityAction { onSelect(tab.id) }
+            }
+            .position(x: bubbleCenterX, y: 26)
+            .scaleEffect(pressingTab != nil && pressingTab == active ? 1.10 : 1.0)
+
+            // Tab icons — always based on `active`, NOT drag state (prevents flicker)
+            HStack(spacing: 0) {
+                ForEach(tabs) { tab in
+                    let isActive   = active == tab.id
+                    let isPressing = pressingTab == tab.id
+                    tabLabel(tab, isActive: isActive, isPressing: isPressing)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                        .contentShape(Rectangle())
+                        .accessibilityLabel(tab.label)
+                        .accessibilityAddTraits(isActive ? [.isButton, .isSelected] : .isButton)
+                        .accessibilityAction { onSelect(tab.id) }
+                }
             }
         }
     }
 
-    // MARK: Active-tab highlight bubble
+    // MARK: Active-tab highlight bubble (fallback for iOS < 26)
     @ViewBuilder
     private func activeTabBubble(width: CGFloat) -> some View {
-        if #available(iOS 26.0, *) {
-            // Simple filled highlight inside the glass bar — NOT glass itself
-            // (rule: never nest glass inside glass)
-            // White pill — clearly visible like Apple's native floating tab bar
+        ZStack {
             Capsule()
                 .fill(scheme == .dark
-                      ? Color.white.opacity(0.22)
-                      : Color.white.opacity(0.82))
-                .shadow(color: .black.opacity(0.10), radius: 4, y: 2)
-                .frame(width: width, height: 44)
-        } else {
-            ZStack {
-                Capsule()
-                    .fill(scheme == .dark
-                          ? Color.white.opacity(0.14)
-                          : Color.white.opacity(0.88))
-                    .background(.thinMaterial, in: Capsule())
-
-                // Specular top highlight
-                LinearGradient(
-                    stops: [
-                        .init(color: .white.opacity(scheme == .dark ? 0.30 : 0.70), location: 0),
-                        .init(color: .white.opacity(scheme == .dark ? 0.06 : 0.18), location: 0.35),
-                        .init(color: .clear, location: 0.65),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
+                      ? Color.white.opacity(0.14)
+                      : Color.white.opacity(0.88))
+                .background(.thinMaterial, in: Capsule())
+            LinearGradient(
+                stops: [
+                    .init(color: .white.opacity(scheme == .dark ? 0.30 : 0.70), location: 0),
+                    .init(color: .white.opacity(scheme == .dark ? 0.06 : 0.18), location: 0.35),
+                    .init(color: .clear, location: 0.65),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .clipShape(Capsule())
+            Capsule()
+                .stroke(
+                    LinearGradient(
+                        colors: [
+                            .white.opacity(scheme == .dark ? 0.45 : 0.90),
+                            .white.opacity(scheme == .dark ? 0.08 : 0.25),
+                            .white.opacity(scheme == .dark ? 0.25 : 0.55),
+                        ],
+                        startPoint: .topLeading,
+                        endPoint: .bottomTrailing
+                    ),
+                    lineWidth: 0.8
                 )
-                .clipShape(Capsule())
-
-                // Rim highlight
-                Capsule()
-                    .stroke(
-                        LinearGradient(
-                            colors: [
-                                .white.opacity(scheme == .dark ? 0.45 : 0.90),
-                                .white.opacity(scheme == .dark ? 0.08 : 0.25),
-                                .white.opacity(scheme == .dark ? 0.25 : 0.55),
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ),
-                        lineWidth: 0.8
-                    )
-            }
-            .frame(width: width, height: 44)
-            .shadow(color: .white.opacity(scheme == .dark ? 0.12 : 0.45), radius: 4, y: -1)
-            .shadow(color: .black.opacity(scheme == .dark ? 0.28 : 0.12), radius: 10, y: 3)
         }
+        .frame(width: width, height: 44)
+        .shadow(color: .white.opacity(scheme == .dark ? 0.12 : 0.45), radius: 4, y: -1)
+        .shadow(color: .black.opacity(scheme == .dark ? 0.28 : 0.12), radius: 10, y: 3)
     }
 
     // MARK: Tab icon + label
@@ -268,14 +239,13 @@ private struct LiquidGlassTabBar: View {
         .animation(.spring(response: 0.15, dampingFraction: 0.65), value: isPressing)
     }
 
-    // MARK: Frosted bar background — used for iOS 15-25 fallback
+    // MARK: Frosted bar background — iOS 15-25 fallback
     @ViewBuilder
     private var fallbackBg: some View {
         ZStack {
-            // Frosted base at 60% opacity
             Capsule()
                 .fill(.ultraThinMaterial)
-                .opacity(0.60)
+                .opacity(0.50)
 
             Capsule()
                 .fill(scheme == .dark
@@ -909,7 +879,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 ? document.addEventListener('DOMContentLoaded', patchPanel)
                 : patchPanel();
 
-            // ── 9b. Patch showView — detect profile sub-view navigation + slide animation ──
+            // ── 9b. Patch showView — Apple-style push/pop with parallax ──
             function patchShowView() {
                 if (window.__lu_sv_patched) return;
                 if (typeof showView !== 'function') { setTimeout(patchShowView, 250); return; }
@@ -921,38 +891,60 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 window.showView = function(id, el) {
                     var isSubView = profileSubViews.indexOf(id) >= 0;
 
-                    if (isSubView) {
-                        // Entering sub-view: same animation as panel open (0.30s)
+                    if (isSubView && !window.__lu_noSubViewAnim) {
+                        // Push: new view slides in from right, hub parallax-slides to left
+                        var hubView = document.getElementById('view-perfil-hub');
                         _sv.apply(this, arguments);
                         var newView = document.getElementById('view-' + id);
-                        if (newView) {
-                            newView.style.transform = 'translateX(100%)';
+                        if (newView && hubView) {
+                            hubView.classList.add('active');
+                            hubView.style.transition = 'none';
+                            hubView.style.transform = 'translateX(0)';
+                            hubView.style.zIndex = '1';
+                            newView.style.zIndex = '2';
                             newView.style.transition = 'none';
-                            requestAnimationFrame(function() {
-                                requestAnimationFrame(function() {
-                                    newView.style.transition = 'transform 0.30s cubic-bezier(0.32,0.72,0,1)';
-                                    newView.style.transform  = 'translateX(0)';
-                                    setTimeout(function() {
-                                        newView.style.transition = '';
-                                        newView.style.transform  = '';
-                                    }, 320);
-                                });
-                            });
+                            newView.style.transform = 'translateX(100%)';
+                            void newView.offsetWidth;
+                            var dur = '0.30s';
+                            var curve = 'cubic-bezier(0.32,0.72,0,1)';
+                            newView.style.transition = 'transform ' + dur + ' ' + curve;
+                            newView.style.transform = 'translateX(0)';
+                            hubView.style.transition = 'transform ' + dur + ' ' + curve;
+                            hubView.style.transform = 'translateX(-30%)';
+                            setTimeout(function() {
+                                newView.style.transition = ''; newView.style.transform = ''; newView.style.zIndex = '';
+                                hubView.classList.remove('active');
+                                hubView.style.transition = ''; hubView.style.transform = ''; hubView.style.zIndex = '';
+                            }, 320);
                         }
                         _isSubViewActive = true;
                         window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'subViewOpen' });
+                    } else if (isSubView) {
+                        _sv.apply(this, arguments);
+                        _isSubViewActive = true;
                     } else {
-                        // Leaving sub-view: same animation as panel close (0.40s)
+                        // Pop: current sub-view slides right, hub parallax-slides from left
                         if (_isSubViewActive && !window.__lu_noSubViewAnim) {
                             var curView = document.querySelector('.view.active');
+                            var hubView2 = document.getElementById('view-perfil-hub');
                             _isSubViewActive = false;
-                            if (curView) {
-                                curView.style.transition = 'transform 0.40s cubic-bezier(0.32,0.72,0,1)';
-                                curView.style.transform  = 'translateX(100%)';
+                            if (curView && hubView2) {
+                                hubView2.classList.add('active');
+                                hubView2.style.transition = 'none';
+                                hubView2.style.transform = 'translateX(-30%)';
+                                hubView2.style.zIndex = '1';
+                                curView.style.zIndex = '2';
+                                void curView.offsetWidth;
+                                var dur2 = '0.40s';
+                                var curve2 = 'cubic-bezier(0.32,0.72,0,1)';
+                                curView.style.transition = 'transform ' + dur2 + ' ' + curve2;
+                                curView.style.transform = 'translateX(100%)';
+                                hubView2.style.transition = 'transform ' + dur2 + ' ' + curve2;
+                                hubView2.style.transform = 'translateX(0)';
                                 var args = arguments;
                                 setTimeout(function() {
-                                    curView.style.transition = '';
-                                    curView.style.transform  = '';
+                                    curView.style.transition = ''; curView.style.transform = ''; curView.style.zIndex = '';
+                                    hubView2.style.transition = ''; hubView2.style.transform = ''; hubView2.style.zIndex = '';
                                     _sv.apply(window, args);
                                 }, 420);
                             } else {
@@ -990,16 +982,35 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'haptic', style: s });
             }
             function addWebHaptics() {
-                // Period accordion headers — no haptic (too frequent, annoying)
-                // Course rows (tap on a materia)
+                // Course rows — light haptic
                 document.querySelectorAll('.mat-row').forEach(function(el) {
                     if (!el.dataset.luh) { el.dataset.luh='1';
-                        el.addEventListener('click', function() { h('medium'); }, true); }
+                        el.addEventListener('click', function() { h('light'); }, true); }
                 });
-                // Elective option rows
+                // Elective option rows — light haptic
                 document.querySelectorAll('.elec-opt, .elec-row').forEach(function(el) {
                     if (!el.dataset.luh) { el.dataset.luh='1';
-                        el.addEventListener('click', function() { h('medium'); }, true); }
+                        el.addEventListener('click', function() { h('light'); }, true); }
+                });
+                // Accordion headers (all sections) — very light select haptic
+                document.querySelectorAll('.per-header, .malla-acc-header').forEach(function(el) {
+                    if (!el.dataset.luh) { el.dataset.luh='1';
+                        el.addEventListener('click', function() { h('select'); }, true); }
+                });
+                // Edit/clear nota buttons (small-btn) — light haptic
+                document.querySelectorAll('.small-btn').forEach(function(el) {
+                    if (!el.dataset.luh) { el.dataset.luh='1';
+                        el.addEventListener('click', function() { h('light'); }, true); }
+                });
+                // Nota confirm button — light haptic
+                document.querySelectorAll('.nota-confirm-btn').forEach(function(el) {
+                    if (!el.dataset.luh) { el.dataset.luh='1';
+                        el.addEventListener('pointerdown', function() { h('light'); }, true); }
+                });
+                // Nota +/- buttons — very light select haptic
+                document.querySelectorAll('.nota-btn:not(.nota-confirm-btn)').forEach(function(el) {
+                    if (!el.dataset.luh) { el.dataset.luh='1';
+                        el.addEventListener('click', function() { h('select'); }, true); }
                 });
                 // Dark mode toggle
                 var dt = document.getElementById('darkToggle');
@@ -1010,7 +1021,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                     if (!el.dataset.luh) { el.dataset.luh='1';
                         el.addEventListener('click', function() { h('medium'); }, true); }
                 });
-                // Copy / prompt buttons in portafolio
+                // Copy / prompt buttons
                 document.querySelectorAll('[onclick*="copy"], [onclick*="Copy"], .copy-btn, [onclick*="prompt"]').forEach(function(el) {
                     if (!el.dataset.luh) { el.dataset.luh='1';
                         el.addEventListener('click', function() { h('light'); }, true); }
@@ -1381,12 +1392,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
             }
 
         } else if isProfileSubViewOpen {
-            // ── Profile sub-view dismiss (profesional/salida/portafolio → perfil-hub) ──
+            // ── Profile sub-view dismiss — hub visible underneath with parallax ──
             switch gr.state {
             case .changed:
                 wv.evaluateJavaScript("""
-                    var v = document.querySelector('.view.active');
-                    if (v) { v.style.transition = 'none'; v.style.transform = 'translateX(\(tx)px)'; }
+                    (function() {
+                        var v = document.querySelector('.view.active');
+                        var hub = document.getElementById('view-perfil-hub');
+                        if (!v) return;
+                        if (hub) {
+                            hub.classList.add('active');
+                            hub.style.transition = 'none';
+                            hub.style.zIndex = '1';
+                            var progress = Math.min(1, \(tx) / \(screenW));
+                            hub.style.transform = 'translateX(' + (-30 * (1 - progress)) + '%)';
+                        }
+                        v.style.zIndex = '2';
+                        v.style.transition = 'none';
+                        v.style.transform = 'translateX(\(tx)px)';
+                    })();
                 """)
             case .ended:
                 if vx > 400 || tx > screenW * 0.4 {
@@ -1394,11 +1418,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                     wv.evaluateJavaScript("""
                         (function() {
                             var v = document.querySelector('.view.active');
+                            var hub = document.getElementById('view-perfil-hub');
                             if (!v) return;
-                            v.style.transition = 'transform \(String(format:"%.2f", dur))s cubic-bezier(0.32,0.72,0,1)';
+                            var d = '\(String(format:"%.2f", dur))s';
+                            var c = 'cubic-bezier(0.32,0.72,0,1)';
+                            v.style.transition = 'transform ' + d + ' ' + c;
                             v.style.transform = 'translateX(100%)';
+                            if (hub) {
+                                hub.style.transition = 'transform ' + d + ' ' + c;
+                                hub.style.transform = 'translateX(0)';
+                            }
                             setTimeout(function() {
-                                v.style.transition = ''; v.style.transform = '';
+                                v.style.transition = ''; v.style.transform = ''; v.style.zIndex = '';
+                                if (hub) { hub.style.transition = ''; hub.style.transform = ''; hub.style.zIndex = ''; }
                                 window.__lu_noSubViewAnim = true;
                                 showView('perfil-hub', null);
                                 window.__lu_noSubViewAnim = false;
@@ -1430,12 +1462,26 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
 
     private func snapViewBack(wv: WKWebView) {
         wv.evaluateJavaScript("""
-            var v = document.querySelector('.view.active');
-            if (v) {
-                v.style.transition = 'transform 0.25s cubic-bezier(0.32,0.72,0,1)';
-                v.style.transform  = 'translateX(0)';
-                setTimeout(function() { v.style.transition = ''; v.style.transform = ''; }, 280);
-            }
+            (function() {
+                var v = document.querySelector('.view.active');
+                var hub = document.getElementById('view-perfil-hub');
+                var d = '0.25s', c = 'cubic-bezier(0.32,0.72,0,1)';
+                if (v) {
+                    v.style.transition = 'transform ' + d + ' ' + c;
+                    v.style.transform = 'translateX(0)';
+                }
+                if (hub && hub.classList.contains('active') && hub !== v) {
+                    hub.style.transition = 'transform ' + d + ' ' + c;
+                    hub.style.transform = 'translateX(-30%)';
+                }
+                setTimeout(function() {
+                    if (v) { v.style.transition = ''; v.style.transform = ''; v.style.zIndex = ''; }
+                    if (hub && hub !== v) {
+                        hub.classList.remove('active');
+                        hub.style.transition = ''; hub.style.transform = ''; hub.style.zIndex = '';
+                    }
+                }, 280);
+            })();
         """)
     }
 
