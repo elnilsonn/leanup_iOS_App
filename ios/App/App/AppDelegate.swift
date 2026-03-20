@@ -68,12 +68,14 @@ private struct LiquidGlassTabBar: View {
                 )
                 .onAppear {
                     guard !hasAppeared else { return }
-                    // Set position immediately, then mark appeared after two frames
-                    // to guarantee the bubble renders at the correct position
+                    // Set position immediately (while invisible via opacity)
                     bubbleCenterX = tabCenter(activeIndex, contentW: contentW)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                    // Wait for layout to settle, then fade in at correct position
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
                         bubbleCenterX = tabCenter(activeIndex, contentW: contentW)
-                        hasAppeared = true
+                        withAnimation(.easeOut(duration: 0.2)) {
+                            hasAppeared = true
+                        }
                     }
                 }
         }
@@ -596,6 +598,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 /* pan-y lets the browser scroll without triggering click on items */
                 #mainContent { touch-action: pan-y !important; -webkit-overflow-scrolling: touch !important; }
                 .mat-row, .elec-opt, .per-header, .malla-acc-header { touch-action: manipulation !important; }
+                /* Allow horizontal swipe on theme selector (override parent pan-y) */
+                .theme-selector { touch-action: pan-x pan-y !important; }
 
                 /* ── Disable :hover on touch-only devices (prevents "marking" while scrolling) ── */
                 @media (hover: none) and (pointer: coarse) {
@@ -934,12 +938,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 }
 
                 window.showView = function(id, el) {
+                    // Clear animation-skip class from previous transitions
+                    document.querySelectorAll('.view.lu-anim-skip').forEach(function(v) { v.classList.remove('lu-anim-skip'); });
+
                     var isSubView = profileSubViews.indexOf(id) >= 0;
                     var goingToHub = (id === 'perfil-hub');
 
                     if (isSubView && !window.__lu_noSubViewAnim) {
                         // PUSH: new view slides in from right, hub parallax to left
-                        if (_animating) return; // prevent double-tap
+                        if (_animating) return;
                         _animating = true;
                         var hubView = document.getElementById('view-perfil-hub');
                         var newView = document.getElementById('view-' + id);
@@ -947,9 +954,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                         if (newView && hubView) {
                             var bg = getBg();
                             var fb = fixedBase(bg);
+                            // CRITICAL: Set BOTH views fixed BEFORE _sv() changes classes
+                            // This prevents hub from flashing when it loses .active
+                            hubView.style.cssText = fb + 'z-index:201;transform:translateX(0)';
                             newView.style.cssText = fb + 'z-index:202;transform:translateX(100%)';
                             _sv.apply(this, [id, el]);
-                            hubView.style.cssText = fb + 'z-index:201;transform:translateX(0)';
                             addEdgeShadow(newView);
                             var dimEl = addDim(hubView);
                             void newView.offsetWidth;
@@ -960,14 +969,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                             hubView.style.transform  = 'translateX(-33%)';
                             setTimeout(function() {
                                 cleanupExtras();
-                                newView.style.cssText = 'animation:none';
+                                // Use lu-anim-skip class to prevent fadeSlideIn re-trigger
+                                // Class will be removed on next showView() call
+                                newView.classList.add('lu-anim-skip');
+                                newView.style.cssText = '';
                                 hubView.style.cssText = '';
-                                requestAnimationFrame(function() {
-                                    requestAnimationFrame(function() {
-                                        newView.style.animation = '';
-                                        _animating = false;
-                                    });
-                                });
+                                _animating = false;
                             }, 470);
                         } else {
                             _sv.apply(this, [id, el]);
@@ -1006,15 +1013,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                             var args = arguments;
                             setTimeout(function() {
                                 cleanupExtras();
-                                hubView2.style.cssText = 'animation:none';
+                                // Use lu-anim-skip class instead of fragile inline animation:none
+                                hubView2.classList.add('lu-anim-skip');
                                 _sv.apply(window, args);
                                 curView.style.cssText = '';
-                                requestAnimationFrame(function() {
-                                    requestAnimationFrame(function() {
-                                        hubView2.style.animation = '';
-                                        _animating = false;
-                                    });
-                                });
+                                hubView2.style.cssText = '';
+                                _animating = false;
                             }, 440);
                         } else {
                             _sv.apply(this, arguments);
@@ -1128,6 +1132,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
             document.readyState === 'loading'
                 ? document.addEventListener('DOMContentLoaded', setupScroll)
                 : setupScroll();
+
+            // ── 8a. Patch setTheme — add haptic on theme change ────────────
+            function patchSetTheme() {
+                if (window.__lu_st_patched) return;
+                if (typeof setTheme !== 'function') { setTimeout(patchSetTheme, 250); return; }
+                window.__lu_st_patched = true;
+                var _st = window.setTheme;
+                window.setTheme = function(mode) {
+                    window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'haptic', style: 'light' });
+                    _st.apply(this, arguments);
+                };
+            }
+            document.readyState === 'loading'
+                ? document.addEventListener('DOMContentLoaded', patchSetTheme)
+                : patchSetTheme();
 
             // ── 8. Dark mode sync → native UI ───────────────────────────────
             function patchDark() {
@@ -1250,24 +1269,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         overlayVC.view.isOpaque = false
     }
 
-    // MARK: Back button animation — Apple-style materialize (scale + opacity + spring)
+    // MARK: Back button animation — stable scale + opacity + spring
+    private var backButtonAnimWorkItem: DispatchWorkItem?
+
     private func animateBackButton(visible: Bool) {
         guard let bvc = backButtonVC else { return }
-        DispatchQueue.main.async {
+        // Cancel any in-flight animation to prevent stacking
+        backButtonAnimWorkItem?.cancel()
+        bvc.view.layer.removeAllAnimations()
+
+        let work = DispatchWorkItem { [weak self] in
+            guard self != nil else { return }
             if visible {
                 bvc.view.isHidden = false
-                bvc.view.transform = CGAffineTransform(scaleX: 0.01, y: 0.01)
+                bvc.view.transform = CGAffineTransform(scaleX: 0.5, y: 0.5)
                 bvc.view.alpha = 0
             }
             UIView.animate(
-                withDuration: visible ? 0.42 : 0.25, delay: 0,
-                usingSpringWithDamping: visible ? 0.68 : 0.9,
-                initialSpringVelocity: visible ? 0.6 : 0
+                withDuration: visible ? 0.32 : 0.2, delay: 0,
+                usingSpringWithDamping: visible ? 0.85 : 0.95,
+                initialSpringVelocity: 0
             ) {
                 bvc.view.alpha = visible ? 1 : 0
                 bvc.view.transform = visible
                     ? .identity
-                    : CGAffineTransform(scaleX: 0.01, y: 0.01)
+                    : CGAffineTransform(scaleX: 0.5, y: 0.5)
             } completion: { _ in
                 if !visible {
                     bvc.view.isHidden = true
@@ -1275,6 +1301,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 }
             }
         }
+        backButtonAnimWorkItem = work
+        DispatchQueue.main.async(execute: work)
     }
 
     // MARK: WKScriptMessageHandler
@@ -1385,6 +1413,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         alert.addAction(.init(title: "Cancelar", style: .cancel) { _ in completionHandler(false) })
         alert.addAction(.init(title: "Reiniciar", style: .destructive) { _ in completionHandler(true) })
         rootVC?.present(alert, animated: true)
+    }
+
+    // MARK: WKNavigationDelegate — intercept mailto: and tel: URLs
+    func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
+                 decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        if let url = navigationAction.request.url,
+           let scheme = url.scheme?.lowercased(),
+           ["mailto", "tel", "sms"].contains(scheme) {
+            UIApplication.shared.open(url)
+            decisionHandler(.cancel)
+            return
+        }
+        decisionHandler(.allow)
     }
 
     // MARK: WKNavigationDelegate — restore data AFTER page finishes loading
@@ -1538,16 +1579,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                             hub.style.transform = 'translateX(0)';
                             document.querySelectorAll('.lu-push-dim,.lu-edge-shadow').forEach(function(e){ e.remove(); });
                             setTimeout(function() {
-                                hub.style.cssText = 'animation:none';
+                                hub.classList.add('lu-anim-skip');
                                 window.__lu_noSubViewAnim = true;
                                 showView('perfil-hub', null);
                                 window.__lu_noSubViewAnim = false;
                                 v.style.cssText = '';
-                                requestAnimationFrame(function() {
-                                    requestAnimationFrame(function() {
-                                        hub.style.animation = '';
-                                    });
-                                });
+                                hub.style.cssText = '';
                                 window.webkit?.messageHandlers?.nativeUI?.postMessage({ event: 'subViewClose' });
                             }, \(Int(dur * 1000)));
                         })();
@@ -1587,14 +1624,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 hub.style.transition = 'transform ' + d + ' ' + c;
                 hub.style.transform = 'translateX(-33%)';
                 setTimeout(function() {
-                    // Keep animation:none to prevent CSS fadeSlideIn flash
-                    v.style.cssText = 'animation:none';
+                    v.classList.add('lu-anim-skip');
+                    v.style.cssText = '';
                     hub.style.cssText = '';
-                    requestAnimationFrame(function() {
-                        requestAnimationFrame(function() {
-                            v.style.animation = '';
-                        });
-                    });
                 }, 320);
             })();
         """)
