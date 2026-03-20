@@ -59,8 +59,10 @@ private struct LiquidGlassTabBar: View {
             let contentW = totalW - innerPad * 2
             let tabW     = contentW / CGFloat(tabs.count)
             let bubbleW  = tabW - 8
+            // Compute correct position from GeometryReader on EVERY render
+            let computedCenter = tabCenter(activeIndex, contentW: contentW)
 
-            barView(bubbleW: bubbleW)
+            barView(bubbleW: bubbleW, computedCenter: computedCenter)
                 .highPriorityGesture(
                     DragGesture(minimumDistance: 0, coordinateSpace: .local)
                         .onChanged { v in onDragChanged(v, contentW: contentW, tabW: tabW) }
@@ -68,11 +70,9 @@ private struct LiquidGlassTabBar: View {
                 )
                 .onAppear {
                     guard !hasAppeared else { return }
-                    // Set position immediately (while invisible via opacity)
-                    bubbleCenterX = tabCenter(activeIndex, contentW: contentW)
-                    // Wait for layout to settle, then fade in at correct position
+                    bubbleCenterX = computedCenter
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
-                        bubbleCenterX = tabCenter(activeIndex, contentW: contentW)
+                        bubbleCenterX = computedCenter
                         withAnimation(.easeOut(duration: 0.2)) {
                             hasAppeared = true
                         }
@@ -140,14 +140,14 @@ private struct LiquidGlassTabBar: View {
 
     // MARK: Bar container (iOS 26 vs fallback)
     @ViewBuilder
-    private func barView(bubbleW: CGFloat) -> some View {
+    private func barView(bubbleW: CGFloat, computedCenter: CGFloat) -> some View {
         if #available(iOS 26.0, *) {
-            tabContent(bubbleW: bubbleW)
+            tabContent(bubbleW: bubbleW, computedCenter: computedCenter)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .glassEffect(.regular.interactive(true), in: .capsule)
         } else {
-            tabContent(bubbleW: bubbleW)
+            tabContent(bubbleW: bubbleW, computedCenter: computedCenter)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 3)
                 .background { fallbackBg }
@@ -156,12 +156,12 @@ private struct LiquidGlassTabBar: View {
 
     // MARK: Tab content — single bubble positioned via continuous offset + icons
     @ViewBuilder
-    private func tabContent(bubbleW: CGFloat) -> some View {
+    private func tabContent(bubbleW: CGFloat, computedCenter: CGFloat) -> some View {
         ZStack {
             // Bubble — follows finger directly during drag, springs to tab on release
+            // Before hasAppeared, use computedCenter (from GeometryReader) to avoid wrong position
             Group {
                 if #available(iOS 26.0, *) {
-                    // Filled capsule — bar already has .glassEffect, no nesting allowed
                     Capsule()
                         .fill(scheme == .dark
                               ? Color.white.opacity(0.12)
@@ -172,7 +172,7 @@ private struct LiquidGlassTabBar: View {
                     activeTabBubble(width: bubbleW)
                 }
             }
-            .position(x: bubbleCenterX, y: 26)
+            .position(x: hasAppeared ? bubbleCenterX : computedCenter, y: 26)
             .opacity(hasAppeared ? 1 : 0)
             .scaleEffect(pressingTab != nil && pressingTab == active ? 1.10 : 1.0)
 
@@ -599,7 +599,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 #mainContent { touch-action: pan-y !important; -webkit-overflow-scrolling: touch !important; }
                 .mat-row, .elec-opt, .per-header, .malla-acc-header { touch-action: manipulation !important; }
                 /* Allow horizontal swipe on theme selector (override parent pan-y) */
-                .theme-selector { touch-action: pan-x pan-y !important; }
+                .theme-selector { touch-action: none !important; }
 
                 /* ── Disable :hover on touch-only devices (prevents "marking" while scrolling) ── */
                 @media (hover: none) and (pointer: coarse) {
@@ -914,7 +914,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 var pushDur = '0.45s';
                 var popDur  = '0.42s';
                 function fixedBase(bg) {
-                    return 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;background:' + bg + ';animation:none;';
+                    // Include .content's mobile padding (16px 14px) so layout doesn't shift
+                    return 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;background:' + bg + ';animation:none;padding:16px 14px;';
                 }
                 // Dimming overlay on hub during push (Apple uses ~8% black overlay on the outgoing view)
                 function addDim(el) {
@@ -1547,7 +1548,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                         if (!v || v === hub) return;
                         var isDark = document.body.classList.contains('dark');
                         var bg = isDark ? '#0d1420' : '#F0F4FA';
-                        var base = 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;background:' + bg + ';animation:none;transition:none;';
+                        var base = 'display:block;position:fixed;top:0;left:0;right:0;bottom:0;overflow-y:auto;background:' + bg + ';animation:none;transition:none;padding:16px 14px;';
                         v.style.cssText = base + 'z-index:202;transform:translateX(0)';
                         hub.style.cssText = base + 'z-index:201;transform:translateX(-33%)';
                     })();

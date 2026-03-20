@@ -2154,7 +2154,7 @@ window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',func
     if(!sel)return;
     var dx=e.touches[0].clientX-sx;
     var step=sel.offsetWidth/themes.length;
-    var newIdx=Math.max(0,Math.min(themes.length-1,curIdx+Math.round(-dx/step)));
+    var newIdx=Math.max(0,Math.min(themes.length-1,curIdx+Math.round(dx/step)));
     if(newIdx!==getIdx()){
       h('selection');
       setTheme(themes[newIdx]);
