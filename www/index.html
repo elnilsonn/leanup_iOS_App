@@ -1721,6 +1721,247 @@ body.dark .malla-empty{
   background:rgba(24,32,44,0.78);
   border-color:rgba(255,255,255,0.06);
 }
+
+/* Perfil hub */
+.profile-hub-shell{display:flex;flex-direction:column;gap:24px}
+.profile-hub-hero{
+  position:relative;
+  min-height:320px;
+  border-radius:34px;
+  overflow:hidden;
+  padding:26px 26px 22px;
+  background:
+    radial-gradient(circle at 18% 28%, rgba(255,184,28,0.20), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(0,70,173,0.08), transparent 24%),
+    linear-gradient(180deg, rgba(246,222,206,0.92), rgba(252,249,246,0.98) 72%);
+  box-shadow:0 24px 48px rgba(39,24,12,0.08);
+}
+body.dark .profile-hub-hero{
+  background:
+    radial-gradient(circle at 18% 28%, rgba(255,184,28,0.10), transparent 30%),
+    radial-gradient(circle at 82% 18%, rgba(0,157,196,0.10), transparent 24%),
+    linear-gradient(180deg, rgba(27,34,46,0.96), rgba(20,27,37,0.98) 72%);
+}
+.profile-hub-hero::before{
+  content:'';
+  position:absolute;
+  right:78px;
+  top:28px;
+  width:102px;
+  height:182px;
+  border-radius:999px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.82));
+  box-shadow:0 18px 40px rgba(255,255,255,0.3);
+}
+.profile-hub-hero::after{
+  content:'';
+  position:absolute;
+  left:38px;
+  bottom:32px;
+  width:152px;
+  height:180px;
+  border-radius:46% 54% 38% 62% / 28% 42% 58% 72%;
+  background:
+    linear-gradient(180deg, rgba(166,205,182,0.88), rgba(166,205,182,0.12)),
+    radial-gradient(circle at 70% 20%, rgba(255,255,255,0.34), transparent 28%);
+  filter:blur(0.2px);
+  opacity:0.9;
+}
+.profile-hub-copy{
+  position:relative;
+  z-index:1;
+  min-height:260px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  max-width:360px;
+}
+.profile-hub-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.24em;
+  text-transform:uppercase;
+  color:var(--unad-blue);
+}
+.profile-hub-display{
+  margin-top:10px;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:clamp(62px,8vw,104px);
+  line-height:0.84;
+  letter-spacing:-0.1em;
+  text-transform:uppercase;
+  text-shadow:2px 2px 0 rgba(28,27,27,0.18);
+}
+.profile-hub-deck{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:20px;
+}
+.profile-hub-panel{
+  position:relative;
+  overflow:hidden;
+  padding:28px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+.profile-hub-panel.is-highlight{
+  color:#fff;
+  background:linear-gradient(135deg, var(--unad-blue), #2f79ff);
+  box-shadow:0 24px 42px rgba(0,70,173,0.18);
+}
+body.dark .profile-hub-panel.is-highlight{
+  background:linear-gradient(135deg, #0d49b8, #2a6bf3);
+}
+.profile-hub-panel.is-highlight::after{
+  content:'';
+  position:absolute;
+  right:-64px;
+  bottom:-84px;
+  width:220px;
+  height:220px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.08);
+  filter:blur(10px);
+}
+.profile-hub-panel-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:10px;
+}
+.profile-hub-panel-icon{
+  width:64px;
+  height:64px;
+  border-radius:22px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:30px;
+  background:rgba(0,70,173,0.08);
+  color:var(--unad-blue);
+  flex-shrink:0;
+}
+.profile-hub-panel.is-highlight .profile-hub-panel-icon{
+  background:rgba(255,255,255,0.14);
+  color:#fff;
+}
+.profile-hub-panel-arrow{
+  font-size:24px;
+  color:var(--text3);
+}
+.profile-hub-panel.is-highlight .profile-hub-panel-arrow{color:rgba(255,255,255,0.65)}
+.profile-hub-panel-title{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:clamp(28px,3vw,42px);
+  line-height:0.96;
+  letter-spacing:-0.06em;
+}
+.profile-hub-panel-desc{
+  font-size:16px;
+  line-height:1.65;
+  color:var(--text2);
+  max-width:540px;
+}
+.profile-hub-panel.is-highlight .profile-hub-panel-desc{color:rgba(255,255,255,0.82)}
+.profile-hub-card-foot,
+.profile-hub-card-dots{
+  margin-top:auto;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.profile-hub-dot{
+  height:6px;
+  border-radius:999px;
+  background:rgba(120,107,95,0.16);
+}
+.profile-hub-dot.is-active{
+  width:42px;
+  background:var(--unad-blue);
+}
+.profile-hub-dot:not(.is-active){width:14px}
+.profile-hub-card-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  border-radius:999px;
+  background:rgba(120,107,95,0.10);
+  color:var(--text2);
+  font-size:12px;
+}
+.profile-hub-card-label{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--text3);
+}
+.profile-hub-stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+}
+.profile-hub-stat{
+  padding:22px 20px;
+  border-radius:24px;
+  background:linear-gradient(180deg, rgba(246,241,236,0.92), rgba(255,255,255,0.88));
+  box-shadow:0 18px 30px rgba(39,24,12,0.05);
+}
+body.dark .profile-hub-stat{
+  background:linear-gradient(180deg, rgba(28,36,48,0.94), rgba(23,29,39,0.98));
+}
+.profile-hub-stat-label{
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+  color:var(--text3);
+}
+.profile-hub-stat-value{
+  margin-top:8px;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:20px;
+  font-weight:800;
+  letter-spacing:-0.05em;
+}
+.profile-hub-stat-track{
+  width:100%;
+  height:4px;
+  margin-top:16px;
+  border-radius:999px;
+  background:rgba(120,107,95,0.12);
+  overflow:hidden;
+}
+.profile-hub-stat-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg, var(--unad-blue), #2f79ff);
+}
+.profile-hub-activity-bars{
+  display:flex;
+  align-items:flex-end;
+  gap:4px;
+  margin-top:16px;
+  height:24px;
+}
+.profile-hub-activity-bars span{
+  width:5px;
+  border-radius:999px;
+  background:rgba(0,70,173,0.18);
+}
+.profile-hub-activity-bars[data-level="low"] span:nth-child(1){height:10px;background:rgba(0,70,173,0.5)}
+.profile-hub-activity-bars[data-level="medium"] span:nth-child(1){height:10px;background:rgba(0,70,173,0.35)}
+.profile-hub-activity-bars[data-level="medium"] span:nth-child(2){height:16px;background:rgba(0,70,173,0.55)}
+.profile-hub-activity-bars[data-level="medium"] span:nth-child(3){height:20px;background:rgba(0,70,173,0.8)}
+.profile-hub-activity-bars[data-level="high"] span:nth-child(1){height:10px;background:rgba(0,70,173,0.22)}
+.profile-hub-activity-bars[data-level="high"] span:nth-child(2){height:14px;background:rgba(0,70,173,0.42)}
+.profile-hub-activity-bars[data-level="high"] span:nth-child(3){height:22px;background:rgba(0,70,173,1)}
+.profile-hub-activity-bars[data-level="high"] span:nth-child(4){height:18px;background:rgba(0,70,173,0.62)}
 @media(max-width:1024px){
   .malla-hero{grid-template-columns:1fr}
 }
@@ -1796,6 +2037,36 @@ body.dark .malla-empty{
   .malla-hero{
     gap:18px;
     margin-bottom:20px;
+  }
+  .profile-hub-hero{
+    min-height:286px;
+    padding:22px 20px 18px;
+    border-radius:30px;
+  }
+  .profile-hub-hero::before{
+    right:30px;
+    top:24px;
+    width:82px;
+    height:150px;
+  }
+  .profile-hub-hero::after{
+    left:18px;
+    bottom:18px;
+    width:118px;
+    height:150px;
+  }
+  .profile-hub-copy{
+    min-height:214px;
+    max-width:280px;
+  }
+  .profile-hub-display{font-size:64px}
+  .profile-hub-panel{padding:22px}
+  .profile-hub-panel-title{font-size:24px}
+  .profile-hub-panel-desc{font-size:15px}
+  .profile-hub-stats{grid-template-columns:1fr 1fr;gap:12px}
+  .profile-hub-stat{
+    padding:18px 16px;
+    border-radius:20px;
   }
   .malla-toolbar{
     flex-direction:column;
@@ -2039,32 +2310,66 @@ body.dark .malla-empty{
 
     <!-- PERFIL HUB -->
     <div class="view" id="view-perfil-hub">
-      <div class="h2">Perfil</div>
-      <div class="sub">Tu desarrollo profesional y académico</div>
-      <div class="perfil-hub-grid">
-        <div class="perfil-hub-card" onclick="openProfileSection('profesional')">
-          <div class="perfil-hub-icon">👤</div>
-          <div class="perfil-hub-text">
-            <div class="perfil-hub-title">Perfil Profesional</div>
-            <div class="perfil-hub-desc">Timeline de evolución académica y textos para LinkedIn</div>
+      <div class="profile-hub-shell">
+        <section class="profile-hub-hero">
+          <div class="profile-hub-copy">
+            <div class="profile-hub-kicker">Hub Universitario</div>
+            <div class="profile-hub-display">Perfil</div>
           </div>
-          <div class="perfil-hub-arrow">›</div>
+        </section>
+
+        <div class="profile-hub-deck">
+          <article class="perfil-hub-card profile-hub-panel" onclick="openProfileSection('profesional')">
+            <div class="profile-hub-panel-head">
+              <div class="profile-hub-panel-icon">👤</div>
+              <div class="profile-hub-panel-arrow">↗</div>
+            </div>
+            <div class="profile-hub-panel-title">Perfil Profesional</div>
+            <div class="profile-hub-panel-desc">Gestiona tu identidad académica, traduce tu progreso a lenguaje profesional y aterriza fortalezas para LinkedIn.</div>
+            <div class="profile-hub-card-dots">
+              <span class="profile-hub-dot is-active"></span>
+              <span class="profile-hub-dot"></span>
+              <span class="profile-hub-dot"></span>
+            </div>
+          </article>
+
+          <article class="perfil-hub-card profile-hub-panel" onclick="openProfileSection('salida')">
+            <div class="profile-hub-panel-head">
+              <div class="profile-hub-panel-icon">💼</div>
+              <div class="profile-hub-panel-arrow">↗</div>
+            </div>
+            <div class="profile-hub-panel-title">Salida Laboral</div>
+            <div class="profile-hub-panel-desc">Conecta materias, habilidades y contextos de trabajo reales para proyectar tu carrera más allá de la universidad.</div>
+            <div class="profile-hub-card-foot">
+              <span class="profile-hub-card-pill">✦</span>
+              <span class="profile-hub-card-pill">◔</span>
+              <span class="profile-hub-card-label">Ruta profesional aplicada</span>
+            </div>
+          </article>
+
+          <article class="perfil-hub-card profile-hub-panel is-highlight" onclick="openProfileSection('portafolio')">
+            <div class="profile-hub-panel-head">
+              <div class="profile-hub-panel-icon">📘</div>
+              <div class="profile-hub-panel-arrow">↗</div>
+            </div>
+            <div class="profile-hub-panel-title">Portafolio</div>
+            <div class="profile-hub-panel-desc">Exhibe proyectos y entregables que ya puedes convertir en piezas concretas para mostrar valor fuera del aula.</div>
+          </article>
         </div>
-        <div class="perfil-hub-card" onclick="openProfileSection('salida')">
-          <div class="perfil-hub-icon">💼</div>
-          <div class="perfil-hub-text">
-            <div class="perfil-hub-title">Salida Laboral</div>
-            <div class="perfil-hub-desc">Roles profesionales reales por área de estudio</div>
+
+        <div class="profile-hub-stats">
+          <div class="profile-hub-stat">
+            <div class="profile-hub-stat-label">Nivel de Perfil</div>
+            <div class="profile-hub-stat-value" id="profileHubLevel">0%</div>
+            <div class="profile-hub-stat-track"><div class="profile-hub-stat-fill" id="profileHubLevelBar" style="width:0%"></div></div>
           </div>
-          <div class="perfil-hub-arrow">›</div>
-        </div>
-        <div class="perfil-hub-card" onclick="openProfileSection('portafolio')">
-          <div class="perfil-hub-icon">📁</div>
-          <div class="perfil-hub-text">
-            <div class="perfil-hub-title">Portafolio</div>
-            <div class="perfil-hub-desc">Proyectos reales que puedes construir con lo aprendido</div>
+          <div class="profile-hub-stat">
+            <div class="profile-hub-stat-label">Actividad</div>
+            <div class="profile-hub-stat-value" id="profileHubActivity">Inicial</div>
+            <div class="profile-hub-activity-bars" id="profileHubActivityBars" data-level="low">
+              <span></span><span></span><span></span><span></span>
+            </div>
           </div>
-          <div class="perfil-hub-arrow">›</div>
         </div>
       </div>
     </div>
@@ -2943,6 +3248,16 @@ function getDashboardActivityHTML(currentPeriod){
     </article>`;
   }).join('');
 }
+function getProfileHubActivityState(currentPeriod){
+  const currentCourses=materias.filter(m=>m.per===currentPeriod);
+  const totalCurrent=currentCourses.length;
+  const approvedCurrent=currentCourses.filter(m=>typeof m.nota==='number'&&m.nota>=3).length;
+  const gradedCurrent=currentCourses.filter(m=>typeof m.nota==='number').length;
+  const pct=totalCurrent?Math.round((approvedCurrent/totalCurrent)*100):0;
+  if(pct>=60||gradedCurrent>=Math.max(2,Math.ceil(totalCurrent/2)))return {label:'Alta',level:'high'};
+  if(pct>=20||gradedCurrent>0)return {label:'Media',level:'medium'};
+  return {label:'Inicial',level:'low'};
+}
 function updateAll(){
   const apro=materias.filter(m=>m.nota!==null&&m.nota>=3);
   const notas=apro.map(m=>m.nota);
@@ -2971,6 +3286,15 @@ function updateAll(){
   if(mallaCredEl)mallaCredEl.textContent=cred;
   if(mallaPromEl)mallaPromEl.textContent=prom;
   if(mallaBarEl)mallaBarEl.style.width=pct+'%';
+  const profileLevelEl=document.getElementById('profileHubLevel');
+  const profileLevelBarEl=document.getElementById('profileHubLevelBar');
+  const profileActivityEl=document.getElementById('profileHubActivity');
+  const profileActivityBarsEl=document.getElementById('profileHubActivityBars');
+  if(profileLevelEl)profileLevelEl.textContent=pct+'%';
+  if(profileLevelBarEl)profileLevelBarEl.style.width=pct+'%';
+  const profileActivity=getProfileHubActivityState(getDashboardCurrentPeriod());
+  if(profileActivityEl)profileActivityEl.textContent=profileActivity.label;
+  if(profileActivityBarsEl)profileActivityBarsEl.dataset.level=profileActivity.level;
   document.getElementById('sidebarProg').style.width=pct+'%';
   document.getElementById('sidebarLabel').textContent=pct+'% · '+cred+'/'+TOTAL+' cr.';
   const currentPeriod=getDashboardCurrentPeriod();
