@@ -430,8 +430,8 @@ body.dark .theme-opt.active{background:var(--bg3);box-shadow:0 1px 3px rgba(0,0,
     -webkit-backface-visibility:hidden;
   }
   #profilePanel .profile-detail-panel{
-    /* The moved profile subviews already receive top clearance from the injected .view padding. */
-    padding-top:0;
+    /* Match normal screens: moved subviews already have injected top clearance, plus .content adds 16px. */
+    padding-top:16px;
     padding-left:14px;
     padding-right:14px;
   }
