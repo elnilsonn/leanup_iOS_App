@@ -1962,6 +1962,340 @@ body.dark .profile-hub-stat{
 .profile-hub-activity-bars[data-level="high"] span:nth-child(2){height:14px;background:rgba(0,70,173,0.42)}
 .profile-hub-activity-bars[data-level="high"] span:nth-child(3){height:22px;background:rgba(0,70,173,1)}
 .profile-hub-activity-bars[data-level="high"] span:nth-child(4){height:18px;background:rgba(0,70,173,0.62)}
+
+/* Perfil profesional */
+.prof-page{display:flex;flex-direction:column;gap:26px}
+.prof-hero{
+  position:relative;
+  overflow:hidden;
+  padding:26px 24px 22px;
+  border-radius:34px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(250,246,242,0.98));
+  box-shadow:var(--shadow);
+}
+body.dark .prof-hero{
+  background:linear-gradient(180deg, rgba(28,36,48,0.94), rgba(23,29,39,0.98));
+}
+.prof-hero-watermark{
+  position:absolute;
+  top:10px;
+  left:-6px;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:clamp(74px,14vw,154px);
+  line-height:0.8;
+  letter-spacing:-0.1em;
+  font-weight:800;
+  text-transform:uppercase;
+  color:rgba(28,27,27,0.05);
+  pointer-events:none;
+  user-select:none;
+}
+body.dark .prof-hero-watermark{color:rgba(255,255,255,0.04)}
+.prof-hero-inner{
+  position:relative;
+  z-index:1;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+}
+.prof-avatar-ring{
+  width:96px;
+  height:96px;
+  margin-bottom:18px;
+  padding:3px;
+  border-radius:999px;
+  background:linear-gradient(135deg, var(--unad-blue), #2f79ff);
+}
+.prof-avatar-core{
+  width:100%;
+  height:100%;
+  border-radius:999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,243,238,0.98));
+  font-size:38px;
+}
+.prof-name{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:clamp(34px,4vw,52px);
+  line-height:0.95;
+  letter-spacing:-0.06em;
+}
+.prof-role{
+  margin-top:8px;
+  font-size:15px;
+  color:var(--text2);
+}
+.prof-actions{
+  display:flex;
+  gap:12px;
+  margin-top:22px;
+  flex-wrap:wrap;
+  justify-content:center;
+}
+.prof-action-btn{
+  border:none;
+  border-radius:999px;
+  padding:13px 24px;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:0.04em;
+}
+.prof-action-btn.primary{
+  color:#fff;
+  background:linear-gradient(135deg, var(--unad-blue), #2f79ff);
+  box-shadow:0 18px 30px rgba(0,70,173,0.18);
+}
+.prof-action-btn.secondary{
+  color:var(--text);
+  background:rgba(120,107,95,0.10);
+}
+.prof-section{display:flex;flex-direction:column;gap:16px}
+.prof-section-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.prof-section-title{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:34px;
+  line-height:0.98;
+  letter-spacing:-0.06em;
+}
+.prof-section-note{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--unad-blue);
+}
+.prof-timeline{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  gap:22px;
+}
+.prof-timeline::before{
+  content:'';
+  position:absolute;
+  top:10px;
+  bottom:10px;
+  left:18px;
+  width:2px;
+  background:rgba(120,107,95,0.18);
+}
+.prof-step{
+  position:relative;
+  display:grid;
+  grid-template-columns:52px 1fr;
+  gap:18px;
+  align-items:flex-start;
+}
+.prof-step-index{
+  position:relative;
+  z-index:1;
+  width:36px;
+  height:36px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:16px;
+  font-weight:700;
+  background:rgba(120,107,95,0.10);
+  color:var(--text2);
+  box-shadow:0 12px 22px rgba(12,24,48,0.06);
+}
+.prof-step.active .prof-step-index{
+  background:linear-gradient(135deg, var(--unad-blue), #2f79ff);
+  color:#fff;
+}
+.prof-step-card{
+  padding:22px 22px 20px;
+  border-radius:24px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(252,249,247,0.98));
+  box-shadow:0 18px 30px rgba(12,24,48,0.05);
+}
+body.dark .prof-step-card{
+  background:linear-gradient(180deg, rgba(28,36,48,0.94), rgba(23,29,39,0.98));
+}
+.prof-step-card.is-future{opacity:0.72}
+.prof-step-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:10px;
+}
+.prof-step-kicker{
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--unad-blue);
+}
+.prof-step-icon{
+  color:var(--unad-blue);
+  font-size:14px;
+  font-weight:800;
+}
+.prof-step-title{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:20px;
+  line-height:1.05;
+  letter-spacing:-0.04em;
+}
+.prof-step-desc{
+  margin-top:8px;
+  font-size:14px;
+  line-height:1.6;
+  color:var(--text2);
+}
+.prof-step-meta{
+  margin-top:10px;
+  font-size:12px;
+  color:var(--text3);
+}
+.prof-step-skills{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:12px;
+}
+.prof-step-skills span{
+  padding:4px 10px;
+  border-radius:999px;
+  background:rgba(0,70,173,0.08);
+  font-size:11px;
+  color:var(--unad-blue);
+}
+.prof-milestones{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.prof-milestone{
+  position:relative;
+  overflow:hidden;
+  padding:22px 20px;
+  border-radius:24px;
+  background:linear-gradient(180deg, rgba(246,241,236,0.92), rgba(255,255,255,0.88));
+  box-shadow:0 18px 30px rgba(39,24,12,0.05);
+}
+body.dark .prof-milestone{
+  background:linear-gradient(180deg, rgba(28,36,48,0.94), rgba(23,29,39,0.98));
+}
+.prof-milestone.is-wide{grid-column:1 / -1}
+.prof-milestone-icon{
+  color:var(--unad-blue);
+  font-size:18px;
+  margin-bottom:14px;
+}
+.prof-milestone-title{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:22px;
+  line-height:1.05;
+  letter-spacing:-0.04em;
+}
+.prof-milestone-desc{
+  margin-top:8px;
+  font-size:13px;
+  line-height:1.6;
+  color:var(--text2);
+}
+.prof-milestone-badge{
+  position:absolute;
+  right:-8px;
+  bottom:-18px;
+  font-size:120px;
+  line-height:1;
+  color:rgba(120,107,95,0.10);
+}
+.prof-link-shell{
+  padding:22px;
+  border-radius:24px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(252,249,247,0.98));
+  box-shadow:var(--shadow);
+}
+body.dark .prof-link-shell{
+  background:linear-gradient(180deg, rgba(28,36,48,0.94), rgba(23,29,39,0.98));
+}
+.prof-link-tools{
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.prof-link-feature{
+  padding:20px;
+  border-radius:20px;
+  background:rgba(120,107,95,0.06);
+}
+.prof-link-langs{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:14px;
+}
+.prof-link-lang{
+  padding:5px 9px;
+  border-radius:8px;
+  font-size:10px;
+  font-weight:800;
+  background:rgba(120,107,95,0.10);
+}
+.prof-link-lang.primary{
+  background:rgba(0,70,173,0.10);
+  color:var(--unad-blue);
+}
+.prof-link-quote{
+  font-size:15px;
+  line-height:1.7;
+  color:var(--text);
+  font-style:italic;
+}
+.prof-link-feature hr{
+  border:none;
+  border-top:1px solid rgba(120,107,95,0.14);
+  margin:16px 0;
+}
+.prof-link-explain{
+  font-size:14px;
+  line-height:1.65;
+  color:var(--text2);
+}
+.prof-link-list{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.prof-link-card{
+  padding:18px 18px 16px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.58);
+}
+body.dark .prof-link-card{background:rgba(255,255,255,0.04)}
+.prof-link-card-top{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+.prof-link-card-title{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:18px;
+  line-height:1.08;
+  letter-spacing:-0.04em;
+  margin-top:6px;
+}
+.prof-link-empty{
+  text-align:center;
+  padding:22px;
+  color:var(--text3);
+}
 @media(max-width:1024px){
   .malla-hero{grid-template-columns:1fr}
 }
@@ -2068,6 +2402,58 @@ body.dark .profile-hub-stat{
     padding:18px 16px;
     border-radius:20px;
   }
+  .prof-hero{
+    padding:22px 18px 18px;
+    border-radius:28px;
+  }
+  .prof-hero-watermark{font-size:86px;top:18px}
+  .prof-avatar-ring{
+    width:82px;
+    height:82px;
+    margin-bottom:16px;
+  }
+  .prof-avatar-core{font-size:32px}
+  .prof-name{font-size:34px}
+  .prof-role{font-size:14px}
+  .prof-actions{gap:10px}
+  .prof-action-btn{
+    padding:12px 18px;
+    font-size:12px;
+  }
+  .prof-section-title{font-size:28px}
+  .prof-section-head{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .prof-step{
+    grid-template-columns:42px 1fr;
+    gap:14px;
+  }
+  .prof-step-index{
+    width:32px;
+    height:32px;
+    font-size:14px;
+  }
+  .prof-step-card{
+    padding:18px;
+    border-radius:20px;
+  }
+  .prof-milestones{
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+  }
+  .prof-milestone{
+    padding:18px 16px;
+    border-radius:20px;
+  }
+  .prof-milestone-title{font-size:18px}
+  .prof-link-shell{
+    padding:18px;
+    border-radius:20px;
+  }
+  .prof-link-feature{padding:16px}
+  .prof-link-quote,
+  .prof-link-explain{font-size:14px}
   .malla-toolbar{
     flex-direction:column;
     align-items:stretch;
@@ -2376,15 +2762,50 @@ body.dark .profile-hub-stat{
 
     <!-- PERFIL PROFESIONAL -->
     <div class="view" id="view-profesional">
-      <div class="h2">Perfil Profesional</div>
-      <div class="sub">Tu evolución académica y textos para LinkedIn — agrupados por periodo · Incluye electivos seleccionados</div>
-      <div class="grid-2">
-        <div class="card"><div class="sect-title"><span class="gold-dot"></span>Timeline de evolución</div><div id="timelineEl"></div></div>
-        <div class="card">
-          <div class="sect-title"><span class="gold-dot"></span>Traductor de LinkedIn</div>
-          <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" id="liSearch" type="text" placeholder="Buscar materia para LinkedIn..." oninput="renderLinkedin()"></div>
-          <div id="linkedinCards"></div>
-        </div>
+      <div class="prof-page">
+        <section class="prof-hero">
+          <div class="prof-hero-watermark">PERFIL</div>
+          <div class="prof-hero-inner">
+            <div class="prof-avatar-ring"><div class="prof-avatar-core">👤</div></div>
+            <div class="prof-name" id="profHeroName">Usuario</div>
+            <div class="prof-role" id="profHeroRole">Trayectoria profesional en construcción</div>
+            <div class="prof-actions">
+              <button class="prof-action-btn primary" type="button" onclick="document.getElementById('profTranslateSection').scrollIntoView({behavior:'smooth',block:'start'})">Motor LinkedIn</button>
+              <button class="prof-action-btn secondary" type="button" onclick="document.getElementById('profTimelineSection').scrollIntoView({behavior:'smooth',block:'start'})">Timeline</button>
+            </div>
+          </div>
+        </section>
+
+        <section class="prof-section" id="profTimelineSection">
+          <div class="prof-section-head">
+            <div class="prof-section-title">Evolución dinámica</div>
+            <div class="prof-section-note">Timeline académico</div>
+          </div>
+          <div class="prof-timeline" id="timelineEl"></div>
+        </section>
+
+        <section class="prof-section">
+          <div class="prof-section-head">
+            <div class="prof-section-title">Hitos académicos</div>
+          </div>
+          <div class="prof-milestones" id="profileMilestones"></div>
+        </section>
+
+        <section class="prof-section" id="profTranslateSection">
+          <div class="prof-section-head">
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="color:var(--unad-blue);font-size:20px">✦</span>
+              <div class="prof-section-title">Motor LinkedIn</div>
+            </div>
+          </div>
+          <div class="prof-link-shell">
+            <div class="prof-link-tools">
+              <div class="search-wrap"><span class="search-icon">🔍</span><input class="search-inp" id="liSearch" type="text" placeholder="Buscar materia para LinkedIn..." oninput="renderLinkedin()"></div>
+              <div class="prof-link-feature" id="profileLinkedinFeature"></div>
+              <div class="prof-link-list" id="linkedinCards"></div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
 
@@ -3956,20 +4377,70 @@ function calcTlState(etapa){
   return{state:'future',apro,total,pct};
 }
 
-function renderProfesional(){
-  // Calcular estados reales
+function getProfessionalTimelineStates(){
   const estados=tlData.map(e=>calcTlState(e));
-  // Ajustar: la primera etapa con pct>0 y <100 es "now", las anteriores "done", las siguientes "future"
-  // pero si ninguna tiene nada, todas son "future"
   let foundNow=false;
   const statesFinal=estados.map((s,i)=>{
     if(s.state==='done')return s;
-    if(!foundNow&&s.apro>0){foundNow=true;return{...s,state:'now'};}
-    if(!foundNow&&i>0&&estados[i-1].state==='done'){foundNow=true;return{...s,state:'now'};}
-    return{...s,state:'future'};
+    if(!foundNow&&s.apro>0){
+      foundNow=true;
+      return {...s,state:'now'};
+    }
+    if(!foundNow&&i>0&&estados[i-1].state==='done'){
+      foundNow=true;
+      return {...s,state:'now'};
+    }
+    return {...s,state:'future'};
   });
-  // Si todas son future (0 notas), marcar la primera como "now"
-  if(statesFinal.every(s=>s.state==='future')){statesFinal[0]={...statesFinal[0],state:'now'};}
+  if(statesFinal.every(s=>s.state==='future')&&statesFinal[0]){
+    statesFinal[0]={...statesFinal[0],state:'now'};
+  }
+  return statesFinal;
+}
+
+function getProfessionalHeroRole(statesFinal){
+  let activeIndex=statesFinal.findIndex(s=>s.state==='now');
+  if(activeIndex===-1){
+    activeIndex=statesFinal.map((s,i)=>s.state==='done'?i:-1).filter(i=>i>=0).pop();
+  }
+  if(activeIndex===undefined||activeIndex===-1)activeIndex=0;
+  return tlData[activeIndex]?.rank||'Trayectoria profesional en construccion';
+}
+
+function renderProfessionalMilestones(statesFinal){
+  const completedStages=statesFinal.filter(s=>s.state==='done').length;
+  const average=getAverage();
+  const currentPeriod=getDashboardCurrentPeriod();
+  const finishedCourses=materias.filter(m=>m.nota!==null&&m.nota>=3).length+getElectivos().filter(e=>{
+    const key=e.grupo+':::'+e.cod;
+    return electivosNotas[key]!==undefined&&electivosNotas[key]>=3;
+  }).length;
+  document.getElementById('profileMilestones').innerHTML=[
+    `<article class="prof-milestone is-wide">
+      <div class="prof-milestone-icon">🎓</div>
+      <div class="prof-milestone-title">Nivel academico consolidado</div>
+      <div class="prof-milestone-desc">${completedStages} etapas cerradas y ${finishedCourses} materias aprobadas dentro de tu recorrido en marketing y negocios digitales.</div>
+      <div class="prof-milestone-badge">${Math.round(getOverallProgress())}% progreso</div>
+    </article>`,
+    `<article class="prof-milestone">
+      <div class="prof-milestone-icon">🌍</div>
+      <div class="prof-milestone-title">Momento curricular</div>
+      <div class="prof-milestone-desc">Periodo ${currentPeriod} como foco actual para traducir experiencia academica en posicionamiento profesional.</div>
+    </article>`,
+    `<article class="prof-milestone">
+      <div class="prof-milestone-icon">🧠</div>
+      <div class="prof-milestone-title">Promedio competitivo</div>
+      <div class="prof-milestone-desc">${average.toFixed(2)} de promedio acumulado para reforzar tu narrativa en CV, bio y LinkedIn.</div>
+    </article>`
+  ].join('');
+}
+
+function renderProfesional(){
+  const statesFinal=getProfessionalTimelineStates();
+  const heroName=document.getElementById('profHeroName');
+  const heroRole=document.getElementById('profHeroRole');
+  if(heroName)heroName.textContent=username||'Usuario';
+  if(heroRole)heroRole.textContent=getProfessionalHeroRole(statesFinal);
 
   let th='';
   tlData.forEach((r,i)=>{
@@ -4036,6 +4507,92 @@ function copyLi(id,btn){
 }
 
 /* ── SALIDA LABORAL ── */
+function renderProfesional(){
+  const statesFinal=getProfessionalTimelineStates();
+  const heroName=document.getElementById('profHeroName');
+  const heroRole=document.getElementById('profHeroRole');
+  if(heroName)heroName.textContent=username||'Usuario';
+  if(heroRole)heroRole.textContent=getProfessionalHeroRole(statesFinal);
+
+  const timelineHTML=tlData.map((r,i)=>{
+    const s=statesFinal[i];
+    const badgeText=s.state==='done'
+      ? `Completado ${s.apro}/${s.total}`
+      : s.state==='now'
+        ? `En progreso ${s.apro}/${s.total}`
+        : 'Pendiente';
+    const badgeIcon=s.state==='done'?'✓':s.state==='now'?'↗':'○';
+    return `<article class="prof-step ${s.state}">
+      <div class="prof-step-index">${String(i+1).padStart(2,'0')}</div>
+      <div class="prof-step-card">
+        <div class="prof-step-top">
+          <div class="prof-step-kicker">${s.state==='done'?'ETAPA COMPLETADA':s.state==='now'?'FASE ACTUAL':'PROXIMA ETAPA'}</div>
+          <div class="prof-step-icon">${badgeIcon}</div>
+        </div>
+        <div class="prof-step-title">${r.rank}</div>
+        <div class="prof-step-desc">${r.desc}</div>
+        <div class="prof-step-meta">${r.credits} · ${badgeText}</div>
+        <div class="prof-link-quote" style="margin:0 0 14px 0">${r.logro}</div>
+        <div class="prof-step-skills">${r.skills.map(sk=>`<span class="tl-skill">${sk}</span>`).join('')}</div>
+      </div>
+    </article>`;
+  }).join('');
+
+  document.getElementById('timelineEl').innerHTML=timelineHTML;
+  renderProfessionalMilestones(statesFinal);
+  renderLinkedin();
+}
+
+function renderLinkedin(){
+  const input=document.getElementById('liSearch');
+  const q=(input||{}).value||'';
+  const sq=q.toLowerCase().trim();
+  const all=getAllMats().filter(m=>m.li);
+  const filtered=all.filter(m=>{
+    if(!sq)return true;
+    return m.nombre.toLowerCase().includes(sq)
+      || (m.li||'').toLowerCase().includes(sq)
+      || (m.sk||[]).some(sk=>sk.toLowerCase().includes(sq));
+  });
+  const featured=filtered[0]||all[0]||null;
+  const featureEl=document.getElementById('profileLinkedinFeature');
+  if(featureEl){
+    featureEl.innerHTML=featured
+      ? `<div class="prof-link-langs">
+          <span class="prof-link-lang">ES</span>
+          <span style="color:var(--text3)">→</span>
+          <span class="prof-link-lang">LinkedIn</span>
+        </div>
+        <div class="prof-link-quote">"${featured.li}"</div>
+        <div class="prof-link-explain">Texto base construido desde ${featured.nombre}${featured.esElec?' · Electiva':''} para traducir tu avance academico a una narrativa profesional clara.</div>`
+      : '<div class="prof-link-empty">Todavia no hay textos disponibles para este filtro.</div>';
+  }
+
+  const cardsEl=document.getElementById('linkedinCards');
+  if(!cardsEl)return;
+  if(!filtered.length){
+    cardsEl.innerHTML=`<div class="prof-link-empty">No encontre materias para "${q.trim()}". Prueba con otra palabra clave.</div>`;
+    return;
+  }
+
+  cardsEl.innerHTML=filtered.map(m=>{
+    const uid=m.esElec?(m.grupo+m.cod).replace(/\W/g,'_'):`m${m.id}`;
+    const skills=(m.sk||[]).slice(0,3).map(sk=>`<span class="tl-skill">${sk}</span>`).join('');
+    return `<article class="li-card prof-link-card">
+      <div class="prof-link-card-top">
+        <div>
+          <div class="li-mat ${m.esElec?'elec':''}">${m.nombre}${m.esElec?' · Electiva':''}</div>
+          <div class="prof-step-meta">Periodo ${m.per} · ${m.cod} · ${m.cr} creditos</div>
+        </div>
+        <button class="copy-btn" onclick="copyLi('lt-${uid}',this)">Copiar</button>
+      </div>
+      <div class="prof-link-card-title">Version lista para LinkedIn</div>
+      <div class="li-text" id="lt-${uid}">${m.li}</div>
+      <div class="prof-step-skills">${skills}</div>
+    </article>`;
+  }).join('');
+}
+
 function renderSalida(){
   const q=(document.getElementById('salidaSearch')||{}).value||'';
   const sq=q.toLowerCase().trim();
