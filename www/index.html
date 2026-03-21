@@ -1385,13 +1385,22 @@ body.dark .malla-summary-card{
   color:var(--text3);
 }
 .malla-summary-meta strong{
-  display:block;
+  display:flex;
+  align-items:baseline;
+  gap:6px;
   margin-top:6px;
   font-family:'Manrope','Sora',sans-serif;
   font-size:34px;
   line-height:0.95;
   letter-spacing:-0.06em;
   color:var(--text);
+}
+.malla-summary-meta strong span,
+.malla-summary-meta strong em{
+  font:inherit;
+  font-style:normal;
+  letter-spacing:inherit;
+  line-height:inherit;
 }
 .malla-summary-meta div:last-child{text-align:right}
 .malla-summary-meta div:last-child strong{color:var(--unad-blue)}
@@ -1458,54 +1467,32 @@ body.dark .malla-rail{
 }
 .malla-chip.muted{background:rgba(120,107,95,0.08)}
 .malla-chip:active{transform:scale(.97)}
-.malla-active-panel{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:14px;
-  align-items:end;
-  margin-bottom:16px;
-  padding:18px 20px;
-  border-radius:28px;
-  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(251,247,243,0.96));
-  border:1px solid rgba(255,255,255,0.66);
-  box-shadow:var(--shadow);
-}
-body.dark .malla-active-panel{
-  background:linear-gradient(180deg, rgba(24,32,44,0.92), rgba(20,27,37,0.96));
-  border-color:rgba(255,255,255,0.06);
-}
-.malla-active-kicker{
-  font-size:11px;
-  font-weight:800;
-  text-transform:uppercase;
-  letter-spacing:0.18em;
-  color:var(--text3);
-}
-.malla-active-title{
-  margin-top:6px;
-  font-family:'Manrope','Sora',sans-serif;
-  font-size:34px;
-  line-height:0.95;
-  letter-spacing:-0.08em;
-}
-.malla-active-meta{
-  margin-top:8px;
-  font-size:13px;
-  color:var(--text2);
-}
-.malla-active-side{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  flex-wrap:wrap;
-  justify-content:flex-end;
-}
 .malla-period-list{display:flex;flex-direction:column;gap:14px}
 .malla-acc.malla-period-section{
+  position:relative;
   margin-bottom:0;
   padding-left:0;
 }
+.malla-period-watermark{
+  position:absolute;
+  inset:54px 0 0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:min(28vw, 220px);
+  line-height:0.8;
+  font-weight:800;
+  letter-spacing:-0.14em;
+  color:rgba(0,70,173,0.05);
+  pointer-events:none;
+  user-select:none;
+  z-index:0;
+}
+body.dark .malla-period-watermark{color:rgba(255,255,255,0.04)}
 .malla-acc-header.malla-period-head{
+  position:relative;
+  z-index:1;
   display:flex;
   align-items:flex-start;
   justify-content:space-between;
@@ -1552,6 +1539,8 @@ body.dark .malla-active-panel{
 .malla-status-chip.active{background:rgba(0,70,173,0.10);color:var(--unad-blue)}
 .malla-status-chip.pending{background:rgba(120,107,95,0.10);color:var(--text3)}
 .malla-acc-body{
+  position:relative;
+  z-index:1;
   padding:8px 0 0;
   display:grid!important;
   gap:12px;
@@ -1811,13 +1800,6 @@ body.dark .malla-empty{
     padding:12px;
     border-radius:20px;
   }
-  .malla-active-panel{
-    grid-template-columns:1fr;
-    padding:16px;
-    border-radius:22px;
-  }
-  .malla-active-title{font-size:28px}
-  .malla-active-side{justify-content:flex-start}
   .malla-summary-card{
     padding:22px;
     border-radius:28px;
@@ -1826,6 +1808,10 @@ body.dark .malla-empty{
   .malla-summary-meta strong{font-size:28px}
   .malla-period-list{gap:12px}
   .malla-acc.malla-period-section{padding-left:0}
+  .malla-period-watermark{
+    inset:42px 0 0;
+    font-size:min(42vw, 180px);
+  }
   .malla-period-title{font-size:20px}
   .malla-acc-header.malla-period-head{gap:10px}
   .malla-status-chip{padding:7px 10px}
@@ -2013,7 +1999,7 @@ body.dark .malla-empty{
           <div class="malla-summary-meta">
             <div>
               <span>Créditos</span>
-              <strong><span id="mallaCred">0</span> / 144</strong>
+              <strong><span id="mallaCred">0</span><em>/ 144</em></strong>
             </div>
             <div>
               <span>Promedio</span>
@@ -2035,7 +2021,6 @@ body.dark .malla-empty{
       </div>
       <div class="malla-grid">
         <div>
-          <div id="mallaActivePanel" class="malla-active-panel"></div>
           <div id="mallaList" class="malla-period-list"></div>
         </div>
       </div>
@@ -3156,20 +3141,6 @@ function renderMallaControls(currentPeriod){
     filterTabs.innerHTML=getMallaFilterDefs().map(f=>`<button type="button" class="malla-chip muted ${mallaFilter===f.id?'active':''}" onclick="setMallaFilter('${f.id}')">${f.label}</button>`).join('');
   }
 }
-function renderMallaActivePanel(period,apro,repro,currentPeriod,totalItems){
-  const panel=document.getElementById('mallaActivePanel');
-  if(!panel)return;
-  const status=getMallaPeriodStatus(period,totalItems,apro,repro,currentPeriod);
-  panel.innerHTML=`<div>
-    <div class="malla-active-kicker">Vista rápida</div>
-    <div class="malla-active-title">Periodo ${period}</div>
-    <div class="malla-active-meta">${totalItems} materias y electivas · ${getPeriodCreditsForView(period)} créditos en foco</div>
-  </div>
-  <div class="malla-active-side">
-    ${getMallaPeriodSummaryHTML(apro,repro)||'<span class="malla-stat-chip">Sin notas aún</span>'}
-    <span class="malla-status-chip ${status.className}">${status.label}</span>
-  </div>`;
-}
 function setMallaPeriod(period){
   mallaPeriodFocus=period;
   renderMalla();
@@ -3221,8 +3192,8 @@ function renderMalla(){
     const elecCredits=visibleElecs.reduce((a,[,data])=>a+((data.opciones[0]&&data.opciones[0].cr)||3),0);
     const totalCount=filtered.length+visibleElecs.length;
     const periodStatus=getMallaPeriodStatus(p,totalCount,apro,repro,currentPeriod);
-    if(!sq&&p===mallaPeriodFocus)renderMallaActivePanel(p,apro,repro,currentPeriod,ms.length+elecs.length);
     html+=`<section class="malla-acc malla-period-section" data-per="${p}">
+      <div class="malla-period-watermark">${String(p).padStart(2,'0')}</div>
       <div class="malla-acc-header malla-period-head">
         <div class="malla-period-copy">
           <span class="malla-period-title">Periodo ${p}</span>
@@ -3240,7 +3211,6 @@ function renderMalla(){
     });
     html+=`</div></section>`;
   });
-  if(!sq)renderMallaActivePanel(mallaPeriodFocus,materias.filter(m=>m.per===mallaPeriodFocus&&m.nota!==null&&m.nota>=3).length,materias.filter(m=>m.per===mallaPeriodFocus&&m.nota!==null&&m.nota<3).length,currentPeriod,materias.filter(m=>m.per===mallaPeriodFocus).length+Object.entries(electivosData).filter(([_,v])=>v.per===mallaPeriodFocus).length);
   if(!hasAny)html=`<div class="malla-empty">No encontré materias para este filtro. Prueba con otro periodo o cambia el filtro rápido.</div>`;
   document.getElementById('mallaList').innerHTML=html;
 }
