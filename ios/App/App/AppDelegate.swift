@@ -1601,21 +1601,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 // Hub MUST have display:block — it has no .active class (display:none from CSS)
                 wv.evaluateJavaScript("""
                     (function() {
-                        var v = document.querySelector('.view.mobile-profile-open');
-                        if (!v) return;
-                        v.classList.add('lu-profile-gesture');
-                        v.style.transition = 'none';
-                        v.style.transform = 'translate3d(0,0,0)';
+                        var pp = document.getElementById('profilePanel');
+                        if (!pp || !pp.classList.contains('mobile-open')) return;
+                        pp.classList.add('lu-panel-gesture');
+                        pp.style.transition = 'none';
+                        pp.style.transform = 'translate3d(0,0,0)';
                     })();
                 """)
             case .changed:
                 wv.evaluateJavaScript("""
                     (function() {
-                        var v = document.querySelector('.view.mobile-profile-open');
-                        if (!v) return;
-                        v.classList.add('lu-profile-gesture');
-                        v.style.transition = 'none';
-                        v.style.transform = 'translate3d(\(tx)px,0,0)';
+                        var pp = document.getElementById('profilePanel');
+                        if (!pp || !pp.classList.contains('mobile-open')) return;
+                        pp.classList.add('lu-panel-gesture');
+                        pp.style.transition = 'none';
+                        pp.style.transform = 'translate3d(\(tx)px,0,0)';
                     })();
                 """)
             case .ended:
@@ -1623,11 +1623,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                     let dur = min(0.34, max(0.18, Double(screenW - tx) / Double(max(vx, 450))))
                     wv.evaluateJavaScript("""
                         (function() {
-                            var v = document.querySelector('.view.mobile-profile-open');
-                            if (!v) return;
-                            v.classList.add('lu-profile-gesture');
-                            v.style.transition = 'transform \(String(format:"%.2f", dur))s cubic-bezier(0.32,0.72,0,1)';
-                            v.style.transform = 'translate3d(100%,0,0)';
+                            var pp = document.getElementById('profilePanel');
+                            if (!pp || !pp.classList.contains('mobile-open')) return;
+                            pp.classList.add('lu-panel-gesture');
+                            pp.style.transition = 'transform \(String(format:"%.2f", dur))s cubic-bezier(0.32,0.72,0,1)';
+                            pp.style.transform = 'translate3d(100%,0,0)';
                             setTimeout(function() {
                                 if (typeof window.__lu_finishProfileOverlayClose === 'function') {
                                     window.__lu_finishProfileOverlayClose(true);
@@ -1665,16 +1665,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
         // Snap the mobile profile overlay back to x=0 without moving the hub underneath.
         wv.evaluateJavaScript("""
             (function() {
-                var v = document.querySelector('.view.mobile-profile-open');
-                if (!v) return;
+                var pp = document.getElementById('profilePanel');
+                if (!pp || !pp.classList.contains('mobile-open')) return;
                 var d = '0.25s', c = 'cubic-bezier(0.32,0.72,0,1)';
-                v.classList.add('lu-profile-gesture');
-                v.style.transition = 'transform ' + d + ' ' + c;
-                v.style.transform = 'translate3d(0,0,0)';
+                pp.classList.add('lu-panel-gesture');
+                pp.style.transition = 'transform ' + d + ' ' + c;
+                pp.style.transform = 'translate3d(0,0,0)';
                 setTimeout(function() {
-                    v.classList.remove('lu-profile-gesture');
-                    v.style.transition = '';
-                    v.style.transform = '';
+                    pp.classList.remove('lu-panel-gesture');
+                    pp.style.transition = '';
+                    pp.style.transform = '';
                 }, 320);
             })();
         """)

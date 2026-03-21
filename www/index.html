@@ -348,12 +348,12 @@ body.dark .theme-opt.active{background:var(--bg3);box-shadow:0 1px 3px rgba(0,0,
     body.dark #detailPanel.mobile-open{
       background:rgba(13,20,32,0.85)!important;
     }
-    .view.mobile-profile-open{
+    #profilePanel.mobile-open{
       background:rgba(240,244,250,0.85)!important;
       backdrop-filter:blur(28px) saturate(180%);
       -webkit-backdrop-filter:blur(28px) saturate(180%);
     }
-    body.dark .view.mobile-profile-open{
+    body.dark #profilePanel.mobile-open{
       background:rgba(13,20,32,0.85)!important;
     }
     #detailPanel.mobile-open .detail-panel{
@@ -382,38 +382,21 @@ body.dark .theme-opt.active{background:var(--bg3);box-shadow:0 1px 3px rgba(0,0,
   #detailPanel{position:sticky;top:24px;align-self:start}
 }
 @media(max-width:768px){
-  .view.mobile-profile-open,
-  .view.mobile-profile-open.active{
+  .view.lu-profile-panel-view,
+  .view.lu-profile-panel-view.active{
     display:block!important;
-    position:fixed;
-    top:0;left:0;right:0;bottom:0;
-    z-index:890;
     margin:0;
-    overflow-y:auto;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior-y:contain;
-    padding-top:calc(env(safe-area-inset-top) + 72px);
-    padding-bottom:calc(env(safe-area-inset-bottom) + 64px);
-    padding-left:16px;
-    padding-right:16px;
     min-height:100%;
-    background:var(--bg);
-    contain:layout paint;
-    backface-visibility:hidden;
-    -webkit-backface-visibility:hidden;
     animation:none!important;
   }
-  .view.mobile-profile-open.lu-profile-gesture{
-    will-change:transform;
-    transform:translateZ(0);
-  }
-  .view.mobile-profile-open .tl-item,
-  .view.mobile-profile-open .li-card,
-  .view.mobile-profile-open .sal-card,
-  .view.mobile-profile-open .por-card{
+  .view.lu-profile-panel-view .tl-item,
+  .view.lu-profile-panel-view .li-card,
+  .view.lu-profile-panel-view .sal-card,
+  .view.lu-profile-panel-view .por-card{
     animation:none!important;
   }
-  #detailPanel{
+  #detailPanel,
+  #profilePanel{
     display:none;
     position:fixed;
     top:0;left:0;right:0;bottom:0;
@@ -426,7 +409,8 @@ body.dark .theme-opt.active{background:var(--bg3);box-shadow:0 1px 3px rgba(0,0,
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
   }
-  #detailPanel .detail-panel{
+  #detailPanel .detail-panel,
+  #profilePanel .profile-detail-panel{
     border-radius:0;
     border:none;
     border-left:none;
@@ -446,7 +430,9 @@ body.dark .theme-opt.active{background:var(--bg3);box-shadow:0 1px 3px rgba(0,0,
     -webkit-backface-visibility:hidden;
   }
   #detailPanel.lu-panel-gesture,
-  #detailPanel.lu-panel-gesture .detail-panel{
+  #detailPanel.lu-panel-gesture .detail-panel,
+  #profilePanel.lu-panel-gesture,
+  #profilePanel.lu-panel-gesture .profile-detail-panel{
     will-change:transform;
     transform:translateZ(0);
   }
@@ -605,6 +591,9 @@ body.dark .bn-more-item.active svg{color:var(--unad-gold)}
   body.panel-open,
   body.profile-sub-open{overflow:hidden}
   #detailPanel.mobile-open{
+    display:block;
+  }
+  #profilePanel.mobile-open{
     display:block;
   }
 
@@ -852,6 +841,11 @@ body.dark .bn-more-item.active svg{color:var(--unad-gold)}
       <div style="font-size:13px;line-height:1.6">Selecciona una materia<br>para ver su guía completa</div>
     </div>
   </div>
+</div>
+
+<!-- PROFILE PANEL — overlay en móvil, mismo patrón que Malla -->
+<div id="profilePanel">
+  <div class="profile-detail-panel"></div>
 </div>
 
 <!-- BOTTOM NAV (mobile) -->
@@ -1377,14 +1371,50 @@ function renderProfileSection(id){
   if(id==='portafolio')renderPortafolio();
   if(id==='profesional')renderProfesional();
 }
-function getOpenProfileOverlay(){
+function getProfilePanel(){
+  return document.getElementById('profilePanel');
+}
+function getProfilePanelScroller(){
+  return document.querySelector('#profilePanel .profile-detail-panel');
+}
+function getMountedProfileView(){
   if(window.__lu_mobileProfileId){
     return document.getElementById('view-'+window.__lu_mobileProfileId);
   }
-  return document.querySelector('.view.mobile-profile-open');
+  const scroller=getProfilePanelScroller();
+  return scroller?scroller.querySelector('.view.lu-profile-panel-view'):null;
+}
+function getOpenProfileOverlay(){
+  const panel=getProfilePanel();
+  return panel&&panel.classList.contains('mobile-open')?panel:null;
 }
 function isProfileOverlayOpen(){
   return !!getOpenProfileOverlay();
+}
+function mountProfileViewInPanel(view){
+  const scroller=getProfilePanelScroller();
+  if(!scroller||!view)return false;
+  if(view.parentElement!==scroller){
+    window.__lu_profileViewHome={ parent:view.parentNode, next:view.nextSibling };
+    scroller.appendChild(view);
+  }
+  view.classList.add('lu-profile-panel-view','lu-anim-skip');
+  return true;
+}
+function restoreProfileViewFromPanel(){
+  const view=getMountedProfileView();
+  const home=window.__lu_profileViewHome;
+  if(view){
+    view.classList.remove('lu-profile-panel-view','lu-anim-skip');
+    if(home&&home.parent){
+      if(home.next&&home.next.parentNode===home.parent){
+        home.parent.insertBefore(view,home.next);
+      }else{
+        home.parent.appendChild(view);
+      }
+    }
+  }
+  window.__lu_profileViewHome=null;
 }
 function notifyProfileOverlayClose(){
   if(window.__lu_profileCloseNotified)return;
@@ -1392,12 +1422,13 @@ function notifyProfileOverlayClose(){
   window.webkit?.messageHandlers?.nativeUI?.postMessage({ event:'subViewClose' });
 }
 function finishProfileOverlayClose(notify=true){
-  const view=getOpenProfileOverlay();
-  if(view){
-    view.classList.remove('mobile-profile-open','lu-anim-skip','lu-profile-gesture');
-    view.style.transition='';
-    view.style.transform='';
+  const panel=getProfilePanel();
+  if(panel){
+    panel.classList.remove('mobile-open','lu-panel-gesture');
+    panel.style.transition='';
+    panel.style.transform='';
   }
+  restoreProfileViewFromPanel();
   document.body.classList.remove('profile-sub-open');
   window.__lu_mobileProfileId='';
   window.__lu_profileOverlayOpening=false;
@@ -1440,36 +1471,37 @@ function mobileOpenProfileSection(id){
   if(window.__lu_profileOverlayOpening||window.__lu_profileOverlayClosing)return true;
   const hub=document.getElementById('view-perfil-hub');
   const view=document.getElementById('view-'+id);
-  if(!hub||!view)return false;
+  const panel=getProfilePanel();
+  const scroller=getProfilePanelScroller();
+  if(!hub||!view||!panel||!scroller)return false;
   renderProfileSection(id);
   if(!hub.classList.contains('active')){
     showView('perfil-hub',null);
   }
-  const current=getOpenProfileOverlay();
+  const current=getMountedProfileView();
   if(current&&current!==view){
-    current.classList.remove('mobile-profile-open','lu-anim-skip','lu-profile-gesture');
-    current.style.transition='';
-    current.style.transform='';
+    restoreProfileViewFromPanel();
   }
-  if(current===view&&view.classList.contains('mobile-profile-open'))return true;
+  if(current===view&&panel.classList.contains('mobile-open'))return true;
+  if(!mountProfileViewInPanel(view))return false;
   window.__lu_mobileProfileId=id;
   window.__lu_profileCloseNotified=false;
   window.__lu_profileOverlayOpening=true;
   document.body.classList.add('profile-sub-open');
-  view.classList.add('mobile-profile-open','lu-anim-skip');
-  view.classList.remove('lu-profile-gesture');
-  view.style.transition='none';
-  view.style.transform='translate3d(100%,0,0)';
-  view.scrollTop=0;
+  panel.classList.add('mobile-open');
+  panel.classList.remove('lu-panel-gesture');
+  panel.style.transition='none';
+  panel.style.transform='translate3d(100%,0,0)';
+  scroller.scrollTop=0;
   const tt=document.getElementById('topbarTitle');
   if(tt)tt.textContent=getProfileSectionTitle(id);
   requestAnimationFrame(()=>{
     requestAnimationFrame(()=>{
-      view.style.transition='transform 0.30s cubic-bezier(0.32,0.72,0,1)';
-      view.style.transform='translate3d(0,0,0)';
+      panel.style.transition='transform 0.30s cubic-bezier(0.32,0.72,0,1)';
+      panel.style.transform='translate3d(0,0,0)';
       setTimeout(()=>{
-        view.style.transition='';
-        view.style.transform='';
+        panel.style.transition='';
+        panel.style.transform='';
         window.__lu_profileOverlayOpening=false;
       },320);
     });
@@ -1478,8 +1510,8 @@ function mobileOpenProfileSection(id){
   return true;
 }
 function mobileCloseProfileSectionOrBack(opts){
-  const view=getOpenProfileOverlay();
-  if(!view)return false;
+  const panel=getOpenProfileOverlay();
+  if(!panel)return false;
   if(window.__lu_profileOverlayClosing)return true;
   const immediate=!!(opts&&opts.immediate);
   const notify=!opts||opts.notify!==false;
@@ -1489,9 +1521,9 @@ function mobileCloseProfileSectionOrBack(opts){
   }
   window.__lu_profileOverlayClosing=true;
   if(notify)notifyProfileOverlayClose();
-  view.classList.remove('lu-profile-gesture');
-  view.style.transition='transform 0.40s cubic-bezier(0.32,0.72,0,1)';
-  view.style.transform='translate3d(100%,0,0)';
+  panel.classList.remove('lu-panel-gesture');
+  panel.style.transition='transform 0.40s cubic-bezier(0.32,0.72,0,1)';
+  panel.style.transform='translate3d(100%,0,0)';
   setTimeout(()=>{ finishProfileOverlayClose(false); },420);
   return true;
 }
