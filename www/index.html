@@ -429,6 +429,12 @@ body.dark .theme-opt.active{background:var(--bg3);box-shadow:0 1px 3px rgba(0,0,
     backface-visibility:hidden;
     -webkit-backface-visibility:hidden;
   }
+  #profilePanel .profile-detail-panel{
+    /* Match the normal mobile content start: safe area + topbar (50px) + content padding (16px) */
+    padding-top:calc(env(safe-area-inset-top) + 66px);
+    padding-left:14px;
+    padding-right:14px;
+  }
   #detailPanel.lu-panel-gesture,
   #detailPanel.lu-panel-gesture .detail-panel,
   #profilePanel.lu-panel-gesture,
