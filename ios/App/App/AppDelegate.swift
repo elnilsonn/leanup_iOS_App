@@ -908,6 +908,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
             // ── 9b. Patch showView — Apple push/pop with parallax via position:fixed ──
             // Both views use position:fixed during animation so they can overlap visually.
             // animation:none inline prevents CSS fadeSlideIn from re-triggering on cleanup.
+            /* Legacy profile showView patch disabled: mobile profile now uses dedicated overlay helpers.
             function patchShowView() {
                 if (window.__lu_sv_patched) return;
                 if (typeof showView !== 'function'
@@ -1089,6 +1090,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                 : patchShowView();
 
             // ── 9c. Patch showViewGear — close sub-view state ───────────────
+            */
             function patchShowViewGear() {
                 if (window.__lu_svg_patched) return;
                 if (typeof showViewGear !== 'function') { setTimeout(patchShowViewGear, 250); return; }
@@ -1633,7 +1635,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                             }, \(Int(dur * 1000)));
                         })();
                     """)
-                    isProfileSubViewOpen = false
                 } else {
                     snapViewBack(wv: wv)
                 }

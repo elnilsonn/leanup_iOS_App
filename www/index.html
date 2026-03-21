@@ -1386,6 +1386,11 @@ function getOpenProfileOverlay(){
 function isProfileOverlayOpen(){
   return !!getOpenProfileOverlay();
 }
+function notifyProfileOverlayClose(){
+  if(window.__lu_profileCloseNotified)return;
+  window.__lu_profileCloseNotified=true;
+  window.webkit?.messageHandlers?.nativeUI?.postMessage({ event:'subViewClose' });
+}
 function finishProfileOverlayClose(notify=true){
   const view=getOpenProfileOverlay();
   if(view){
@@ -1400,7 +1405,7 @@ function finishProfileOverlayClose(notify=true){
   const tt=document.getElementById('topbarTitle');
   if(tt)tt.textContent='Perfil';
   if(notify){
-    window.webkit?.messageHandlers?.nativeUI?.postMessage({ event:'subViewClose' });
+    notifyProfileOverlayClose();
   }
 }
 window.__lu_finishProfileOverlayClose=function(notify){
@@ -1448,6 +1453,7 @@ function mobileOpenProfileSection(id){
   }
   if(current===view&&view.classList.contains('mobile-profile-open'))return true;
   window.__lu_mobileProfileId=id;
+  window.__lu_profileCloseNotified=false;
   window.__lu_profileOverlayOpening=true;
   document.body.classList.add('profile-sub-open');
   view.classList.add('mobile-profile-open','lu-anim-skip');
@@ -1482,10 +1488,11 @@ function mobileCloseProfileSectionOrBack(opts){
     return true;
   }
   window.__lu_profileOverlayClosing=true;
+  if(notify)notifyProfileOverlayClose();
   view.classList.remove('lu-profile-gesture');
   view.style.transition='transform 0.40s cubic-bezier(0.32,0.72,0,1)';
   view.style.transform='translate3d(100%,0,0)';
-  setTimeout(()=>{ finishProfileOverlayClose(notify); },420);
+  setTimeout(()=>{ finishProfileOverlayClose(false); },420);
   return true;
 }
 function showView(id,el){
