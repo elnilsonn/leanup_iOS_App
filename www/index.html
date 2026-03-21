@@ -24,7 +24,7 @@
   %22orientation%22:%22portrait%22,
   %22icons%22:[{%22src%22:%22data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20512%20512'%3E%3Crect%20width='512'%20height='512'%20rx='80'%20fill='%23001B50'/%3E%3Ctext%20x='80'%20y='340'%20font-family='Arial'%20font-weight='900'%20font-size='220'%20fill='white'%3EL%3C/text%3E%3Ctext%20x='230'%20y='340'%20font-family='Arial'%20font-weight='900'%20font-size='220'%20fill='%23FFB81C'%3EU%3C/text%3E%3C/svg%3E%22,%22sizes%22:%22512x512%22,%22type%22:%22image/svg+xml%22}]
 }">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Sora:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -624,6 +624,767 @@ body.dark .bn-more-item.active svg{color:var(--unad-gold)}
   .bottom-nav{display:none!important}
   .topbar-glass-btn{display:none!important}
 }
+
+/* —— Editorial redesign —— */
+:root{
+  --bg:#fcf8f4;
+  --bg2:#ffffff;
+  --bg3:#f5f0ea;
+  --bg4:#e7ded5;
+  --text:#191515;
+  --text2:#5f5960;
+  --text3:#8d8790;
+  --border:#ece2da;
+  --border2:#d8cabd;
+  --shadow:0 24px 56px rgba(39,24,12,0.07);
+  --editorial-sheen:rgba(255,255,255,0.72);
+  --editorial-blue:#0046AD;
+  --editorial-blue-soft:#dfe7ff;
+  --editorial-gold:rgba(255,184,28,0.18);
+}
+body.dark{
+  --bg:#11141b;
+  --bg2:#171d27;
+  --bg3:#1c2430;
+  --bg4:#273241;
+  --text:#f4efe9;
+  --text2:#b3acb4;
+  --text3:#867f88;
+  --border:#2a3340;
+  --border2:#3b4452;
+  --shadow:0 28px 60px rgba(0,0,0,0.28);
+  --editorial-sheen:rgba(255,255,255,0.06);
+  --editorial-blue-soft:rgba(79,120,224,0.18);
+  --editorial-gold:rgba(255,184,28,0.12);
+}
+body{
+  font-family:'Inter',sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(255,184,28,0.12), transparent 26%),
+    radial-gradient(circle at top right, rgba(0,70,173,0.10), transparent 28%),
+    linear-gradient(180deg, rgba(255,255,255,0.55), transparent 20%),
+    var(--bg);
+  color:var(--text);
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(135deg, rgba(255,255,255,0.12), transparent 32%),
+    radial-gradient(circle at 20% 0%, rgba(255,255,255,0.30), transparent 20%);
+  opacity:.7;
+}
+.logo-mark,.h2,.sect-title,.topbar-title,.panel-name,.perfil-hub-title,.about-version,.dash-title,.dash-section-title,.mat-nombre,.tl-rank{
+  font-family:'Manrope','Sora',sans-serif;
+}
+.sidebar{
+  background:linear-gradient(180deg,#101c37 0%,#0b1428 100%);
+  border-right:1px solid rgba(255,255,255,0.06);
+}
+.logo-area{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.05)}
+.logo-mark{font-size:28px;font-weight:800;letter-spacing:-1.1px}
+.logo-sub{font-family:'Inter',sans-serif;font-size:10px;letter-spacing:1.2px;color:rgba(255,255,255,0.42)}
+.nav{padding:14px 10px}
+.nav-sect{color:rgba(255,255,255,0.26)}
+.nav-item{
+  padding:12px 14px;
+  margin-bottom:6px;
+  border-radius:18px;
+  border-left:none;
+  font-family:'Inter',sans-serif;
+  color:rgba(255,255,255,0.58);
+}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.88)}
+.nav-item.active{
+  background:linear-gradient(180deg, rgba(255,255,255,0.13), rgba(255,255,255,0.06));
+  color:#fff;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,0.08), 0 12px 24px rgba(0,0,0,0.12);
+}
+.nav-item.active .nav-icon{color:var(--unad-gold)}
+.sidebar-footer{border-top:1px solid rgba(255,255,255,0.05)}
+.prog-bar{height:6px;background:rgba(255,255,255,0.08)}
+.prog-fill{background:linear-gradient(90deg,var(--unad-gold),#ffe1a1)}
+.unad-badge{
+  background:rgba(255,255,255,0.05);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:16px;
+}
+.main{background:transparent}
+.topbar{
+  height:64px;
+  padding:0 28px;
+  background:rgba(252,248,244,0.76);
+  backdrop-filter:blur(22px) saturate(150%);
+  -webkit-backdrop-filter:blur(22px) saturate(150%);
+  border-bottom:1px solid rgba(255,255,255,0.5);
+  box-shadow:none;
+}
+body.dark .topbar{
+  background:rgba(17,20,27,0.72);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.topbar-title{
+  font-size:16px;
+  font-weight:800;
+  letter-spacing:-0.02em;
+}
+.content{padding:34px 34px 42px}
+.view>.h2{
+  font-size:38px;
+  line-height:1.02;
+  letter-spacing:-0.05em;
+  margin-bottom:8px;
+}
+.view>.sub{
+  font-size:15px;
+  color:var(--text2);
+  max-width:880px;
+  margin-bottom:28px;
+}
+.card,.cfg-card,.detail-panel,.li-card,.sal-card,.por-card,.perfil-hub-card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.90), rgba(252,249,247,0.96));
+  border:1px solid rgba(255,255,255,0.62);
+  border-radius:28px;
+  box-shadow:var(--shadow);
+}
+body.dark .card,
+body.dark .cfg-card,
+body.dark .detail-panel,
+body.dark .li-card,
+body.dark .sal-card,
+body.dark .por-card,
+body.dark .perfil-hub-card{
+  background:linear-gradient(180deg, rgba(28,36,48,0.92), rgba(23,29,39,0.96));
+  border-color:rgba(255,255,255,0.06);
+}
+.card,.cfg-card,.detail-panel{padding:24px}
+.sect-title{
+  font-size:11px;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color:var(--unad-blue);
+  margin-bottom:18px;
+  padding-bottom:0;
+  border-bottom:none;
+}
+.sect-title .gold-dot{
+  width:8px;
+  height:8px;
+  background:var(--unad-gold);
+}
+.search-wrap{margin-bottom:18px}
+.search-icon{left:16px;color:var(--text3)}
+.search-inp,
+.cfg-inp{
+  background:rgba(255,255,255,0.7);
+  border:1px solid rgba(255,255,255,0.56);
+  border-radius:18px;
+  padding:14px 16px 14px 42px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.38);
+  font-family:'Inter',sans-serif;
+}
+.cfg-inp{padding-left:16px}
+body.dark .search-inp,
+body.dark .cfg-inp{
+  background:rgba(255,255,255,0.04);
+  border-color:rgba(255,255,255,0.06);
+}
+.search-inp:focus,
+.cfg-inp:focus{
+  border-color:rgba(0,70,173,0.28);
+  box-shadow:0 0 0 4px rgba(0,70,173,0.08);
+}
+.btn,
+.copy-btn,
+.small-btn,
+.change-btn,
+.contact-btn{
+  border-radius:999px;
+  font-family:'Inter',sans-serif;
+  font-weight:700;
+}
+.btn-save{
+  background:linear-gradient(135deg,var(--unad-blue),#0059d8);
+  border-color:transparent;
+}
+.btn-reset{
+  background:rgba(255,255,255,0.6);
+  border-color:rgba(255,255,255,0.45);
+}
+.mat-row,
+.malla-acc-header,
+.per-header{
+  border:none;
+  border-left:none;
+  border-radius:24px;
+  box-shadow:0 16px 34px rgba(39,24,12,0.06);
+}
+.malla-acc-header,
+.per-header{
+  padding:16px 20px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.84), rgba(245,240,234,0.92));
+}
+body.dark .malla-acc-header,
+body.dark .per-header{
+  background:linear-gradient(180deg, rgba(28,36,48,0.92), rgba(23,29,39,0.98));
+}
+.malla-acc-header:hover,
+.per-header:hover{
+  border-color:transparent;
+  transform:translateY(-1px);
+}
+.malla-acc-body{padding:14px 6px 8px}
+.mat-row{
+  padding:16px 18px;
+  margin-bottom:10px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,243,238,0.98));
+}
+body.dark .mat-row{background:linear-gradient(180deg, rgba(28,36,48,0.94), rgba(23,29,39,0.98))}
+.mat-row:hover{
+  transform:translateY(-2px);
+  border-left-color:transparent;
+  background:linear-gradient(180deg, rgba(255,255,255,0.96), rgba(249,245,241,1));
+}
+.mat-row.selected{
+  transform:translateY(-1px);
+  border-left-color:transparent;
+  background:linear-gradient(180deg, rgba(227,236,255,0.92), rgba(255,255,255,0.96));
+  box-shadow:0 0 0 1px rgba(0,70,173,0.12),0 18px 38px rgba(0,70,173,0.08);
+}
+.nota-badge,
+.radio,
+.theme-selector,
+.theme-opt.active,
+.chip,
+.tag,
+.perfil-hub-icon,
+.dash-trend-badge{
+  border-radius:999px;
+}
+.nota-badge,
+.radio,
+.chip,
+.tag{
+  border:none;
+}
+.perfil-hub-grid{gap:16px;margin-top:10px}
+.perfil-hub-card{
+  padding:22px 24px;
+  gap:18px;
+}
+.perfil-hub-card:hover{
+  border-color:rgba(255,255,255,0.62);
+  box-shadow:0 20px 44px rgba(0,70,173,0.10);
+}
+.perfil-hub-icon{
+  width:56px;
+  height:56px;
+  background:linear-gradient(135deg, rgba(255,184,28,0.16), rgba(0,70,173,0.10));
+}
+.perfil-hub-title{font-size:20px;font-weight:800;letter-spacing:-0.03em}
+.perfil-hub-desc{font-size:14px;line-height:1.55}
+.perfil-hub-arrow{font-size:20px;color:var(--unad-blue)}
+.li-card,.sal-card,.por-card{
+  padding:18px 20px;
+  margin-bottom:12px;
+}
+.li-text{
+  border-left:none;
+  padding-left:0;
+  color:var(--text2);
+}
+.sal-roles,
+.about-box{
+  background:rgba(255,255,255,0.48);
+  border:none;
+  border-radius:20px;
+  padding:14px 16px;
+}
+body.dark .sal-roles,
+body.dark .about-box{background:rgba(255,255,255,0.04)}
+.copy-btn,
+.small-btn,
+.change-btn{
+  background:rgba(255,255,255,0.65);
+  border:1px solid rgba(255,255,255,0.52);
+  color:var(--text);
+}
+body.dark .copy-btn,
+body.dark .small-btn,
+body.dark .change-btn{
+  background:rgba(255,255,255,0.05);
+  border-color:rgba(255,255,255,0.06);
+  color:var(--text);
+}
+.theme-selector{
+  padding:4px;
+  gap:4px;
+  background:rgba(255,255,255,0.55);
+  border:1px solid rgba(255,255,255,0.48);
+}
+body.dark .theme-selector{
+  background:rgba(255,255,255,0.04);
+  border-color:rgba(255,255,255,0.06);
+}
+.theme-opt{
+  border-radius:999px;
+  padding:9px 16px;
+  font-family:'Inter',sans-serif;
+}
+.theme-opt.active{
+  background:linear-gradient(135deg, rgba(255,255,255,0.96), rgba(244,238,232,0.96));
+  box-shadow:0 10px 18px rgba(32,18,8,0.07);
+}
+body.dark .theme-opt.active{
+  background:rgba(255,255,255,0.08);
+  box-shadow:none;
+}
+#detailPanel .detail-panel,
+#profilePanel .profile-detail-panel{
+  background:linear-gradient(180deg, rgba(255,255,255,0.92), rgba(248,243,238,0.98));
+}
+body.dark #detailPanel .detail-panel,
+body.dark #profilePanel .profile-detail-panel{
+  background:linear-gradient(180deg, rgba(28,36,48,0.95), rgba(23,29,39,0.98));
+}
+.info-box{
+  background:rgba(255,255,255,0.6);
+  border-left:none;
+  border-radius:18px;
+}
+body.dark .info-box{background:rgba(255,255,255,0.05)}
+.bottom-nav{
+  background:rgba(255,255,255,0.72);
+  border:1px solid rgba(255,255,255,0.48);
+  box-shadow:0 12px 28px rgba(39,24,12,0.10), inset 0 1px 0 rgba(255,255,255,0.66);
+}
+body.dark .bottom-nav{
+  background:rgba(21,28,38,0.78);
+  border-color:rgba(255,255,255,0.06);
+}
+.bn-item{font-family:'Inter',sans-serif}
+.bn-label{font-size:10px;letter-spacing:0.14em;text-transform:uppercase}
+
+/* Dashboard */
+.dash-hero{
+  position:relative;
+  min-height:320px;
+  margin-bottom:28px;
+  padding:38px 34px;
+  border-radius:38px;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at top left, rgba(255,184,28,0.16), transparent 26%),
+    linear-gradient(135deg, rgba(255,255,255,0.72), rgba(244,236,228,0.98));
+  border:1px solid rgba(255,255,255,0.62);
+  box-shadow:var(--shadow);
+}
+body.dark .dash-hero{
+  background:
+    radial-gradient(circle at top left, rgba(255,184,28,0.14), transparent 24%),
+    linear-gradient(135deg, rgba(28,36,48,0.96), rgba(20,24,33,0.98));
+  border-color:rgba(255,255,255,0.06);
+}
+.dash-hero-copy{
+  position:relative;
+  z-index:1;
+  max-width:560px;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  min-height:244px;
+}
+.dash-kicker,
+.dash-overline{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--unad-blue);
+}
+.dash-title{
+  margin-top:18px;
+  font-size:clamp(38px,5vw,64px);
+  line-height:0.95;
+  letter-spacing:-0.07em;
+}
+.greet-link{
+  cursor:pointer;
+  position:relative;
+  display:inline-block;
+}
+.greet-link::after{
+  content:'';
+  position:absolute;
+  left:0;right:0;bottom:-4px;
+  height:4px;
+  border-radius:999px;
+  background:linear-gradient(90deg, rgba(255,184,28,0.95), rgba(0,70,173,0.18));
+}
+.dash-subtitle{
+  margin-top:14px;
+  font-size:17px;
+  line-height:1.6;
+  max-width:520px;
+  color:var(--text2);
+}
+.dash-hero-art{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+.dash-orb{
+  position:absolute;
+  border-radius:50%;
+  filter:blur(2px);
+}
+.dash-orb-a{
+  width:180px;
+  height:180px;
+  right:-34px;
+  top:24px;
+  background:radial-gradient(circle, rgba(255,255,255,0.58), rgba(255,255,255,0));
+}
+.dash-orb-b{
+  width:130px;
+  height:130px;
+  left:44%;
+  bottom:-18px;
+  background:radial-gradient(circle, rgba(255,184,28,0.18), rgba(255,184,28,0));
+}
+.dash-frame{
+  position:absolute;
+  border:6px solid rgba(207,185,159,0.46);
+  background:rgba(255,255,255,0.25);
+  box-shadow:0 16px 32px rgba(65,46,21,0.08);
+}
+.dash-frame-main{
+  right:58px;
+  bottom:50px;
+  width:172px;
+  height:138px;
+}
+.dash-frame-mini{
+  right:248px;
+  bottom:84px;
+  width:52px;
+  height:96px;
+  border-width:4px;
+}
+.dash-summary-card{
+  margin-bottom:36px;
+  padding:28px 30px;
+  border-radius:32px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.94), rgba(252,249,247,0.98));
+  border:1px solid rgba(255,255,255,0.64);
+  box-shadow:var(--shadow);
+}
+body.dark .dash-summary-card{
+  background:linear-gradient(180deg, rgba(28,36,48,0.95), rgba(23,29,39,0.98));
+  border-color:rgba(255,255,255,0.06);
+}
+.dash-summary-top,
+.dash-summary-bottom{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:24px;
+}
+.dash-score-wrap{margin-top:10px}
+.dash-score{
+  font-size:72px;
+  line-height:0.92;
+  font-family:'Manrope','Sora',sans-serif;
+  font-weight:800;
+  letter-spacing:-0.08em;
+}
+.dash-score-note{
+  margin-top:10px;
+  font-size:16px;
+  color:var(--text2);
+}
+.dash-trend-badge{
+  width:76px;
+  height:76px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:var(--editorial-blue-soft);
+  color:var(--unad-blue);
+  flex-shrink:0;
+}
+.dash-trend-badge svg{width:32px;height:32px}
+.dash-summary-divider{
+  height:1px;
+  margin:24px 0;
+  background:linear-gradient(90deg, transparent, rgba(83,67,53,0.18), transparent);
+}
+.dash-progress-spotlight{
+  min-width:180px;
+}
+.dash-progress-number{
+  font-size:54px;
+  line-height:0.95;
+  font-family:'Manrope','Sora',sans-serif;
+  font-weight:800;
+  letter-spacing:-0.08em;
+}
+.dash-progress-label{
+  margin-top:10px;
+  font-size:12px;
+  font-weight:800;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--text2);
+}
+.dash-progress-meta{flex:1;min-width:0}
+.dash-progress-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  font-size:14px;
+  color:var(--text2);
+}
+.dash-progress-row strong{font-family:'IBM Plex Mono',monospace;color:var(--text)}
+.dash-progress-muted{
+  margin-top:10px;
+  font-size:12px;
+  color:var(--text3);
+}
+.dash-progress-bar{
+  margin-top:16px;
+  height:10px;
+  border-radius:999px;
+  background:rgba(120,107,95,0.10);
+}
+.dash-progress-bar .bar-fill{
+  background:linear-gradient(90deg, var(--unad-blue), #2f79ff);
+}
+.dash-section{margin-top:28px}
+.dash-section-head{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:18px;
+}
+.dash-section-title{
+  margin-top:6px;
+  font-size:34px;
+  line-height:1;
+  letter-spacing:-0.06em;
+}
+.dash-section-note{
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--text3);
+}
+.dash-period-strip{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:18px;
+}
+.period-card{
+  padding:22px;
+  border-radius:28px;
+  background:linear-gradient(180deg, rgba(246,241,236,0.96), rgba(255,255,255,0.92));
+  border:1px solid rgba(255,255,255,0.6);
+  box-shadow:0 20px 44px rgba(39,24,12,0.06);
+}
+body.dark .period-card{
+  background:linear-gradient(180deg, rgba(28,36,48,0.95), rgba(23,29,39,0.98));
+  border-color:rgba(255,255,255,0.06);
+}
+.period-card.current{
+  background:linear-gradient(180deg, rgba(231,237,255,0.96), rgba(255,255,255,0.94));
+}
+body.dark .period-card.current{
+  background:linear-gradient(180deg, rgba(32,42,60,0.98), rgba(23,29,39,0.98));
+}
+.period-card-top,
+.period-card-line{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+}
+.period-card-top{margin-bottom:18px}
+.period-card-title{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:22px;
+  font-weight:800;
+  letter-spacing:-0.05em;
+}
+.period-card-badge{
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800;
+  letter-spacing:0.16em;
+  text-transform:uppercase;
+}
+.period-card-badge.active{background:rgba(0,70,173,0.10);color:var(--unad-blue)}
+.period-card-badge.done{background:rgba(0,168,107,0.10);color:var(--success)}
+.period-card-badge.idle{background:rgba(120,107,95,0.10);color:var(--text2)}
+.period-card-line{
+  font-size:14px;
+  color:var(--text2);
+  margin-bottom:10px;
+}
+.period-card-line strong{color:var(--text);font-family:'IBM Plex Mono',monospace}
+.period-card-progress{
+  height:8px;
+  border-radius:999px;
+  background:rgba(120,107,95,0.10);
+  overflow:hidden;
+}
+.period-card-progress .bar-fill{height:100%;background:linear-gradient(90deg,var(--unad-blue),#2f79ff)}
+.period-card-foot{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:14px;
+  font-size:12px;
+  color:var(--text3);
+}
+.dash-activity-list{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:18px 22px;
+}
+.dash-activity-item{
+  display:flex;
+  align-items:flex-start;
+  gap:18px;
+}
+.activity-thumb{
+  width:96px;
+  height:120px;
+  border-radius:24px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:flex-start;
+  padding:16px;
+  flex-shrink:0;
+  color:#fff;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:30px;
+  font-weight:800;
+  letter-spacing:-0.06em;
+  box-shadow:0 18px 30px rgba(39,24,12,0.10);
+}
+.activity-thumb.tone-1{background:linear-gradient(180deg, #f6edd2, #d2dcca); color:#1c1b1b}
+.activity-thumb.tone-2{background:linear-gradient(180deg, #2c6e7f, #152733)}
+.activity-thumb.tone-3{background:linear-gradient(180deg, #6d7bf2, #223467)}
+.activity-thumb.tone-4{background:linear-gradient(180deg, #d9ccb8, #8c7156)}
+.activity-copy{padding-top:8px}
+.activity-kicker{
+  font-size:11px;
+  font-weight:800;
+  letter-spacing:0.18em;
+  text-transform:uppercase;
+  color:var(--unad-blue);
+}
+.activity-title{
+  margin-top:8px;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:18px;
+  line-height:1.16;
+  letter-spacing:-0.05em;
+}
+.activity-meta{
+  margin-top:6px;
+  font-size:14px;
+  color:var(--text2);
+  line-height:1.55;
+}
+.activity-status{
+  margin-top:8px;
+  font-size:13px;
+  color:var(--text3);
+}
+@media(max-width:1024px){
+  .dash-period-strip{grid-template-columns:1fr 1fr}
+  .dash-activity-list{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .content{padding:18px 14px 36px}
+  .view>.h2{
+    font-size:17px;
+    line-height:1.1;
+    letter-spacing:-0.04em;
+  }
+  .view>.sub{
+    font-size:13px;
+    margin-bottom:18px;
+  }
+  .dash-hero{
+    min-height:272px;
+    padding:24px 22px;
+    border-radius:30px;
+    margin-bottom:20px;
+  }
+  .dash-hero-copy{min-height:210px}
+  .dash-title{font-size:56px;max-width:280px}
+  .dash-subtitle{font-size:15px;max-width:290px}
+  .dash-frame-main{width:132px;height:108px;right:26px;bottom:38px}
+  .dash-frame-mini{width:40px;height:78px;right:182px;bottom:64px}
+  .dash-summary-card{
+    padding:22px;
+    border-radius:28px;
+    margin-bottom:24px;
+  }
+  .dash-summary-top,
+  .dash-summary-bottom{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .dash-trend-badge{
+    width:70px;
+    height:70px;
+    align-self:flex-end;
+    margin-top:-82px;
+  }
+  .dash-score{font-size:56px}
+  .dash-progress-number{font-size:46px}
+  .dash-section{margin-top:22px}
+  .dash-section-head{
+    align-items:flex-start;
+    flex-direction:column;
+    margin-bottom:14px;
+  }
+  .dash-section-title{font-size:24px}
+  .dash-period-strip{
+    display:flex;
+    gap:14px;
+    overflow-x:auto;
+    padding-bottom:6px;
+    scroll-snap-type:x proximity;
+  }
+  .dash-period-strip .period-card{
+    min-width:270px;
+    scroll-snap-align:start;
+  }
+  .dash-activity-item{gap:14px}
+  .activity-thumb{
+    width:98px;
+    height:112px;
+    border-radius:22px;
+  }
+  .activity-title{font-size:17px}
+  .card,.cfg-card,.detail-panel,.perfil-hub-card,.li-card,.sal-card,.por-card{
+    border-radius:24px;
+  }
+  .malla-acc-header,.per-header,.mat-row{
+    border-radius:22px;
+  }
+}
 </style>
 </head>
 <body>
@@ -693,29 +1454,73 @@ body.dark .bn-more-item.active svg{color:var(--unad-gold)}
 
     <!-- DASHBOARD -->
     <div class="view active" id="view-dashboard">
-      <div class="h2">Hola, <span id="greetName" onclick="focusNameEdit()" title="Cambiar nombre" style="cursor:pointer;border-bottom:2px dashed var(--unad-gold);padding-bottom:1px">Usuario</span> 👋</div>
-      <div class="sub">Marketing y Negocios Digitales · UNAD · Virtual · 8 periodos · 144 créditos</div>
-      <div class="grid-4">
-        <div class="stat-card"><div class="stat-num c1" id="dPct">0%</div><div class="stat-lbl">Completado</div></div>
-        <div class="stat-card"><div class="stat-num c2" id="dProm">—</div><div class="stat-lbl">Promedio</div></div>
-        <div class="stat-card"><div class="stat-num c3" id="dApro">0</div><div class="stat-lbl">Materias aprobadas</div></div>
-        <div class="stat-card"><div class="stat-num c4" id="dCred">0</div><div class="stat-lbl">Créditos acumulados</div></div>
-      </div>
-      <div class="grid-2">
-        <div class="card"><div class="sect-title"><span class="gold-dot"></span>Progreso por periodo</div><div id="dBars"></div></div>
-        <div class="card">
-          <div class="sect-title"><span class="gold-dot"></span>Información del programa</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div style="background:var(--bg3);border-radius:8px;padding:12px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Total créditos</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono';color:var(--unad-blue)">144</div></div>
-            <div style="background:var(--bg3);border-radius:8px;padding:12px"><div style="font-size:10px;color:var(--text3);margin-bottom:3px">Periodos</div><div style="font-size:22px;font-weight:700;font-family:'IBM Plex Mono';color:var(--unad-blue)">8</div></div>
-            <div style="background:rgba(255,184,28,0.07);border:1px solid rgba(255,184,28,0.25);border-radius:8px;padding:12px;grid-column:1/-1">
-              <div style="font-size:10px;color:#8A5F00;font-weight:600;margin-bottom:3px;letter-spacing:0.5px;text-transform:uppercase">Universidad</div>
-              <div style="font-size:12px;font-weight:600;color:var(--text)">UNAD · Universidad Nacional Abierta y a Distancia</div>
-              <div style="font-size:10px;color:var(--text3);margin-top:2px">Modalidad virtual · SNIES 116376 · Res. 010006 de 2023</div>
+      <section class="dash-hero">
+        <div class="dash-hero-copy">
+          <div class="dash-kicker">LeanUp · Marketing y Negocios Digitales</div>
+          <div class="dash-title">Hola, <span id="greetName" class="greet-link" onclick="focusNameEdit()" title="Cambiar nombre">Usuario</span></div>
+          <div class="dash-subtitle">Tu resumen académico, tu progreso curricular y tus próximos pasos en una sola vista.</div>
+        </div>
+        <div class="dash-hero-art" aria-hidden="true">
+          <div class="dash-orb dash-orb-a"></div>
+          <div class="dash-orb dash-orb-b"></div>
+          <div class="dash-frame dash-frame-main"></div>
+          <div class="dash-frame dash-frame-mini"></div>
+        </div>
+      </section>
+
+      <section class="dash-summary-card">
+        <div class="dash-summary-top">
+          <div>
+            <div class="dash-overline">Estado académico</div>
+            <div class="dash-score-wrap">
+              <div class="dash-score" id="dProm">—</div>
+              <div class="dash-score-note">Promedio acumulado</div>
+            </div>
+          </div>
+          <div class="dash-trend-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 16l5-5 4 4 7-7"/><path d="M15 8h5v5"/></svg>
+          </div>
+        </div>
+        <div class="dash-summary-divider"></div>
+        <div class="dash-summary-bottom">
+          <div class="dash-progress-spotlight">
+            <div class="dash-progress-number" id="dPct">0%</div>
+            <div class="dash-progress-label">Avance total</div>
+          </div>
+          <div class="dash-progress-meta">
+            <div class="dash-progress-row">
+              <span>Créditos acumulados</span>
+              <strong><span id="dCred">0</span> / 144</strong>
+            </div>
+            <div class="bar dash-progress-bar"><div class="bar-fill" id="dHeroBar" style="width:0%"></div></div>
+            <div class="dash-progress-row dash-progress-muted">
+              <span><span id="dApro">0</span> materias aprobadas</span>
+              <span>8 periodos · modalidad virtual</span>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      <section class="dash-section">
+        <div class="dash-section-head">
+          <div>
+            <div class="dash-overline">Ruta curricular</div>
+            <div class="dash-section-title">Progreso por periodo</div>
+          </div>
+          <div class="dash-section-note">SNIES 116376 · 144 créditos</div>
+        </div>
+        <div class="dash-period-strip" id="dPeriodCards"></div>
+      </section>
+
+      <section class="dash-section">
+        <div class="dash-section-head">
+          <div>
+            <div class="dash-overline">Pulso académico</div>
+            <div class="dash-section-title">Actividad reciente</div>
+          </div>
+        </div>
+        <div class="dash-activity-list" id="dRecentActivity"></div>
+      </section>
     </div>
 
     <!-- MALLA -->
@@ -1583,11 +2388,61 @@ function getElectivos(){
 function getAllMats(){return[...materias,...getElectivos()];}
 
 /* ── STATS ── */
+function getDashNote(m){
+  return m.esElec ? electivosNotas[m.grupo+':::'+m.cod] : m.nota;
+}
+function getDashboardCurrentPeriod(){
+  for(const p of periodos){
+    const ms=materias.filter(m=>m.per===p);
+    const elecEnPer=getElectivos().filter(e=>e.per===p);
+    const totalCount=ms.length+elecEnPer.length;
+    const completed=ms.filter(m=>m.nota!==null&&m.nota>=3).length+
+      elecEnPer.filter(e=>{
+        const n=electivosNotas[e.grupo+':::'+e.cod];
+        return n!==undefined&&n>=3;
+      }).length;
+    if(completed<totalCount)return p;
+  }
+  return periodos[periodos.length-1]||1;
+}
+function getDashInitials(name){
+  return (name||'LU').split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join('').toUpperCase();
+}
+function getDashboardActivityHTML(currentPeriod){
+  const all=getAllMats().map(m=>({...m,dashNote:getDashNote(m)}));
+  const graded=[...all].filter(m=>typeof m.dashNote==='number').sort((a,b)=>b.per-a.per||b.dashNote-a.dashNote);
+  const pending=[...all].filter(m=>typeof m.dashNote!=='number').sort((a,b)=>a.per-b.per);
+  const picks=[];
+  const used=new Set();
+  function pushPick(m){
+    const key=m.esElec?(m.grupo+':::'+m.cod):('m'+m.id);
+    if(used.has(key)||picks.length>=4)return;
+    used.add(key);
+    picks.push(m);
+  }
+  graded.slice(0,2).forEach(pushPick);
+  pending.filter(m=>m.per===currentPeriod).slice(0,2).forEach(pushPick);
+  pending.slice(0,4).forEach(pushPick);
+  if(!picks.length)all.slice(0,3).forEach(pushPick);
+  return picks.slice(0,4).map((m,idx)=>{
+    const meta=(m.d||'').length>96?(m.d||'').substring(0,96)+'…':(m.d||'');
+    const status=typeof m.dashNote==='number'
+      ? `Calificado: ${Number(m.dashNote).toFixed(1)}/5.0`
+      : (m.per===currentPeriod?'En curso actualmente':'Pendiente por cursar');
+    return `<article class="dash-activity-item">
+      <div class="activity-thumb tone-${(idx%4)+1}">${getDashInitials(m.nombre)}</div>
+      <div class="activity-copy">
+        <div class="activity-kicker">Periodo ${m.per}${m.esElec?' · Electiva':''}</div>
+        <div class="activity-title">${m.nombre}</div>
+        <div class="activity-meta">${meta}</div>
+        <div class="activity-status">${status}</div>
+      </div>
+    </article>`;
+  }).join('');
+}
 function updateAll(){
-  // Materias obligatorias aprobadas
   const apro=materias.filter(m=>m.nota!==null&&m.nota>=3);
   const notas=apro.map(m=>m.nota);
-  // Incluir electivos con nota en promedio y créditos
   const elecApro=getElectivos().filter(e=>{
     const n=electivosNotas[e.grupo+':::'+e.cod];
     return n!==undefined&&n>=3;
@@ -1604,25 +2459,38 @@ function updateAll(){
   document.getElementById('dProm').textContent=prom;
   document.getElementById('dApro').textContent=apro.length+elecApro.length;
   document.getElementById('dCred').textContent=cred;
+  document.getElementById('dHeroBar').style.width=pct+'%';
   document.getElementById('sidebarProg').style.width=pct+'%';
   document.getElementById('sidebarLabel').textContent=pct+'% · '+cred+'/'+TOTAL+' cr.';
-  let bh='';
+  const currentPeriod=getDashboardCurrentPeriod();
+  let periodCards='';
   periodos.forEach(p=>{
     const ms=materias.filter(m=>m.per===p);
     const elecEnPer=getElectivos().filter(e=>e.per===p);
-    const totalMs=ms.length; // solo obligatorias para el porcentaje de barra
+    const totalMs=ms.length;
     const ap=ms.filter(m=>m.nota!==null&&m.nota>=3).length;
     const rep=ms.filter(m=>m.nota!==null&&m.nota<3).length;
     const elecAp=elecEnPer.filter(e=>{const n=electivosNotas[e.grupo+':::'+e.cod];return n!==undefined&&n>=3;}).length;
     const elecRep=elecEnPer.filter(e=>{const n=electivosNotas[e.grupo+':::'+e.cod];return n!==undefined&&n<3;}).length;
-    const pc=Math.round((ap/totalMs)*100);
-    const cl=pc===100?'bar-fill done':pc>0?'bar-fill':'bar-fill low';
-    const apLabel=(ap+elecAp)+'/'+(totalMs+elecEnPer.length)+' aprobadas';
+    const totalCount=totalMs+elecEnPer.length;
+    const completed=ap+elecAp;
+    const pc=totalCount?Math.round((completed/totalCount)*100):0;
+    const badgeClass=pc===100?'done':p===currentPeriod?'active':'idle';
+    const badgeLabel=pc===100?'Cerrado':p===currentPeriod?'Activo':(completed>0?'En ruta':'Pendiente');
     const repTotal=rep+elecRep;
-    const repLabel=repTotal>0?` · <span style="color:var(--danger)">${repTotal} reprobada${repTotal>1?'s':''}</span>`:'';
-    bh+=`<div class="prog-row"><div class="prog-meta"><span>Periodo ${p}</span><span>${apLabel}${repLabel}</span></div><div class="bar"><div class="${cl}" style="width:${pc}%"></div></div></div>`;
+    const repLabel=repTotal>0?`${repTotal} reprobada${repTotal>1?'s':''}`:'Sin reprocesos';
+    periodCards+=`<article class="period-card ${badgeClass==='active'?'current':''}">
+      <div class="period-card-top">
+        <div class="period-card-title">Periodo ${p}</div>
+        <div class="period-card-badge ${badgeClass}">${badgeLabel}</div>
+      </div>
+      <div class="period-card-line"><span>Cursos</span><strong>${completed} / ${totalCount}</strong></div>
+      <div class="period-card-progress"><div class="bar-fill" style="width:${pc}%"></div></div>
+      <div class="period-card-foot"><span>${pc}% completado</span><span>${repLabel}</span></div>
+    </article>`;
   });
-  document.getElementById('dBars').innerHTML=bh;
+  document.getElementById('dPeriodCards').innerHTML=periodCards;
+  document.getElementById('dRecentActivity').innerHTML=getDashboardActivityHTML(currentPeriod);
 }
 
 /* ── MALLA ── */
