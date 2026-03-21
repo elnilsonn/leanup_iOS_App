@@ -1309,6 +1309,331 @@ body.dark .period-card.current{
   font-size:13px;
   color:var(--text3);
 }
+
+/* Malla */
+.malla-hero{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(300px,380px);
+  gap:24px;
+  align-items:end;
+  margin-bottom:26px;
+}
+.malla-hero-copy .h2{margin-bottom:8px}
+.malla-hero-copy .sub{margin-bottom:0;max-width:620px}
+.malla-summary-card{
+  padding:24px 26px;
+  border-radius:32px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.94), rgba(252,249,247,0.98));
+  border:1px solid rgba(255,255,255,0.62);
+  box-shadow:var(--shadow);
+}
+body.dark .malla-summary-card{
+  background:linear-gradient(180deg, rgba(28,36,48,0.95), rgba(23,29,39,0.98));
+  border-color:rgba(255,255,255,0.06);
+}
+.malla-summary-kicker{
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:0.22em;
+  color:var(--unad-blue);
+}
+.malla-summary-top{margin-top:10px}
+.malla-summary-value{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:24px;
+  font-weight:700;
+  color:var(--text);
+}
+.malla-summary-value span{
+  font-size:72px;
+  line-height:0.92;
+  letter-spacing:-0.08em;
+  color:var(--unad-blue);
+}
+.malla-summary-value small{
+  font-size:16px;
+  font-family:'Inter',sans-serif;
+  font-weight:700;
+  color:var(--text);
+}
+.malla-summary-track{
+  margin-top:22px;
+  height:12px;
+  border-radius:999px;
+  background:rgba(120,107,95,0.10);
+  overflow:hidden;
+}
+.malla-summary-fill{
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg, var(--unad-blue), #1f60db);
+  transition:width 0.6s cubic-bezier(0.25,0.46,0.45,0.94);
+}
+.malla-summary-meta{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  margin-top:20px;
+}
+.malla-summary-meta span{
+  display:block;
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:0.16em;
+  color:var(--text3);
+}
+.malla-summary-meta strong{
+  display:block;
+  margin-top:6px;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:34px;
+  line-height:0.95;
+  letter-spacing:-0.06em;
+  color:var(--text);
+}
+.malla-summary-meta div:last-child{text-align:right}
+.malla-summary-meta div:last-child strong{color:var(--unad-blue)}
+.malla-toolbar{margin-bottom:18px}
+.malla-search{max-width:520px}
+.malla-period-list{display:flex;flex-direction:column;gap:44px}
+.malla-acc.malla-period-section{
+  position:relative;
+  margin-bottom:0;
+  padding-left:18px;
+}
+.malla-period-watermark{
+  position:absolute;
+  top:-34px;
+  left:-2px;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:10rem;
+  line-height:0.9;
+  font-weight:800;
+  letter-spacing:-0.12em;
+  color:rgba(0,70,173,0.05);
+  pointer-events:none;
+  user-select:none;
+}
+body.dark .malla-period-watermark{color:rgba(255,255,255,0.04)}
+.malla-acc-header.malla-period-head{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  padding:0;
+  background:transparent;
+  box-shadow:none;
+  border:none;
+}
+.malla-period-copy{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.malla-period-title{
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:38px;
+  line-height:0.94;
+  letter-spacing:-0.08em;
+  color:var(--text);
+}
+.malla-period-meta{
+  font-size:13px;
+  color:var(--text2);
+}
+.malla-period-stats{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.malla-stat-chip,
+.malla-status-chip{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:0.18em;
+}
+.malla-stat-chip.done{background:rgba(0,168,107,0.10);color:var(--success)}
+.malla-stat-chip.fail{background:rgba(201,43,43,0.08);color:var(--danger)}
+.malla-status-chip.done{background:rgba(0,70,173,0.10);color:var(--unad-blue)}
+.malla-status-chip.active{background:rgba(0,70,173,0.10);color:var(--unad-blue)}
+.malla-status-chip.pending{background:rgba(120,107,95,0.10);color:var(--text3)}
+.malla-acc-body{
+  position:relative;
+  z-index:1;
+  padding:14px 0 0;
+  display:grid!important;
+  gap:18px;
+  max-height:none!important;
+  opacity:1!important;
+  overflow:visible;
+}
+.mat-row.malla-course-card{
+  display:block;
+  padding:26px 24px 20px;
+  margin-bottom:0;
+  border-radius:30px;
+  background:linear-gradient(180deg, rgba(255,255,255,0.94), rgba(251,248,245,0.98));
+}
+body.dark .mat-row.malla-course-card{
+  background:linear-gradient(180deg, rgba(28,36,48,0.95), rgba(23,29,39,0.98));
+}
+.mat-row.malla-course-card.is-future{
+  opacity:0.58;
+  background:linear-gradient(180deg, rgba(245,240,234,0.72), rgba(255,255,255,0.84));
+  box-shadow:inset 0 0 0 1px rgba(120,107,95,0.12);
+}
+body.dark .mat-row.malla-course-card.is-future{
+  background:linear-gradient(180deg, rgba(28,36,48,0.55), rgba(23,29,39,0.72));
+}
+.malla-card-top,
+.malla-card-bottom{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+}
+.malla-card-bottom{margin-top:18px;align-items:flex-end}
+.mat-row.malla-course-card .mat-nombre{
+  font-size:clamp(26px,2.5vw,42px);
+  line-height:1;
+  letter-spacing:-0.06em;
+  max-width:78%;
+}
+.malla-card-mark{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-shrink:0;
+  font-size:17px;
+  font-weight:800;
+  color:#fff;
+}
+.malla-card-mark.aprobada{background:var(--success)}
+.malla-card-mark.reprobada{background:var(--danger)}
+.malla-card-mark.cursando{background:var(--unad-blue)}
+.malla-card-mark.pendiente{background:rgba(120,107,95,0.18);color:var(--text2)}
+.malla-card-meta{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.malla-credit-pill{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:7px 12px;
+  border-radius:999px;
+  background:rgba(0,70,173,0.08);
+  color:var(--unad-blue);
+  font-size:12px;
+  font-weight:800;
+}
+.malla-code{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--text3);
+}
+.malla-card-state{
+  font-size:13px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.malla-card-state.aprobada{color:var(--success)}
+.malla-card-state.reprobada{color:var(--danger)}
+.malla-card-state.cursando{color:var(--unad-blue)}
+.malla-card-state.pendiente{color:var(--text3)}
+.malla-card-accent{
+  height:4px;
+  border-radius:999px;
+  margin-top:16px;
+  background:rgba(120,107,95,0.10);
+  overflow:hidden;
+}
+.malla-card-accent>span{
+  display:block;
+  height:100%;
+  border-radius:999px;
+}
+.malla-card-accent.aprobada>span{width:100%;background:var(--success)}
+.malla-card-accent.reprobada>span{width:100%;background:var(--danger)}
+.malla-card-accent.cursando>span{width:68%;background:var(--unad-blue)}
+.malla-card-accent.pendiente>span{width:0}
+.elec-block.malla-elec-block{
+  margin-bottom:0;
+  padding:20px;
+  border-radius:28px;
+  border:none;
+  background:linear-gradient(180deg, rgba(244,238,232,0.94), rgba(255,255,255,0.90));
+  box-shadow:0 18px 38px rgba(39,24,12,0.05);
+}
+body.dark .elec-block.malla-elec-block{
+  background:linear-gradient(180deg, rgba(28,36,48,0.92), rgba(23,29,39,0.98));
+}
+.malla-elec-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:16px;
+  margin-bottom:14px;
+}
+.malla-elec-kicker{
+  font-size:10px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:0.18em;
+  color:var(--unad-blue);
+}
+.malla-elec-title{
+  margin-top:6px;
+  font-family:'Manrope','Sora',sans-serif;
+  font-size:20px;
+  line-height:1.05;
+  letter-spacing:-0.04em;
+}
+.elec-opt{
+  padding:14px 16px;
+  border:none;
+  border-radius:18px;
+  background:rgba(255,255,255,0.58);
+  margin-top:8px;
+}
+body.dark .elec-opt{background:rgba(255,255,255,0.04)}
+.elec-opt .radio{background:rgba(0,70,173,0.08)}
+.malla-detail-intro{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  margin-bottom:12px;
+}
+.malla-detail-kicker{
+  font-size:11px;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:0.18em;
+  color:var(--unad-blue);
+  margin-bottom:8px;
+}
+@media(max-width:1024px){
+  .malla-hero{grid-template-columns:1fr}
+}
 @media(max-width:1024px){
   .dash-period-strip{grid-template-columns:1fr 1fr}
   .dash-activity-list{grid-template-columns:1fr}
@@ -1378,6 +1703,49 @@ body.dark .period-card.current{
     border-radius:22px;
   }
   .activity-title{font-size:17px}
+  .malla-hero{
+    gap:18px;
+    margin-bottom:20px;
+  }
+  .malla-summary-card{
+    padding:22px;
+    border-radius:28px;
+  }
+  .malla-summary-value span{font-size:58px}
+  .malla-summary-meta strong{font-size:28px}
+  .malla-toolbar{margin-bottom:10px}
+  .malla-period-list{gap:34px}
+  .malla-acc.malla-period-section{padding-left:0}
+  .malla-period-watermark{
+    left:-4px;
+    top:-20px;
+    font-size:7.8rem;
+  }
+  .malla-period-title{font-size:24px}
+  .malla-acc-header.malla-period-head{gap:10px}
+  .malla-status-chip{padding:7px 10px}
+  .mat-row.malla-course-card{
+    padding:22px 20px 18px;
+    border-radius:26px;
+  }
+  .mat-row.malla-course-card .mat-nombre{
+    font-size:20px;
+    max-width:74%;
+  }
+  .malla-card-mark{
+    width:28px;
+    height:28px;
+    font-size:14px;
+  }
+  .malla-card-bottom{
+    flex-direction:column;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .elec-block.malla-elec-block{
+    padding:18px;
+    border-radius:24px;
+  }
   .card,.cfg-card,.detail-panel,.perfil-hub-card,.li-card,.sal-card,.por-card{
     border-radius:24px;
   }
@@ -1525,14 +1893,38 @@ body.dark .period-card.current{
 
     <!-- MALLA -->
     <div class="view" id="view-malla">
-      <div class="h2">Malla Curricular</div>
-      <div class="sub">Haz clic en una materia o electiva para ver su guía · Selecciona electivos · Ingresa tus notas</div>
-      <div class="search-wrap">
-        <span class="search-icon">🔍</span>
-        <input class="search-inp" id="mallaSearch" type="text" placeholder="Buscar materia por nombre o descripción..." oninput="renderMalla()">
+      <section class="malla-hero">
+        <div class="malla-hero-copy">
+          <div class="dash-overline">Ruta curricular</div>
+          <div class="h2">Malla Curricular</div>
+          <div class="sub">Explora periodos, selecciona electivas y entra al detalle de cada materia sin perder la lógica actual de LeanUp.</div>
+        </div>
+        <div class="malla-summary-card">
+          <div class="malla-summary-kicker">Impacto académico</div>
+          <div class="malla-summary-top">
+            <div class="malla-summary-value"><span id="mallaPct">0%</span> <small>completado</small></div>
+          </div>
+          <div class="malla-summary-track"><div class="malla-summary-fill" id="mallaSummaryBar" style="width:0%"></div></div>
+          <div class="malla-summary-meta">
+            <div>
+              <span>Créditos</span>
+              <strong><span id="mallaCred">0</span> / 144</strong>
+            </div>
+            <div>
+              <span>Promedio</span>
+              <strong id="mallaProm">—</strong>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="malla-toolbar">
+        <div class="search-wrap malla-search">
+          <span class="search-icon">🔍</span>
+          <input class="search-inp" id="mallaSearch" type="text" placeholder="Buscar materia por nombre o descripción..." oninput="renderMalla()">
+        </div>
       </div>
       <div class="malla-grid">
-        <div id="mallaList"></div>
+        <div id="mallaList" class="malla-period-list"></div>
       </div>
     </div>
 
@@ -2425,7 +2817,7 @@ function getDashboardActivityHTML(currentPeriod){
   pending.slice(0,4).forEach(pushPick);
   if(!picks.length)all.slice(0,3).forEach(pushPick);
   return picks.slice(0,4).map((m,idx)=>{
-    const meta=(m.d||'').length>96?(m.d||'').substring(0,96)+'…':(m.d||'');
+    const meta=(m.d||'').length>96?(m.d||'').substring(0,96)+'⬦':(m.d||'');
     const status=typeof m.dashNote==='number'
       ? `Calificado: ${Number(m.dashNote).toFixed(1)}/5.0`
       : (m.per===currentPeriod?'En curso actualmente':'Pendiente por cursar');
@@ -2460,6 +2852,14 @@ function updateAll(){
   document.getElementById('dApro').textContent=apro.length+elecApro.length;
   document.getElementById('dCred').textContent=cred;
   document.getElementById('dHeroBar').style.width=pct+'%';
+  const mallaPctEl=document.getElementById('mallaPct');
+  const mallaCredEl=document.getElementById('mallaCred');
+  const mallaPromEl=document.getElementById('mallaProm');
+  const mallaBarEl=document.getElementById('mallaSummaryBar');
+  if(mallaPctEl)mallaPctEl.textContent=pct+'%';
+  if(mallaCredEl)mallaCredEl.textContent=cred;
+  if(mallaPromEl)mallaPromEl.textContent=prom;
+  if(mallaBarEl)mallaBarEl.style.width=pct+'%';
   document.getElementById('sidebarProg').style.width=pct+'%';
   document.getElementById('sidebarLabel').textContent=pct+'% · '+cred+'/'+TOTAL+' cr.';
   const currentPeriod=getDashboardCurrentPeriod();
@@ -2532,97 +2932,127 @@ function toggleMalla(p){
   }
 }
 
+function getMallaPeriodStatus(p,totalCount,apro,repro,currentPeriod){
+  const graded=apro+repro;
+  if(totalCount>0&&graded>=totalCount)return {label:'Finalizado',className:'done'};
+  if(p<=currentPeriod||graded>0)return {label:'En curso',className:'active'};
+  return {label:'Pendiente',className:'pending'};
+}
+function getMallaPeriodSummaryHTML(apro,repro){
+  let html='';
+  if(apro>0)html+=`<span class="malla-stat-chip done">${apro} aprobada${apro>1?'s':''}</span>`;
+  if(repro>0)html+=`<span class="malla-stat-chip fail">${repro} reprobada${repro>1?'s':''}</span>`;
+  return html;
+}
+function getMallaCardState(period,note,currentPeriod){
+  if(typeof note==='number'&&note>=3)return {className:'aprobada',mark:'✓',label:`Aprobada (${note.toFixed(1)})`,future:false};
+  if(typeof note==='number'&&note<3)return {className:'reprobada',mark:'×',label:`Reprobada (${note.toFixed(1)})`,future:false};
+  if(period===currentPeriod)return {className:'cursando',mark:'··',label:'En curso',future:false};
+  if(period<currentPeriod)return {className:'pendiente',mark:'•',label:'Sin nota',future:false};
+  return {className:'pendiente',mark:'○',label:'Pendiente',future:true};
+}
+function getMallaCourseCardHTML(m,currentPeriod,isElectiva=false,grupo=''){
+  const note=isElectiva?electivosNotas[grupo+':::'+m.cod]:m.nota;
+  const state=getMallaCardState(m.per,note,currentPeriod);
+  const rowAttrs=isElectiva?`data-cod="${m.cod}"`:`id="mrow-${m.id}"`;
+  const click=isElectiva?`selElec('${grupo.replace(/'/g,'&#39;')}','${m.cod}')`:`selMat(${m.id})`;
+  return `<article class="mat-row malla-course-card ${state.future?'is-future':''}" ${rowAttrs} onclick="${click}">
+    <div class="malla-card-top">
+      <div class="mat-nombre">${m.nombre}</div>
+      <div class="malla-card-mark ${state.className}">${state.mark}</div>
+    </div>
+    <div class="malla-card-bottom">
+      <div class="malla-card-meta">
+        <span class="malla-credit-pill">${m.cr||3} créditos</span>
+        <span class="malla-code">${m.cod}</span>
+        ${isElectiva?'<span class="tag tag-electiva">Electiva</span>':''}
+      </div>
+      <span class="malla-card-state ${state.className}">${state.label}</span>
+    </div>
+    <div class="malla-card-accent ${state.className}"><span></span></div>
+  </article>`;
+}
+function getMallaElectivaBlockHTML(grupo,data,currentPeriod){
+  const sel=electivosSeleccionados[grupo];
+  const sg=grupo.replace(/'/g,'&#39;');
+  let html=`<section class="elec-block malla-elec-block" data-grupo="${sg}">
+    <div class="malla-elec-head">
+      <div>
+        <div class="malla-elec-kicker">Ruta electiva</div>
+        <div class="malla-elec-title">${grupo}</div>
+      </div>
+    </div>`;
+  data.opciones.forEach(op=>{
+    if(sel===op.cod){
+      html+=getMallaCourseCardHTML({...op,per:data.per,cr:op.cr||3},currentPeriod,true,grupo);
+    }else{
+      html+=`<div class="elec-opt" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
+        <div class="radio"></div>
+        <div class="elec-name">${op.nombre}</div>
+        <div class="elec-cr">${op.cr||3} cr.</div>
+      </div>`;
+    }
+  });
+  html+=`</section>`;
+  return html;
+}
+
 function renderMalla(){
   const q=(document.getElementById('mallaSearch')||{}).value||'';
   const sq=q.toLowerCase().trim();
+  const currentPeriod=getDashboardCurrentPeriod();
   let html='';
   periodos.forEach(p=>{
     const ms=materias.filter(m=>m.per===p);
     const filtered=sq?ms.filter(m=>m.nombre.toLowerCase().includes(sq)||m.d.toLowerCase().includes(sq)):ms;
     const elecs=Object.entries(electivosData).filter(([k,v])=>v.per===p);
     if(!filtered.length&&!elecs.length)return;
-    const isOpen=openMalla.has(p)||sq.length>0;
     const apro=ms.filter(m=>m.nota!==null&&m.nota>=3).length;
     const repro=ms.filter(m=>m.nota!==null&&m.nota<3).length;
-    const pct=Math.round((apro/ms.length)*100);
-    html+=`<div class="malla-acc" data-per="${p}">
-      <div class="malla-acc-header" onclick="toggleMalla(${p})">
-        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span>Periodo ${p}</span>
-          <span style="font-size:11px;color:var(--text3);font-weight:400">${ms.length} materias · 18 cr.</span>
-          ${apro>0?`<span style="font-size:10px;font-weight:600;color:var(--success);background:rgba(0,168,107,0.1);padding:2px 7px;border-radius:10px">${apro} aprobada${apro>1?'s':''}</span>`:''}
-          ${repro>0?`<span style="font-size:10px;font-weight:600;color:var(--danger);background:rgba(201,43,43,0.08);padding:2px 7px;border-radius:10px">${repro} reprobada${repro>1?'s':''}</span>`:''}
+    const elecCredits=elecs.reduce((a,[,data])=>a+((data.opciones[0]&&data.opciones[0].cr)||3),0);
+    const totalCount=ms.length+Object.entries(electivosData).filter(([_,v])=>v.per===p).length;
+    const periodStatus=getMallaPeriodStatus(p,totalCount,apro,repro,currentPeriod);
+    html+=`<section class="malla-acc malla-period-section" data-per="${p}">
+      <div class="malla-period-watermark">${String(p).padStart(2,'0')}</div>
+      <div class="malla-acc-header malla-period-head">
+        <div class="malla-period-copy">
+          <span class="malla-period-title">Periodo ${p}</span>
+          <span class="malla-period-meta">${ms.length} materias · ${(ms.reduce((a,m)=>a+m.cr,0)+elecCredits)} créditos</span>
+          <div class="malla-period-stats" data-period-summary="${p}">${getMallaPeriodSummaryHTML(apro,repro)}</div>
         </div>
-        <span class="malla-acc-arrow ${isOpen?'':'closed'}">▼</span>
-      </div>`;
-    const bodyStyle=isOpen?'max-height:5000px;opacity:1':'display:none;max-height:0;opacity:0';
-    html+=`<div class="malla-acc-body" style="${bodyStyle}">`;
+        <div class="malla-status-chip ${periodStatus.className}">${periodStatus.label}</div>
+      </div>
+      <div class="malla-acc-body">`;
     filtered.forEach(m=>{
-        const e=m.nota!==null?(m.nota>=3?'aprobada':'reprobada'):m.cursando?'cursando':'pendiente';
-        const et=m.nota!==null?(m.nota>=3?'Aprobada':'Reprobada'):m.cursando?'En curso':'Pendiente';
-        html+=`<div class="mat-row" id="mrow-${m.id}" onclick="selMat(${m.id})">
-          <div style="flex:1">
-            <div class="mat-nombre">${m.nombre}</div>
-            <div class="mat-desc">${m.d.substring(0,70)}…</div>
-            <div class="mat-meta">Cód. ${m.cod} · ${m.cr} créditos</div>
-            <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px">${m.tipo.map(tipoTag).join('')}<span class="tag tag-${e}">${et}</span></div>
-          </div>
-          <div class="${nClass(m.nota)} nota-badge">${m.nota!==null?m.nota:'—'}</div>
-        </div>`;
+      html+=getMallaCourseCardHTML(m,currentPeriod,false,'');
+    });
+    if(!sq){
+      elecs.forEach(([grupo,data])=>{
+        html+=getMallaElectivaBlockHTML(grupo,data,currentPeriod);
       });
-      if(!sq){
-        elecs.forEach(([grupo,data])=>{
-          const sel=electivosSeleccionados[grupo];
-          const sg=grupo.replace(/'/g,'&#39;');
-          html+=`<div class="elec-block" data-grupo="${sg}"><div class="elec-title">${grupo}</div>`;
-          data.opciones.forEach(op=>{
-            const isSel=sel===op.cod;
-            if(isSel){
-              // Render selected electiva as a full mat-row like regular materias
-              const nKey=grupo+':::'+op.cod;
-              const nota=electivosNotas[nKey]!==undefined?electivosNotas[nKey]:null;
-              const e=nota!==null?(nota>=3?'aprobada':'reprobada'):'pendiente';
-              const et=nota!==null?(nota>=3?'Aprobada':'Reprobada'):'Pendiente';
-              const tipoTags=(op.tipo||['Electiva']).map(tipoTag).join('');
-              html+=`<div class="mat-row selected" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
-                <div style="flex:1">
-                  <div class="mat-nombre">${op.nombre}</div>
-                  <div class="mat-desc">${(op.d||'').substring(0,70)}…</div>
-                  <div class="mat-meta">Cód. ${op.cod} · ${op.cr||3} créditos</div>
-                  <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px">
-                    <span class="tag tag-electiva">◆ Electiva</span>
-                    <span class="tag tag-${e}">${et}</span>
-                  </div>
-                </div>
-                <div class="${nClass(nota)} nota-badge">${nota!==null?nota:'—'}</div>
-              </div>`;
-            } else {
-              html+=`<div class="elec-opt" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
-                <div class="radio"></div>
-                <div class="elec-name">${op.nombre}</div>
-                <div class="elec-cr">${op.cr||3} cr.</div>
-              </div>`;
-            }
-          });
-          html+=`</div>`;
-        });
-      }
-      html+=`</div>`;
-    html+=`</div>`;
+    }
+    html+=`</div></section>`;
   });
   document.getElementById('mallaList').innerHTML=html;
 }
-
 function selMat(id){
   document.querySelectorAll('.mat-row').forEach(r=>r.classList.remove('selected'));
   const row=document.getElementById('mrow-'+id);
   if(row)row.classList.add('selected');
   const m=materias.find(x=>x.id===id);if(!m)return;
+  const currentPeriod=getDashboardCurrentPeriod();
+  const state=getMallaCardState(m.per,m.nota,currentPeriod);
   const dls=['','Muy fácil','Fácil','Media','Alta','Muy alta'];
   const dlc=['','var(--success)','var(--success)','var(--unad-blue)','var(--warning)','var(--danger)'];
   const hasNota=m.nota!==null;
   document.getElementById('detailPanel').innerHTML=`<div class="detail-panel">
-    <div class="panel-name">${m.nombre}</div>
+    <div class="malla-detail-intro">
+      <div>
+        <div class="malla-detail-kicker">Materia base</div>
+        <div class="panel-name">${m.nombre}</div>
+      </div>
+      <div class="malla-status-chip ${state.className==='aprobada'?'done':state.className==='reprobada'?'pending':state.className==='cursando'?'active':'pending'}">Periodo ${m.per}</div>
+    </div>
     <div class="panel-meta">Cód. ${m.cod} · ${m.cr} créditos · Periodo ${m.per}</div>
     <div style="display:flex;gap:3px;flex-wrap:wrap;margin-bottom:12px">${m.tipo.map(tipoTag).join('')}</div>
     <div class="info-box">${m.d}</div>
@@ -2679,35 +3109,7 @@ function selElec(grupo,cod){
   const sg=grupo.replace(/'/g,'&#39;');
   const block=document.querySelector(`.elec-block[data-grupo="${sg}"]`);
   if(block&&gd){
-    let inner=`<div class="elec-title">${grupo}</div>`;
-    gd.opciones.forEach(op=>{
-      const isSel=op.cod===cod;
-      if(isSel){
-        const nKey=grupo+':::'+op.cod;
-        const nota=electivosNotas[nKey]!==undefined?electivosNotas[nKey]:null;
-        const e=nota!==null?(nota>=3?'aprobada':'reprobada'):'pendiente';
-        const et=nota!==null?(nota>=3?'Aprobada':'Reprobada'):'Pendiente';
-        inner+=`<div class="mat-row selected" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
-          <div style="flex:1">
-            <div class="mat-nombre">${op.nombre}</div>
-            <div class="mat-desc">${(op.d||'').substring(0,70)}…</div>
-            <div class="mat-meta">Cód. ${op.cod} · ${op.cr||3} créditos</div>
-            <div style="display:flex;gap:3px;flex-wrap:wrap;margin-top:4px">
-              <span class="tag tag-electiva">◆ Electiva</span>
-              <span class="tag tag-${e}">${et}</span>
-            </div>
-          </div>
-          <div class="${nClass(nota)} nota-badge">${nota!==null?nota:'—'}</div>
-        </div>`;
-      } else {
-        inner+=`<div class="elec-opt" data-cod="${op.cod}" onclick="selElec('${sg}','${op.cod}')">
-          <div class="radio"></div>
-          <div class="elec-name">${op.nombre}</div>
-          <div class="elec-cr">${op.cr||3} cr.</div>
-        </div>`;
-      }
-    });
-    block.innerHTML=inner;
+    block.outerHTML=getMallaElectivaBlockHTML(grupo,gd,getDashboardCurrentPeriod());
   }
   showElecDetail(grupo,cod);
 }
@@ -2717,11 +3119,19 @@ function showElecDetail(grupo,cod){
   const op=gd.opciones.find(o=>o.cod===cod);if(!op)return;
   const nKey=grupo+':::'+cod;
   const nota=electivosNotas[nKey]!==undefined?electivosNotas[nKey]:null;
+  const currentPeriod=getDashboardCurrentPeriod();
+  const state=getMallaCardState(gd.per,nota,currentPeriod);
   const hasNota=nota!==null;
   document.getElementById('detailPanel').innerHTML=`<div class="detail-panel" style="border-left-color:var(--unad-gold)">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:3px">
-      <div class="panel-name">${op.nombre}</div>
-      <span class="tag tag-electiva" style="flex-shrink:0;margin-top:2px">◆ Electiva</span>
+    <div class="malla-detail-intro">
+      <div>
+        <div class="malla-detail-kicker">Ruta electiva</div>
+        <div class="panel-name">${op.nombre}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="tag tag-electiva" style="flex-shrink:0;margin-top:2px">Electiva</span>
+        <div class="malla-status-chip ${state.className==='aprobada'?'done':state.className==='reprobada'?'pending':state.className==='cursando'?'active':'pending'}">Periodo ${gd.per}</div>
+      </div>
     </div>
     <div class="panel-meta">Cód. ${op.cod} · ${op.cr} créditos · Periodo ${gd.per} · ${grupo}</div>
     <div class="info-box" style="border-left-color:var(--unad-gold)">${op.d}</div>
@@ -2814,12 +3224,8 @@ function updateAccHeader(per){
   });
   const acc=document.querySelector(`.malla-acc[data-per="${per}"]`);
   if(!acc)return;
-  const headerDiv=acc.querySelector('.malla-acc-header > div');
-  if(!headerDiv)return;
-  const chips=headerDiv.querySelectorAll('span:nth-child(n+3)');
-  chips.forEach(s=>s.remove());
-  if(apro>0){const s=document.createElement('span');s.style.cssText='font-size:10px;font-weight:600;color:var(--success);background:rgba(0,168,107,0.1);padding:2px 7px;border-radius:10px';s.textContent=apro+' aprobada'+(apro>1?'s':'');headerDiv.appendChild(s);}
-  if(repro>0){const s=document.createElement('span');s.style.cssText='font-size:10px;font-weight:600;color:var(--danger);background:rgba(201,43,43,0.08);padding:2px 7px;border-radius:10px';s.textContent=repro+' reprobada'+(repro>1?'s':'');headerDiv.appendChild(s);}
+  const summary=acc.querySelector('[data-period-summary]');
+  if(summary)summary.innerHTML=getMallaPeriodSummaryHTML(apro,repro);
 }
 
 function saveNota(id){
@@ -2841,21 +3247,9 @@ function saveNota(id){
       </div>`;
   }
 
-  // Actualizar badge en la lista
-  const badge=document.querySelector('#mrow-'+id+' .nota-badge');
-  if(badge){badge.className=nClass(m.nota)+' nota-badge';badge.textContent=m.nota;}
-
-  // Actualizar tag de estado en la lista
+  renderMalla();
   const row=document.getElementById('mrow-'+id);
-  if(row){
-    const tagEstado=row.querySelector('.tag-aprobada,.tag-reprobada,.tag-cursando,.tag-pendiente');
-    if(tagEstado){
-      const e=m.nota>=3?'aprobada':'reprobada';
-      tagEstado.className='tag tag-'+e;tagEstado.textContent=m.nota>=3?'Aprobada':'Reprobada';
-    }
-  }
-
-  updateAccHeader(m.per);
+  if(row)row.classList.add('selected');
   updateAll();
   if(document.getElementById('view-profesional').classList.contains('active'))renderProfesional();
 }
@@ -2878,21 +3272,9 @@ function editNota(id){
   m.nota=null;
   markUnsaved();
 
-  // 3. Actualizar badge en la lista directamente (sin renderMalla)
-  const badge=document.querySelector('#mrow-'+id+' .nota-badge');
-  if(badge){badge.className='n-empty nota-badge';badge.textContent='—';}
-
-  // 4. Actualizar tag de estado en la lista directamente (sin renderMalla)
+  renderMalla();
   const row=document.getElementById('mrow-'+id);
-  if(row){
-    const tagEstado=row.querySelector('.tag-aprobada,.tag-reprobada,.tag-cursando,.tag-pendiente');
-    if(tagEstado){tagEstado.className='tag tag-pendiente';tagEstado.textContent='Pendiente';}
-  }
-
-  // 5. Actualizar header del acordeón
-  updateAccHeader(m.per);
-
-  // 6. Actualizar stats del dashboard (no toca el panel)
+  if(row)row.classList.add('selected');
   updateAll();
 
   // 6. Focus al input
@@ -2911,14 +3293,9 @@ function resetNota(id){
     </div>
     <div id="nota-hint-${id}" class="nota-hint">↵ Enter para guardar · Escribe 35 para 3.5</div>`;
   }
-  const badge=document.querySelector('#mrow-'+id+' .nota-badge');
-  if(badge){badge.className='n-empty nota-badge';badge.textContent='—';}
+  renderMalla();
   const row=document.getElementById('mrow-'+id);
-  if(row){
-    const tagEstado=row.querySelector('.tag-aprobada,.tag-reprobada,.tag-cursando,.tag-pendiente');
-    if(tagEstado){tagEstado.className='tag tag-pendiente';tagEstado.textContent='Pendiente';}
-  }
-  updateAccHeader(m.per);
+  if(row)row.classList.add('selected');
   updateAll();
   if(document.getElementById('view-profesional').classList.contains('active'))renderProfesional();
 }
@@ -2939,17 +3316,10 @@ function saveElecNota(grupo,cod){
   if(gd){gd.opciones.forEach(op=>{delete electivosNotas[grupo+':::'+op.cod];});}
   electivosNotas[grupo+':::'+cod]=v;
   markUnsaved();
-  // Update mat-row badge and tag in elec-block
+  renderMalla();
   const sg2=grupo.replace(/'/g,'&#39;');
   const elecRow=document.querySelector(`.elec-block[data-grupo="${sg2}"] .mat-row[data-cod="${cod}"]`);
-  if(elecRow){
-    const badge=elecRow.querySelector('.nota-badge');
-    if(badge){badge.className=nClass(v)+' nota-badge';badge.textContent=v;}
-    const tagE=elecRow.querySelector('.tag-aprobada,.tag-reprobada,.tag-pendiente');
-    if(tagE){tagE.className='tag tag-'+(v>=3?'aprobada':'reprobada');tagE.textContent=v>=3?'Aprobada':'Reprobada';}
-  }
-  const gper=gd?gd.per:null;
-  if(gper)updateAccHeader(gper);
+  if(elecRow)elecRow.classList.add('selected');
   updateAll();
   if(document.getElementById('view-profesional').classList.contains('active'))renderProfesional();
   showElecDetail(grupo,cod);
@@ -2980,16 +3350,10 @@ function resetElecNota(grupo,cod){
   delete electivosNotas[nKey];
   markUnsaved();
   const gd=electivosData[grupo];
+  renderMalla();
   const sg2=grupo.replace(/'/g,'&#39;');
   const elecRow=document.querySelector(`.elec-block[data-grupo="${sg2}"] .mat-row[data-cod="${cod}"]`);
-  if(elecRow){
-    const badge=elecRow.querySelector('.nota-badge');
-    if(badge){badge.className='n-empty nota-badge';badge.textContent='—';}
-    const tagE=elecRow.querySelector('.tag-aprobada,.tag-reprobada,.tag-pendiente');
-    if(tagE){tagE.className='tag tag-pendiente';tagE.textContent='Pendiente';}
-  }
-  const gper=gd?gd.per:null;
-  if(gper)updateAccHeader(gper);
+  if(elecRow)elecRow.classList.add('selected');
   updateAll();
   if(document.getElementById('view-profesional').classList.contains('active'))renderProfesional();
   showElecDetail(grupo,cod);
@@ -3113,7 +3477,7 @@ function renderProfesional(){
         <div class="tl-desc">${r.desc}</div>
         <div class="tl-creds">${r.credits}</div>
         ${progBar}
-        <div style="font-size:11px;color:${s.state==='done'?'var(--success)':s.state==='now'?'var(--unad-blue)':'var(--text3)'};margin-bottom:6px;font-weight:500">▸ ${r.logro}</div>
+        <div style="font-size:11px;color:${s.state==='done'?'var(--success)':s.state==='now'?'var(--unad-blue)':'var(--text3)'};margin-bottom:6px;font-weight:500">▼ ${r.logro}</div>
         <div class="tl-skills">${r.skills.map(sk=>`<span class="tl-skill">${sk}</span>`).join('')}</div>
       </div>
     </div>`;
@@ -3484,3 +3848,4 @@ if('serviceWorker' in navigator){
 </script>
 </body>
 </html>
+
