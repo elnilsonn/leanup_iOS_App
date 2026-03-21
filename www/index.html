@@ -1376,6 +1376,11 @@ body.dark .malla-summary-card{
   gap:16px;
   margin-top:20px;
 }
+.malla-summary-meta>div{
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-start;
+}
 .malla-summary-meta span{
   display:block;
   font-size:11px;
@@ -1402,7 +1407,10 @@ body.dark .malla-summary-card{
   letter-spacing:inherit;
   line-height:inherit;
 }
-.malla-summary-meta div:last-child{text-align:right}
+.malla-summary-meta div:last-child{
+  align-items:flex-end;
+  text-align:right;
+}
 .malla-summary-meta div:last-child strong{color:var(--unad-blue)}
 .malla-toolbar{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .malla-search{max-width:520px;flex:1}
@@ -1475,19 +1483,21 @@ body.dark .malla-rail{
 }
 .malla-period-watermark{
   position:absolute;
-  inset:54px 0 0;
+  inset:18px -8px -18px;
   display:flex;
   align-items:center;
   justify-content:center;
   font-family:'Manrope','Sora',sans-serif;
-  font-size:min(28vw, 220px);
-  line-height:0.8;
+  font-size:min(92vw, 520px);
+  line-height:0.72;
   font-weight:800;
-  letter-spacing:-0.14em;
-  color:rgba(0,70,173,0.05);
+  letter-spacing:-0.18em;
+  color:rgba(0,70,173,0.045);
   pointer-events:none;
   user-select:none;
   z-index:0;
+  transform:rotate(-11deg) scaleX(1.16);
+  transform-origin:center;
 }
 body.dark .malla-period-watermark{color:rgba(255,255,255,0.04)}
 .malla-acc-header.malla-period-head{
@@ -1809,8 +1819,9 @@ body.dark .malla-empty{
   .malla-period-list{gap:12px}
   .malla-acc.malla-period-section{padding-left:0}
   .malla-period-watermark{
-    inset:42px 0 0;
-    font-size:min(42vw, 180px);
+    inset:24px -10px -24px;
+    font-size:min(122vw, 420px);
+    transform:rotate(-13deg) scaleX(1.2);
   }
   .malla-period-title{font-size:20px}
   .malla-acc-header.malla-period-head{gap:10px}
