@@ -656,6 +656,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
 
                 /* ── Suppress viewFadeIn during custom push/pop transitions ── */
                 .view.lu-anim-skip { animation: none !important; transition: none !important; }
+                .view.lu-nav-static .tl-item,
+                .view.lu-nav-static .stat-card,
+                .view.lu-nav-static .li-card,
+                .view.lu-nav-static .sal-card,
+                .view.lu-nav-static .por-card,
+                .view.lu-nav-static .elec-block {
+                    animation: none !important;
+                }
 
                 /* Extra top padding when views are position:fixed during transitions.
                    Compensates for .content's 16px top padding lost when escaping normal flow. */
@@ -962,11 +970,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                             var bg = getBg();
                             var fb = fixedBase(bg);
                             // CRITICAL: Set BOTH views fixed BEFORE _sv() changes classes
+                            hubView.classList.add('lu-nav-static');
+                            newView.classList.add('lu-nav-static');
                             addFixedClass(hubView);
                             addFixedClass(newView);
                             hubView.style.cssText = fb + 'z-index:201;transform:translateX(0)';
                             newView.style.cssText = fb + 'z-index:202;transform:translateX(100%)';
+                            window.__lu_skipMainScrollReset = true;
                             _sv.apply(this, [id, el]);
+                            var mainContent = document.getElementById('mainContent');
+                            if (mainContent) mainContent.scrollTop = 0;
                             addEdgeShadow(newView);
                             var dimEl = addDim(hubView);
                             void newView.offsetWidth;
@@ -1006,6 +1019,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, WKScriptMessageHandler, W
                             _animating = true;
                             var bg2 = getBg();
                             var fb2 = fixedBase(bg2);
+                            curView.classList.add('lu-nav-static');
+                            hubView2.classList.add('lu-nav-static');
                             addFixedClass(curView);
                             addFixedClass(hubView2);
                             curView.style.cssText  = fb2 + 'z-index:202;transform:translateX(0)';
