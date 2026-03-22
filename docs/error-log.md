@@ -294,3 +294,43 @@ Como se soluciono:
 Regla:
 
 - Si un `ScrollView` vertical de LeanUp empieza a moverse lateralmente solo con ciertos datos, fijar primero el ancho real del contenido al viewport antes de perseguir "umbrales" numericos.
+
+### 15. Rebound lateral en Malla por ancho negociado
+
+Que paso:
+
+- `Malla` tambien empezo a moverse o estirarse lateralmente con ciertas combinaciones de banners y contenido.
+
+Por que paso:
+
+- Igual que en `Dashboard`, el `ScrollView` vertical de `Malla` estaba dejando que el contenido negociara un ancho ideal ligeramente mayor al viewport.
+- El problema no venia de una sola tarjeta concreta sino del ancho util completo de la pantalla.
+
+Como se soluciono:
+
+- Se envolvio `Malla` en `GeometryReader` y se fijo el ancho real del `VStack` principal al viewport disponible.
+
+Regla:
+
+- Si una pantalla vertical de LeanUp empieza a hacer rebote lateral sin tener un `ScrollView(.horizontal)`, revisar primero si el contenido principal esta verdaderamente anclado al ancho del viewport.
+
+### 16. Busqueda de Malla resuelta con una vista aparte en vez de inline
+
+Que paso:
+
+- La lupa de `Malla` seguia abriendo una pantalla aparte de busqueda.
+
+Por que paso:
+
+- Aunque existia una solucion funcional, no seguia el patron nativo que el usuario queria para iOS 26: buscar dentro de la misma vista con la lupa expandiendose a barra.
+
+Como se soluciono:
+
+- Se retiro el flujo de sheet para la busqueda principal de `Malla`.
+- Se paso a `searchable` inline sobre la propia pantalla con `searchToolbarBehavior(.minimize)` en iOS 26.
+- Los resultados ahora viven dentro de la misma `Malla`.
+
+Regla:
+
+- Si el requerimiento de busqueda es "ahi mismo", no resolverlo con una pantalla aparte aunque sea funcional.
+- En iOS 26, priorizar `searchable` y el comportamiento del toolbar del sistema antes que un sheet o una vista secundaria.

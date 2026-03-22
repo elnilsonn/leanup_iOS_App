@@ -805,79 +805,41 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var mallaMotivationMessage: LeanUpMotivationMessage {
-        let todaySeed = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
-        let personalizationOffset = preferredDisplayName?.count ?? 0
-        let seed = todaySeed + approvedCount + inProgressCount + failedCount + personalizationOffset
-
-        if failedCount > 0 {
-            let options = [
-                LeanUpMotivationMessage(
-                    title: "Cada rojo que cierras te devuelve aire.",
-                    detail: personalized("No necesitas resolver toda la carrera hoy\(namePause). Empieza por una de las materias que mas pesa y vuelve a agarrar impulso.")
-                ),
-                LeanUpMotivationMessage(
-                    title: "Recuperar tambien es avanzar.",
-                    detail: personalized("Tu progreso no se mide solo por lo nuevo\(namePause), sino por lo que logras enderezar con constancia.")
-                ),
-                LeanUpMotivationMessage(
-                    title: "Lo importante es no soltar el hilo.",
-                    detail: personalized("Incluso cuando una materia se complica\(namePause), seguir registrando y ordenando tu avance evita que todo se te venga encima.")
-                )
-            ]
-            return options[seed % options.count]
-        }
-
-        if inProgressCount >= 4 {
-            let options = [
-                LeanUpMotivationMessage(
-                    title: "Llevas una carga fuerte, pero ya esta mapeada.",
-                    detail: personalized("Tener varias materias en curso tambien es una senal de compromiso\(namePause). Lo clave ahora es cerrarlas una por una.")
-                ),
-                LeanUpMotivationMessage(
-                    title: "Mucha carga no significa desorden.",
-                    detail: personalized("LeanUp ya te esta ayudando a ver que tienes encima\(namePause), para que la carga no se convierta en ruido.")
-                ),
-                LeanUpMotivationMessage(
-                    title: "Tu ritmo actual merece respeto.",
-                    detail: personalized("No es poco sostener varias materias al tiempo\(namePause). Lo importante es seguirlas con cabeza fria y constancia.")
-                )
-            ]
-            return options[seed % options.count]
-        }
-
-        if approvedCount >= 20 {
-            let options = [
-                LeanUpMotivationMessage(
-                    title: "Ya no vas empezando: ya construiste camino.",
-                    detail: personalized("Todo lo que has aprobado hasta aqui ya cuenta como evidencia real\(namePause). No minimices lo que llevas.")
-                ),
-                LeanUpMotivationMessage(
-                    title: "Tu carrera ya tiene forma.",
-                    detail: personalized("Cuando miras lo aprobado y lo que sigue\(namePause), se nota que ya no estas improvisando tu avance.")
-                ),
-                LeanUpMotivationMessage(
-                    title: "La mitad del esfuerzo ya habla por ti.",
-                    detail: personalized("Seguir asi no es solo completar materias\(namePause), es demostrarte que si puedes sostener el proceso.")
-                )
-            ]
-            return options[seed % options.count]
-        }
-
-        let options = [
-            LeanUpMotivationMessage(
-                title: "Un avance claro siempre pesa mas que un avance perfecto.",
-                detail: personalized("Lo importante es que no pierdas de vista lo que estas construyendo\(namePause), materia por materia.")
-            ),
-            LeanUpMotivationMessage(
-                title: "La constancia tambien se ve en pequeno.",
-                detail: personalized("Cada nota que registras y cada materia que ordenas\(namePause), le baja ruido a la carrera y te devuelve control.")
-            ),
-            LeanUpMotivationMessage(
-                title: "Tu proceso merece verse con claridad.",
-                detail: personalized("No se trata de correr mas que nadie\(namePause), sino de seguir avanzando sin soltarte del todo.")
-            )
+        let titles = [
+            "Sigue empujando con claridad.",
+            "Hoy tambien cuenta.",
+            "Tu avance se esta notando.",
+            "No estas construyendo poco.",
+            "Lo importante es sostener el ritmo.",
+            "Cada registro ordena la carrera.",
+            "La constancia se vuelve visible.",
+            "Tu proceso merece continuidad.",
+            "No pierdas el hilo que ya agarraste.",
+            "Cerrar una cosa a la vez tambien es estrategia."
         ]
-        return options[seed % options.count]
+
+        let endings = [
+            "A veces basta con cerrar una tarea concreta para que todo vuelva a verse manejable.",
+            "Cuando ordenas lo que llevas encima, la carga se siente menos pesada y mas realista.",
+            "Lo importante no es hacerlo perfecto, sino evitar que se te vuelva ruido.",
+            "Un paso claro hoy vale mas que muchas intenciones sueltas.",
+            "Si mantienes visibilidad sobre tus materias, te cuesta menos sostener el proceso.",
+            "Seguir presente en tu malla ya es una forma real de no soltar la carrera.",
+            "La claridad que ganas aqui tambien te ahorra desgaste mental afuera.",
+            "Cada materia que ubicas bien te devuelve un poco de control.",
+            "No todo se resuelve en un dia, pero si puedes dejar mejor ubicado lo de hoy.",
+            "Tener el panorama claro evita que el semestre se te monte encima sin darte cuenta."
+        ]
+
+        let hourToken = Int(Date().timeIntervalSince1970 / 3600.0)
+        let shuffledIndex = ((hourToken * 37) + 11) % 100
+        let title = titles[shuffledIndex / 10]
+        let ending = endings[shuffledIndex % 10]
+
+        return LeanUpMotivationMessage(
+            title: title,
+            detail: "\(motivationContextLead) \(ending)"
+        )
     }
 
     var periodAverageSeries: [LeanUpPeriodAveragePoint] {
@@ -1242,15 +1204,40 @@ final class LeanUpAppModel: ObservableObject {
         return Double(inProgressCount) / averageItemsPerPeriod
     }
 
-    private var namePause: String {
-        if let preferredDisplayName {
-            return ", \(preferredDisplayName)"
+    private var motivationContextLead: String {
+        if failedCount > 0 {
+            return personalizedLead(
+                named: "Tienes materias por recuperar, \(displayName), y eso no invalida lo que ya avanzaste.",
+                unnamed: "Tienes materias por recuperar y eso no invalida lo que ya avanzaste."
+            )
         }
-        return ""
+
+        if inProgressCount >= 4 {
+            return personalizedLead(
+                named: "Estas sosteniendo una carga fuerte, \(displayName), y verlo con orden ya es parte del trabajo bien hecho.",
+                unnamed: "Estas sosteniendo una carga fuerte y verlo con orden ya es parte del trabajo bien hecho."
+            )
+        }
+
+        if approvedCount >= 20 {
+            return personalizedLead(
+                named: "Ya llevas una base academica seria, \(displayName), y eso merece que tambien te hables con mas criterio.",
+                unnamed: "Ya llevas una base academica seria y eso merece que tambien te hables con mas criterio."
+            )
+        }
+
+        return personalizedLead(
+            named: "Vas construyendo una carrera con mas forma, \(displayName), incluso en los dias que parecen pequenos.",
+            unnamed: "Vas construyendo una carrera con mas forma, incluso en los dias que parecen pequenos."
+        )
     }
 
-    private func personalized(_ text: String) -> String {
-        text
+    private var displayName: String {
+        preferredDisplayName ?? "Usuario"
+    }
+
+    private func personalizedLead(named: String, unnamed: String) -> String {
+        preferredDisplayName == nil ? unnamed : named
     }
 }
 

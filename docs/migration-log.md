@@ -643,3 +643,33 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - aprobadas
   - nombre de usuario
 - Cuando la frase usa nombre, toma siempre el `username` actual guardado en la app.
+
+## Actualizacion 2026-03-22 - Pulido visual y de comportamiento en Malla
+
+- Se aplico a `Malla` la misma estrategia de ancho fijo al viewport que ya habia estabilizado `Dashboard`, para evitar rebote lateral con ciertos contenidos.
+- La parte alta de `Malla` se reordeno asi:
+  - resumen rapido
+  - mensaje
+  - fechas del periodo
+- `Resumen rapido` y `Mensaje` quedaron compactos.
+- `Fechas del periodo` volvio a un tamano mas normal para no apretar el contenido.
+- Los tres banners principales ahora usan fondo blanco en vez del tono grisaceo anterior.
+
+## Actualizacion 2026-03-22 - Busqueda inline nativa en Malla
+
+- La lupa de `Malla` ya no abre una vista aparte.
+- La busqueda vive en la misma pantalla mediante `searchable` nativo del sistema.
+- En iOS 26 se apoya en `searchToolbarBehavior(.minimize)` para acercarse al patron de lupa que se expande a barra.
+- Cuando hay texto activo, los resultados aparecen inline dentro de la misma `Malla`.
+
+## Actualizacion 2026-03-22 - Mensajes motivacionales con ciclo largo
+
+- El mensaje motivacional de `Malla` ya no rota por dia sino por hora.
+- Se construyo un catalogo de 100 combinaciones posibles usando 10 titulos x 10 cierres.
+- El orden ya no es secuencial: se usa una permutacion estable sobre bloques horarios para evitar repeticion temprana.
+- El contexto del mensaje sigue dependiendo del estado academico real del usuario y del `username` actual cuando existe un nombre personalizado.
+
+## Actualizacion 2026-03-22 - Recordatorios con detalle de periodos corto
+
+- En el editor de recordatorios, el selector de periodo ahora usa etiquetas cortas `P1`, `P2`, `P3`... para que el control respire mejor en iPhone.
+- El boton `Expandir` del banner de fechas se reforzo con una microanimacion para que la accion se sienta mas viva sin salirnos de un patron nativo sencillo.
