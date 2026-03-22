@@ -391,3 +391,21 @@ Como se soluciono:
 Regla:
 
 - Aunque la app se pruebe en iOS 26, cualquier firma nueva de SwiftUI debe validarse contra el deployment target real del proyecto antes de dejarla en codigo.
+
+### 20. Referencia colgante al quitar la busqueda interna de detalle
+
+Que paso:
+
+- Despues de retirar la busqueda interna de `Electiva`, la compilacion rompio con `cannot find 'hasActiveSearch' in scope`.
+
+Por que paso:
+
+- Se elimino la propiedad `hasActiveSearch` del detalle, pero quedo una referencia vieja dentro de `optionCountText`.
+
+Como se soluciono:
+
+- Se limpio la condicion sobrante y `optionCountText` volvio a usar solo el conteo filtrado vigente.
+
+Regla:
+
+- Cuando se retire una feature de una vista, barrer tambien computadas auxiliares y textos derivados para evitar referencias colgantes.

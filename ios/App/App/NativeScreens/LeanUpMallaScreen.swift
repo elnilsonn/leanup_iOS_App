@@ -1509,10 +1509,6 @@ private extension LeanUpElectiveGroupDetailView {
     }
 
     var optionCountText: String {
-        if hasActiveSearch {
-            return "Periodo \(group.period) - \(displayedOptions.count) resultados dentro de \(group.options.count) opciones de este electivo"
-        }
-
         return "Periodo \(group.period) - \(filteredOptions.count) de \(group.options.count) opciones"
     }
 
