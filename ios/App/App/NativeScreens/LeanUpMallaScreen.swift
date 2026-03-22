@@ -709,12 +709,12 @@ struct LeanUpCourseDetailView: View {
     let course: LeanUpCourse
     var onSelectRoute: (LeanUpMallaDetailRoute) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
-    @State private var isSearchPresented = false
+    @State private var isSearchExpanded = false
     @State private var searchQuery = ""
 
     var body: some View {
         NavigationView {
-            ZStack {
+            ZStack(alignment: .topTrailing) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         LeanUpSurfaceCard {
@@ -727,13 +727,6 @@ struct LeanUpCourseDetailView: View {
                                 Text(course.summary)
                                     .font(.subheadline)
                                     .foregroundStyle(.primary)
-                            }
-                        }
-
-                        if hasActiveSearch {
-                            LeanUpDetailInlineResultsCard(results: searchResults) { route in
-                                searchQuery = ""
-                                onSelectRoute(route)
                             }
                         }
 
@@ -800,6 +793,13 @@ struct LeanUpCourseDetailView: View {
                 }
                 .leanUpKeyboardFriendlyScroll()
                 .background(LeanUpPageBackground())
+
+                LeanUpInlineDetailSearchOverlay(
+                    model: model,
+                    query: $searchQuery,
+                    isExpanded: $isSearchExpanded,
+                    onSelect: onSelectRoute
+                )
             }
             .navigationTitle("Materia")
             .navigationBarTitleDisplayMode(.inline)
@@ -812,23 +812,8 @@ struct LeanUpCourseDetailView: View {
                     }
                 }
             }
-            .modifier(
-                LeanUpNativeDetailSearchModifier(
-                    query: $searchQuery,
-                    isPresented: $isSearchPresented,
-                    prompt: "Busca otra materia o electiva"
-                )
-            )
         }
         .navigationViewStyle(.stack)
-    }
-
-    private var hasActiveSearch: Bool {
-        !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    private var searchResults: [LeanUpMallaSearchResult] {
-        leanUpMallaSearchResults(model: model, query: searchQuery.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 }
 
@@ -838,19 +823,19 @@ struct LeanUpElectiveGroupDetailView: View {
     var onSelectRoute: (LeanUpMallaDetailRoute) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
     @State private var selectedDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack?
-    @State private var isSearchPresented = false
+    @State private var isSearchExpanded = false
     @State private var searchQuery = ""
 
     var body: some View {
         NavigationView {
-            ZStack {
+            ZStack(alignment: .topTrailing) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 18) {
                         LeanUpSurfaceCard {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text(group.name)
                                     .font(.title2.weight(.bold))
-                                Text(optionCountText)
+                                Text("Periodo \(group.period) - \(filteredOptions.count) de \(group.options.count) opciones")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                 Text(headerDescription)
@@ -894,19 +879,7 @@ struct LeanUpElectiveGroupDetailView: View {
                             }
                         }
 
-                        if hasActiveSearch, displayedOptions.isEmpty {
-                            LeanUpSurfaceCard {
-                                VStack(alignment: .leading, spacing: 10) {
-                                    Label("Sin resultados", systemImage: "magnifyingglass")
-                                        .font(.headline.weight(.semibold))
-                                    Text("No encontramos una opcion dentro de este electivo que coincida con \"\(searchQuery.trimmingCharacters(in: .whitespacesAndNewlines))\".")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-
-                        ForEach(displayedOptions) { option in
+                        ForEach(filteredOptions) { option in
                             LeanUpSurfaceCard {
                                 VStack(alignment: .leading, spacing: 12) {
                                     HStack(alignment: .top, spacing: 12) {
@@ -1009,6 +982,13 @@ struct LeanUpElectiveGroupDetailView: View {
                 }
                 .leanUpKeyboardFriendlyScroll()
                 .background(LeanUpPageBackground())
+
+                LeanUpInlineDetailSearchOverlay(
+                    model: model,
+                    query: $searchQuery,
+                    isExpanded: $isSearchExpanded,
+                    onSelect: onSelectRoute
+                )
             }
             .navigationTitle("Electiva")
             .navigationBarTitleDisplayMode(.inline)
@@ -1021,13 +1001,6 @@ struct LeanUpElectiveGroupDetailView: View {
                     }
                 }
             }
-            .modifier(
-                LeanUpNativeDetailSearchModifier(
-                    query: $searchQuery,
-                    isPresented: $isSearchPresented,
-                    prompt: "Busca una opcion dentro de esta electiva"
-                )
-            )
         }
         .navigationViewStyle(.stack)
         .onAppear {
@@ -1036,14 +1009,9 @@ struct LeanUpElectiveGroupDetailView: View {
             }
         }
     }
-
 }
 
 private extension LeanUpElectiveGroupDetailView {
-    var hasActiveSearch: Bool {
-        !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
     var activeDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack? {
         selectedDisciplinaryTrack ?? group.electiveDisciplinaryTrack ?? availableDisciplinaryTracks.first
     }
@@ -1062,20 +1030,6 @@ private extension LeanUpElectiveGroupDetailView {
         return group.options.filter { option in
             option.disciplinaryTrackValues.isEmpty || option.disciplinaryTrackValues.contains(track)
         }
-    }
-
-    var displayedOptions: [LeanUpElectiveOption] {
-        let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedQuery.isEmpty else { return filteredOptions }
-        return group.options.filter { leanUpElectiveOptionMatches($0, query: trimmedQuery) }
-    }
-
-    var optionCountText: String {
-        if hasActiveSearch {
-            return "Periodo \(group.period) - \(displayedOptions.count) resultados dentro de \(group.options.count) opciones de este electivo"
-        }
-
-        return "Periodo \(group.period) - \(filteredOptions.count) de \(group.options.count) opciones"
     }
 
     var headerDescription: String {
@@ -1214,7 +1168,7 @@ struct LeanUpMallaLinkedInContent: View {
                 LeanUpCopyFeedbackButton(
                     sourceText: text,
                     idleTitle: "Copiar texto",
-                    successTitle: "✓ Copiado",
+                    successTitle: "âœ“ Copiado",
                     systemImage: "doc.on.doc",
                     successSystemImage: "checkmark.circle.fill"
                 )
@@ -1277,8 +1231,8 @@ struct LeanUpMallaPortfolioContent: View {
             if !prompt.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 LeanUpCopyFeedbackButton(
                     sourceText: prompt,
-                    idleTitle: "Copiar prompt para IA",
-                    successTitle: "✓ Prompt copiado",
+                    idleTitle: "ðŸ¤– Copiar prompt para IA",
+                    successTitle: "âœ“ Prompt copiado",
                     systemImage: "sparkles.rectangle.stack",
                     successSystemImage: "checkmark.circle.fill",
                     fillColor: Color.unadBlue.opacity(0.09),
@@ -1329,6 +1283,114 @@ struct LeanUpCopyFeedbackButton: View {
         .frame(maxWidth: width ?? .infinity)
         .scaleEffect(copied ? 1.02 : 1.0)
         .animation(.spring(response: 0.22, dampingFraction: 0.72), value: copied)
+    }
+}
+
+@MainActor
+struct LeanUpInlineDetailSearchOverlay: View {
+    @ObservedObject var model: LeanUpAppModel
+    @Binding var query: String
+    @Binding var isExpanded: Bool
+    let onSelect: (LeanUpMallaDetailRoute) -> Void
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 10) {
+            if isExpanded {
+                VStack(alignment: .leading, spacing: 12) {
+                    HStack(spacing: 10) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(Color.unadBlue)
+
+                        TextField("Busca otra materia o electiva", text: $query)
+                            .textInputAutocapitalization(.never)
+                            .disableAutocorrection(true)
+
+                        Button {
+                            withAnimation(.spring(response: 0.26, dampingFraction: 0.84)) {
+                                query = ""
+                                isExpanded = false
+                            }
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if !trimmedQuery.isEmpty {
+                        Divider()
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            if results.isEmpty {
+                                Text("No encontramos coincidencias con ese texto.")
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                ForEach(Array(results.prefix(6))) { result in
+                                    Button {
+                                        query = ""
+                                        withAnimation(.spring(response: 0.26, dampingFraction: 0.84)) {
+                                            isExpanded = false
+                                        }
+                                        onSelect(result.route)
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(result.title)
+                                                .font(.subheadline.weight(.semibold))
+                                                .foregroundStyle(.primary)
+                                            Text(result.subtitle)
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                                .lineLimit(2)
+                                        }
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .padding(.vertical, 4)
+                                    }
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding(14)
+                .frame(maxWidth: 320)
+                .background(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .fill(Color(.systemBackground).opacity(0.97))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 24, style: .continuous)
+                        .stroke(Color.primary.opacity(0.08), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.08), radius: 18, y: 10)
+            } else {
+                Button {
+                    withAnimation(.spring(response: 0.26, dampingFraction: 0.84)) {
+                        isExpanded = true
+                    }
+                } label: {
+                    Image(systemName: "magnifyingglass")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(Color.white)
+                        .padding(16)
+                        .background(
+                            Circle()
+                                .fill(Color.unadBlue)
+                        )
+                        .shadow(color: Color.unadBlue.opacity(0.22), radius: 14, y: 8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.top, 14)
+        .padding(.trailing, 20)
+    }
+
+    private var trimmedQuery: String {
+        query.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var results: [LeanUpMallaSearchResult] {
+        leanUpMallaSearchResults(model: model, query: trimmedQuery)
     }
 }
 
@@ -1431,89 +1493,6 @@ struct LeanUpMallaSearchResult: Identifiable {
     let period: Int
     let route: LeanUpMallaDetailRoute
     let isElective: Bool
-}
-
-private struct LeanUpDetailInlineResultsCard: View {
-    let results: [LeanUpMallaSearchResult]
-    let onSelect: (LeanUpMallaDetailRoute) -> Void
-
-    var body: some View {
-        LeanUpSurfaceCard {
-            VStack(alignment: .leading, spacing: 12) {
-                Label("Resultados dentro de Malla", systemImage: "magnifyingglass")
-                    .font(.headline.weight(.semibold))
-
-                if results.isEmpty {
-                    Text("No encontramos coincidencias con lo que escribiste.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                } else {
-                    ForEach(Array(results.prefix(6))) { result in
-                        Button {
-                            onSelect(result.route)
-                        } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(result.title)
-                                    .font(.subheadline.weight(.semibold))
-                                Text(result.subtitle)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .lineLimit(2)
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.vertical, 4)
-                        }
-                        .buttonStyle(.plain)
-                    }
-                }
-            }
-        }
-    }
-}
-
-private struct LeanUpNativeDetailSearchModifier: ViewModifier {
-    @Binding var query: String
-    @Binding var isPresented: Bool
-    let prompt: String
-
-    @ViewBuilder
-    func body(content: Content) -> some View {
-        if #available(iOS 26.0, *) {
-            searchableContentIOS26(content)
-        } else if #available(iOS 17.0, *) {
-            searchableContentIOS17(content)
-        } else {
-            content
-                .searchable(
-                    text: $query,
-                    placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: prompt
-                )
-        }
-    }
-
-    @available(iOS 26.0, *)
-    private func searchableContentIOS26(_ content: Content) -> some View {
-        content
-            .searchable(
-                text: $query,
-                isPresented: $isPresented,
-                placement: .automatic,
-                prompt: prompt
-            )
-            .searchToolbarBehavior(.minimize)
-    }
-
-    @available(iOS 17.0, *)
-    private func searchableContentIOS17(_ content: Content) -> some View {
-        content
-            .searchable(
-                text: $query,
-                isPresented: $isPresented,
-                placement: .navigationBarDrawer(displayMode: .always),
-                prompt: prompt
-            )
-    }
 }
 
 struct LeanUpGradeEditorCard: View {
@@ -1760,23 +1739,6 @@ private func leanUpElectiveGroupMatches(_ group: LeanUpElectiveGroup, query: Str
 
         return values.contains { leanUpMatches($0, query: query) }
     }
-}
-
-private func leanUpElectiveOptionMatches(_ option: LeanUpElectiveOption, query: String) -> Bool {
-    guard !query.isEmpty else { return true }
-
-    let values = [
-        option.name,
-        option.code,
-        option.summary,
-        option.plainLanguage,
-        option.outcomes,
-        option.linkedinText,
-        option.portfolioProject,
-        option.portfolioPrompt
-    ] + option.skills
-
-    return values.contains { leanUpMatches($0, query: query) }
 }
 
 @MainActor
