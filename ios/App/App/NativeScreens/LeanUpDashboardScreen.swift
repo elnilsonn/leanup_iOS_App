@@ -91,6 +91,7 @@ struct LeanUpDashboardHero: View {
             }
             .padding(24)
         }
+        .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
         .shadow(color: Color.unadNavy.opacity(scheme == .dark ? 0.16 : 0.10), radius: 12, x: 0, y: 8)
     }
 

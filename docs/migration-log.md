@@ -527,6 +527,14 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - El acceso sale desde la barra superior del sistema y la busqueda se resuelve con patron nativo de `SwiftUI`, dentro del mismo panel.
 - Se corrigio explicitamente el intento anterior de usar un overlay custom para este flujo.
 
+### 46. Ajuste fino de busqueda local en detalle y contencion del dashboard
+
+- La busqueda dentro del detalle de `Electiva` ya no consulta otros grupos disciplinares.
+- Ahora filtra solo dentro del mismo grupo abierto y respeta la ruta disciplinar visible.
+- En `Materia`, los resultados de busqueda ya aparecen dentro del mismo panel en vez de depender de una vista aparte.
+- Para iOS 26, el detalle adopta el patron nativo minimizado del sistema con `searchToolbarBehavior(.minimize)` para acercarse mas al comportamiento de Liquid Glass.
+- En `Dashboard` se recorto el desborde del hero y se suavizo el ajuste de las `pills` para reducir el pequeno scroll horizontal no deseado.
+
 ## Estado actual
 
 ### Ya funcional
