@@ -69,7 +69,7 @@ struct LeanUpNativeRootView: View {
     var body: some View {
         TabView {
             LeanUpNavigationContainer {
-                LeanUpDashboardRootView(model: model)
+                LeanUpDashboardView(model: model)
             }
             .tabItem {
                 Label("Inicio", systemImage: "house.fill")
@@ -101,22 +101,6 @@ struct LeanUpNativeRootView: View {
     }
 }
 
-struct LeanUpDashboardRootView: View {
-    @ObservedObject var model: LeanUpAppModel
-
-    var body: some View {
-        Group {
-            if #available(iOS 16.0, *) {
-                LeanUpDashboardView(model: model)
-                    .scrollBounceBehavior(.basedOnSize, axes: .vertical)
-            } else {
-                LeanUpDashboardView(model: model)
-            }
-        }
-        .background(LeanUpScrollViewBehaviorConfigurator())
-    }
-}
-
 struct LeanUpNavigationContainer<Content: View>: View {
     let content: Content
 
@@ -135,36 +119,6 @@ struct LeanUpNavigationContainer<Content: View>: View {
             }
             .navigationViewStyle(.stack)
         }
-    }
-}
-
-private struct LeanUpScrollViewBehaviorConfigurator: UIViewRepresentable {
-    func makeUIView(context: Context) -> UIView {
-        let view = UIView(frame: .zero)
-        view.isUserInteractionEnabled = false
-        return view
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {
-        DispatchQueue.main.async {
-            guard let scrollView = uiView.leanUpEnclosingScrollView else { return }
-            scrollView.alwaysBounceHorizontal = false
-            scrollView.showsHorizontalScrollIndicator = false
-            scrollView.directionalLockEnabled = true
-        }
-    }
-}
-
-private extension UIView {
-    var leanUpEnclosingScrollView: UIScrollView? {
-        var current = superview
-        while let view = current {
-            if let scrollView = view as? UIScrollView {
-                return scrollView
-            }
-            current = view.superview
-        }
-        return nil
     }
 }
 
