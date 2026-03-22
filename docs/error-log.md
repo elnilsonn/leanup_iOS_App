@@ -237,3 +237,40 @@ Como se soluciono:
 Regla:
 
 - Si un bug visual del `Dashboard` cambia segun el contenido del JSON, revisar primero las tarjetas que pintan texto dinamico real antes de tocar `NativeRoot` o el scroll global.
+
+### 12. Correccion manual definitiva del JSON por parte del usuario
+
+Que paso:
+
+- Tras varias pruebas, el usuario corrigio manualmente los caracteres problematicos dentro de `native-academics.json`.
+- Con esa correccion manual desaparecieron tanto los jeroglificos como el comportamiento raro del `Dashboard`.
+
+Como se cerro:
+
+- Se toma como version valida la correccion manual hecha por el usuario.
+- No se deben reescribir ni "normalizar" esos textos otra vez sin comparar primero contra esta version ya estable.
+
+Regla:
+
+- Si vuelve a aparecer un problema parecido, tomar primero la version manual estable del usuario como referencia de verdad antes de intentar otra conversion automatica.
+
+### 13. Rebound lateral del Dashboard al subir las materias en curso
+
+Que paso:
+
+- El `Dashboard` podia volver a estirarse lateralmente cuando el usuario marcaba mas de 4 materias en curso.
+
+Por que paso:
+
+- El disparador mas probable estaba en `LeanUpDashboardPaceCard`.
+- Esa tarjeta renderizaba tres bloques de estadistica dentro de un `HStack`, y esos valores cambian justamente cuando sube `inProgressCount`.
+- En iPhone compacto, pequenos cambios de contenido en esas tres tarjetas podian empujar el ancho ideal del bloque y activar el rebote lateral.
+
+Como se soluciono:
+
+- Se mantuvo el mismo diseno visual general, pero el contenedor interno de esas tres estadisticas se paso a `LazyVGrid` de tres columnas flexibles.
+- Tambien se reforzo el wrapping y escalado minimo de los textos dentro de `LeanUpDashboardAccentStat`.
+
+Regla:
+
+- Si una fila de metricas del `Dashboard` depende de valores dinamicos, preferir `LazyVGrid` o columnas flexibles controladas antes que un `HStack` simple en ancho compacto.

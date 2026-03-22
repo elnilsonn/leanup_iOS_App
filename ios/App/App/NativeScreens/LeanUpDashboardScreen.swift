@@ -180,6 +180,12 @@ struct LeanUpDashboardSnapshotBand: View {
 struct LeanUpDashboardPaceCard: View {
     @ObservedObject var model: LeanUpAppModel
 
+    private let columns = [
+        GridItem(.flexible(minimum: 0), spacing: 12),
+        GridItem(.flexible(minimum: 0), spacing: 12),
+        GridItem(.flexible(minimum: 0), spacing: 12)
+    ]
+
     var body: some View {
         LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 16) {
@@ -189,7 +195,7 @@ struct LeanUpDashboardPaceCard: View {
                     detail: model.paceDetail
                 )
 
-                HStack(spacing: 12) {
+                LazyVGrid(columns: columns, spacing: 12) {
                     LeanUpDashboardAccentStat(
                         title: "Ritmo",
                         value: model.paceValueText,
@@ -496,12 +502,18 @@ struct LeanUpDashboardAccentStat: View {
                 .font(.caption.weight(.bold))
                 .tracking(0.8)
                 .foregroundStyle(tint)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
             Text(value)
                 .font(.title2.weight(.bold))
                 .foregroundStyle(.primary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.85)
             Text(caption)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+                .lineLimit(3)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)

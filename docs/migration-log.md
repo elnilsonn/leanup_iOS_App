@@ -583,3 +583,19 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Se aislo que el unico bloque del `Dashboard` sensible al contenido textual de `native-academics.json` era `Lectura de rendimiento`.
 - Se reforzo `LeanUpDashboardPerformanceCard` para iPhone: en ancho compacto ahora apila sus columnas y fija mejor el wrapping de nombres largos de materias.
 - No se tocaron `NativeRoot` ni el comportamiento global del scroll para esta correccion.
+
+## Actualizacion 2026-03-22 - Cierre manual del JSON por parte del usuario
+
+- El usuario corrigio manualmente los caracteres de `ios/App/App/native-academics.json`.
+- Despues de esa correccion manual:
+  - desaparecieron los jeroglificos
+  - el `Dashboard` dejo de presentar el comportamiento raro
+- Esta correccion manual se toma como referencia estable y no debe sobreescribirse sin comparacion previa.
+
+## Actualizacion 2026-03-22 - Estabilidad del dashboard con muchas materias en curso
+
+- Se investigo la pista del usuario de que el fallo reaparecia al superar 4 materias en curso.
+- El ajuste quedo acotado a `LeanUpDashboardPaceCard`, porque ese bloque es el que cambia directamente con `inProgressCount`.
+- Se mantuvo el mismo look del dashboard, pero se volvio mas estable el layout interno:
+  - las 3 metricas de ritmo ahora viven en una `LazyVGrid` de 3 columnas flexibles
+  - los textos de `LeanUpDashboardAccentStat` ahora toleran mejor cambios de ancho sin empujar lateralmente la pantalla
