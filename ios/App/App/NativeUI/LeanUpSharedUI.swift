@@ -259,9 +259,6 @@ struct LeanUpPill: View {
         HStack(spacing: 8) {
             Image(systemName: icon)
             Text(text)
-                .lineLimit(1)
-                .minimumScaleFactor(0.72)
-                .allowsTightening(true)
         }
         .font(.footnote.weight(.semibold))
         .padding(.horizontal, 12)

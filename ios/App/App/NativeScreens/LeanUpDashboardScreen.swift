@@ -4,7 +4,7 @@ struct LeanUpDashboardView: View {
     @ObservedObject var model: LeanUpAppModel
 
     var body: some View {
-        ScrollView(.vertical, showsIndicators: false) {
+        ScrollView {
             VStack(alignment: .leading, spacing: 22) {
                 LeanUpDashboardHero(model: model)
                 LeanUpDashboardSnapshotBand(model: model)
@@ -18,7 +18,6 @@ struct LeanUpDashboardView: View {
             .padding(.bottom, 24)
             .frame(maxWidth: .infinity, alignment: .leading)
         }
-        .clipped()
         .background(LeanUpPageBackground())
         .navigationTitle("LeanUp")
         .navigationBarTitleDisplayMode(.large)
@@ -84,17 +83,14 @@ struct LeanUpDashboardHero: View {
                     LeanUpInlineMetric(title: "Periodo foco", value: model.focusPeriod.map(String.init) ?? "Listo")
                 }
 
-                VStack(alignment: .leading, spacing: 10) {
-                    HStack(spacing: 10) {
-                        LeanUpPill(text: "\(model.earnedCredits) creditos", icon: "bolt.fill")
-                        LeanUpPill(text: "\(model.registeredCount) notas", icon: "chart.bar.fill")
-                    }
+                HStack(spacing: 10) {
+                    LeanUpPill(text: "\(model.earnedCredits) creditos", icon: "bolt.fill")
+                    LeanUpPill(text: "\(model.registeredCount) notas", icon: "chart.bar.fill")
                     LeanUpPill(text: "\(model.completedPeriodsCount) periodos cerrados", icon: "flag.checkered")
                 }
             }
             .padding(24)
         }
-        .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
         .shadow(color: Color.unadNavy.opacity(scheme == .dark ? 0.16 : 0.10), radius: 12, x: 0, y: 8)
     }
 
@@ -193,7 +189,7 @@ struct LeanUpDashboardPaceCard: View {
                     detail: model.paceDetail
                 )
 
-                VStack(spacing: 12) {
+                HStack(spacing: 12) {
                     LeanUpDashboardAccentStat(
                         title: "Ritmo",
                         value: model.paceValueText,
@@ -201,21 +197,19 @@ struct LeanUpDashboardPaceCard: View {
                         tint: .unadBlue
                     )
 
-                    HStack(spacing: 12) {
-                        LeanUpDashboardAccentStat(
-                            title: "Restan",
-                            value: model.remainingPeriodsText,
-                            caption: "Periodos estimados",
-                            tint: .unadGold
-                        )
+                    LeanUpDashboardAccentStat(
+                        title: "Restan",
+                        value: model.remainingPeriodsText,
+                        caption: "Periodos estimados",
+                        tint: .unadGold
+                    )
 
-                        LeanUpDashboardAccentStat(
-                            title: "En curso",
-                            value: model.inProgressCountText,
-                            caption: "Carga activa",
-                            tint: .unadCyan
-                        )
-                    }
+                    LeanUpDashboardAccentStat(
+                        title: "En curso",
+                        value: model.inProgressCountText,
+                        caption: "Carga activa",
+                        tint: .unadCyan
+                    )
                 }
 
                 LeanUpProgressTrack(
@@ -333,7 +327,7 @@ struct LeanUpDashboardPerformanceCard: View {
                         text: "Cuando registres notas de materias normales, aqui apareceran tus mejores resultados y las materias mas retadoras."
                     )
                 } else {
-                    VStack(spacing: 12) {
+                    HStack(alignment: .top, spacing: 12) {
                         LeanUpDashboardPerformanceColumn(
                             title: "Mejor te fue en",
                             tint: .green,
