@@ -64,7 +64,7 @@
                                        "Aprendizaje autónomo",
                                        "Entornos virtuales"
                                    ],
-                        "linkedinText":  "GestiÃ³n del aprendizaje autÃ³nomo y productividad en entornos 100% remotos â€” base para el trabajo independiente y el freelancing digital",
+                        "linkedinText":  "Gestión del aprendizaje autónomo y productividad en entornos 100% remotos - base para el trabajo independiente y el freelancing digital",
                         "portfolioProject":  "Sistema personal de productividad para estudiar y trabajar en remoto: rutinas, herramientas digitales, gestión del tiempo y estrategias de aprendizaje autónomo documentadas",
                         "portfolioPrompt":  "Hola, soy estudiante de la UNAD Colombia en modalidad 100% virtual y tengo que crear un sistema personal de productividad para estudiar en remoto. Quiero que me ayudes a construirlo paso a paso, aprendiendo en el proceso. Para empezar: explícame brevemente qué diferencia hay entre estudiar en remoto y estudiar de forma presencial en términos de gestión del tiempo. Luego pregúntame cómo es mi rutina actual y qué me cuesta más del estudio virtual, y espera mi respuesta."
                     },
@@ -88,8 +88,8 @@
                                        "Escritura persuasiva"
                                    ],
                         "linkedinText":  "Comunicación profesional de alto impacto: redacción persuasiva, presentaciones orales y escritura orientada a resultados en entornos corporativos y digitales",
-                        "portfolioProject":  "Kit de comunicaciÃ³n profesional: propuesta comercial, email de ventas y comunicado de prensa â€” tres piezas reales para una misma marca con copywriting efectivo",
-                        "portfolioPrompt":  "Hola, soy estudiante de Competencias Comunicativas en la UNAD Colombia y tengo que crear un kit de comunicaciÃ³n profesional con 3 piezas para una misma marca. Quiero aprender a hacerlo bien contigo, paso a paso. Empieza explicÃ¡ndome cuÃ¡l es la diferencia entre una propuesta comercial, un email de ventas y un comunicado de prensa â€” para quÃ© sirve cada uno. Luego pregÃºntame quÃ© tipo de marca o negocio quiero usar y espera mi respuesta antes de continuar."
+                        "portfolioProject":  "Kit de comunicación profesional: propuesta comercial, email de ventas y comunicado de prensa - tres piezas reales para una misma marca con copywriting efectivo",
+                        "portfolioPrompt":  "Hola, soy estudiante de Competencias Comunicativas en la UNAD Colombia y tengo que crear un kit de comunicación profesional con 3 piezas para una misma marca. Quiero aprender a hacerlo bien contigo, paso a paso. Empieza explicándome cuál es la diferencia entre una propuesta comercial, un email de ventas y un comunicado de prensa - para qué sirve cada uno. Luego pregúntame quál tipo de marca o negocio quiero usar y espera mi respuesta antes de continuar."
                     },
                     {
                         "id":  5,
@@ -110,7 +110,7 @@
                                        "Gestión documental",
                                        "Colaboración remota"
                                    ],
-                        "linkedinText":  "Dominio de Google Workspace y herramientas de colaboraciÃ³n remota â€” gestiÃ³n de proyectos digitales, documentaciÃ³n y trabajo asÃ­ncrono con equipos distribuidos",
+                        "linkedinText":  "Dominio de Google Workspace y herramientas de colaboración remota - gestión de proyectos digitales, documentación y trabajo asíncrono con equipos distribuidos",
                         "portfolioProject":  "Manual operativo de trabajo remoto para equipo de marketing: flujos en Google Workspace, gestión de proyectos, comunicación asíncrona y buenas prácticas documentadas",
                         "portfolioPrompt":  "Hola, soy estudiante de Herramientas Digitales en la UNAD Colombia y tengo que crear un manual operativo de trabajo remoto para un equipo de marketing usando Google Workspace. Quiero aprenderlo contigo paso a paso. Para arrancar: explícame qué es un flujo de trabajo y por qué es importante tenerlo documentado en un equipo remoto. Luego pregúntame si ya uso alguna de las herramientas de Google Workspace y con qué familiaridad, y espera mi respuesta."
                     },
@@ -248,7 +248,7 @@
                                        "Análisis bibliográfico"
                                    ],
                         "linkedinText":  "Investigación rigurosa con metodología científica: diseño de estudios, recolección de fuentes primarias y análisis de datos para proyectos de marketing basados en evidencia",
-                        "portfolioProject":  "Informe de investigaciÃ³n: tendencias de consumo digital en Colombia â€” metodologÃ­a mixta con anÃ¡lisis de fuentes secundarias, encuesta propia, hallazgos e insights para marcas",
+                        "portfolioProject":  "Informe de investigación: tendencias de consumo digital en Colombia - metodologí­a mixta con análisis de fuentes secundarias, encuesta propia, hallazgos e insights para marcas",
                         "portfolioPrompt":  "Hola, soy estudiante de Fundamentos de Investigación en la UNAD Colombia y tengo que hacer un informe de investigación sobre tendencias de consumo digital en Colombia. Quiero aprender la metodología correcta contigo. Para empezar: explícame qué diferencia hay entre un planteamiento del problema y una hipótesis, y dame un ejemplo relacionado con el consumo digital. Luego pregúntame qué aspecto del consumo digital me parece más interesante investigar y espera mi respuesta."
                     },
                     {
@@ -270,7 +270,7 @@
                                        "Gramática básica"
                                    ],
                         "linkedinText":  "Iniciación en inglés profesional con foco en terminología de marketing digital, herramientas globales y comunicación básica con equipos internacionales",
-                        "portfolioProject":  "Glosario de 40 tÃ©rminos de marketing digital en inglÃ©s: definiciÃ³n, pronunciaciÃ³n, equivalente en espaÃ±ol y ejemplo de uso real en contexto laboral â€” Ãºtil para estudiar y consultar",
+                        "portfolioProject":  "Glosario de 40 términos de marketing digital en inglés: definición, pronunciación, equivalente en español y ejemplo de uso real en contexto laboral - útil para estudiar y consultar",
                         "portfolioPrompt":  "Hello! I am a student at UNAD Colombia, level A1 English, studying Marketing Digital. I need to create a glossary of 40 marketing digital terms in English. I want to learn with you, step by step. Please start by teaching me 5 basic terms from Social Media category. For each term, tell me the word, what it means in simple Spanish, and one easy example sentence in English. After I read them, ask me if I understood before we continue with more terms. Go slow, I am a beginner."
                     },
                     {
@@ -314,7 +314,7 @@
                                        "MVP",
                                        "Business Model Canvas"
                                    ],
-                        "linkedinText":  "IdeaciÃ³n y validaciÃ³n de negocios con Design Thinking, Business Model Canvas y metodologÃ­a lean â€” del concepto al MVP con criterio de mercado",
+                        "linkedinText":  "Ideación y validación de negocios con Design Thinking, Business Model Canvas y metodología lean – del concepto al MVP con criterio de mercado",
                         "portfolioProject":  "Startup digital validada: Business Model Canvas con 9 bloques desarrollados, validación de supuestos críticos y pitch deck de 8 slides listo para presentar a inversionistas",
                         "portfolioPrompt":  "Hola, soy estudiante de Generación de Ideas de Negocio en la UNAD Colombia y tengo que desarrollar una propuesta de startup digital validada con Business Model Canvas y pitch deck. Quiero construirla contigo paso a paso, entendiendo cada decisión. Empieza explicándome para qué sirve el Business Model Canvas y cuál es la diferencia entre una idea de negocio y un modelo de negocio validado. Luego pregúntame si ya tengo una idea en mente o si necesito ayuda para encontrar una, y espera mi respuesta."
                     },
@@ -338,7 +338,7 @@
                                        "Política monetaria"
                                    ],
                         "linkedinText":  "Análisis macroeconómico estratégico: interpretación de inflación, tasas de interés y ciclos económicos para adaptar estrategias de marketing y anticipar cambios de mercado",
-                        "portfolioProject":  "AnÃ¡lisis macroeconÃ³mico de Colombia 2025: PIB, inflaciÃ³n, desempleo y tasa de cambio â€” y cÃ³mo estas variables impactan presupuestos y decisiones de inversiÃ³n en marketing digital",
+                        "portfolioProject":  "Análisis macroeconómico de Colombia 2025: PIB, inflación, desempleo y tasa de cambio – y cómo estas variables impactan presupuestos y decisiones de inversión en marketing digital",
                         "portfolioPrompt":  "Hola, soy estudiante de Macroeconomía en la UNAD Colombia y tengo que hacer un análisis del entorno macroeconómico de Colombia y su impacto en el marketing digital. Quiero entenderlo bien, no solo tener un documento. Para empezar: explícame con un ejemplo muy concreto cómo la inflación en Colombia puede afectar el presupuesto de una agencia de marketing digital. Luego pregúntame qué tanto conozco sobre los indicadores económicos del país y espera mi respuesta."
                     },
                     {
@@ -360,7 +360,7 @@
                                        "Análisis de costos",
                                        "Márgenes de rentabilidad"
                                    ],
-                        "linkedinText":  "Estrategias avanzadas de pricing con base en anÃ¡lisis de costos, elasticidad de la demanda y posicionamiento competitivo â€” alineadas con objetivos de rentabilidad",
+                        "linkedinText":  "Estrategias avanzadas de pricing con base en análisis de costos, elasticidad de la demanda y posicionamiento competitivo – alineadas con objetivos de rentabilidad",
                         "portfolioProject":  "Estrategia de pricing completa para producto digital: análisis de competencia, modelos evaluados, simulación de márgenes por escenario y precio final recomendado con justificación financiera",
                         "portfolioPrompt":  "Hola, soy estudiante de Finanzas y Fijación de Precios en la UNAD Colombia y tengo que diseñar la estrategia de pricing de un producto digital colombiano. Quiero aprender el proceso de verdad. Para comenzar: explícame cuáles son las 3 formas principales de ponerle precio a algo (basado en costos, en competencia y en valor) y dame un ejemplo sencillo de cada una con un producto digital. Luego pregúntame qué tipo de producto digital quiero analizar y espera mi respuesta."
                     },
@@ -385,7 +385,7 @@
                                        "UX Research"
                                    ],
                         "linkedinText":  "Investigación cualitativa del consumidor: diseño de entrevistas en profundidad, grupos focales y análisis de narrativas para extraer insights accionables de marca",
-                        "portfolioProject":  "InvestigaciÃ³n cualitativa: comportamiento digital de millennials colombianos â€” guÃ­a de focus group virtual, anÃ¡lisis de narrativas emergentes e insights accionables para marcas",
+                        "portfolioProject":  "Investigación cualitativa: comportamiento digital de millennials colombianos – guía de focus group virtual, análisis de narrativas emergentes e insights accionables para marcas",
                         "portfolioPrompt":  "Hola, soy estudiante de Investigación Cualitativa en la UNAD Colombia y tengo que hacer una investigación sobre el comportamiento digital de millennials colombianos. Quiero aprender el proceso metodológico contigo paso a paso. Para empezar: explícame en qué se diferencia una investigación cualitativa de una cuantitativa y cuándo conviene usar cada una. Luego pregúntame qué aspecto del comportamiento digital de los millennials me parece más interesante explorar y espera mi respuesta."
                     },
                     {
@@ -453,8 +453,8 @@
                                        "Normativa laboral",
                                        "Compliance"
                                    ],
-                        "linkedinText":  "Conocimiento del marco legal comercial y laboral colombiano â€” contratos, propiedad intelectual, regulaciÃ³n digital y cumplimiento normativo en negocios y agencias de marketing",
-                        "portfolioProject":  "GuÃ­a legal para emprendedores digitales colombianos: tipos de empresa, registro de marca, contratos esenciales, Habeas Data y obligaciones tributarias â€” explicado sin tecnicismos",
+                        "linkedinText":  "Conocimiento del marco legal comercial y laboral colombiano – contratos, propiedad intelectual, regulación digital y cumplimiento normativo en negocios y agencias de marketing",
+                        "portfolioProject":  "Guía legal para emprendedores digitales colombianos: tipos de empresa, registro de marca, contratos esenciales, Habeas Data y obligaciones tributarias – explicado sin tecnicismos",
                         "portfolioPrompt":  "Hola, soy estudiante de Legislación Comercial y Laboral en la UNAD Colombia y tengo que crear una guía legal práctica para emprendedores digitales colombianos. Quiero entender cada tema bien, no memorizar sin comprender. Para empezar: explícame en lenguaje muy sencillo cuáles son las diferencias principales entre crear una SAS, trabajar como persona natural y crear una empresa unipersonal en Colombia, y cuándo conviene cada opción. Luego pregúntame si ya tengo o pienso tener un negocio propio y espera mi respuesta."
                     },
                     {
@@ -522,8 +522,8 @@
                                        "Business English"
                                    ],
                         "linkedinText":  "Inglés B1 para entornos profesionales: redacción de emails, comprensión de briefs internacionales y comunicación fluida en reuniones con clientes o equipos globales",
-                        "portfolioProject":  "Marketing campaign analysis written in English: performance metrics review, what worked and what did not, and 5 strategic recommendations â€” professional B1 English report",
-                        "portfolioPrompt":  "Hello! I am a Marketing student at UNAD Colombia with English level B1. I need to write a marketing campaign analysis in English. I want to learn to do it step by step, not just receive the complete text. Let us start with the first section: Campaign Overview. Explain to me what information I need to include and why each piece matters. Then ask me what campaign I want to analyze â€” real or invented â€” and wait for my answer before we continue."
+                        "portfolioProject":  "Marketing campaign analysis written in English: performance metrics review, what worked and what did not, and 5 strategic recommendations – professional B1 English report",
+                        "portfolioPrompt":  "Hello! I am a Marketing student at UNAD Colombia with English level B1. I need to write a marketing campaign analysis in English. I want to learn to do it step by step, not just receive the complete text. Let us start with the first section: Campaign Overview. Explain to me what information I need to include and why each piece matters. Then ask me what campaign I want to analyze – real or invented – and wait for my answer before we continue."
                     },
                     {
                         "id":  24,
@@ -591,8 +591,8 @@
                                        "Negociación en inglés"
                                    ],
                         "linkedinText":  "Inglés B2 para comunicación corporativa avanzada: presentaciones a stakeholders internacionales, negociación y redacción de documentos estratégicos en inglés",
-                        "portfolioProject":  "Full commercial proposal in English for an international tech client: executive summary, services, pricing, timeline and why us â€” professional B2 level business document",
-                        "portfolioPrompt":  "Hello! I am a Marketing student at UNAD Colombia with English level B2. I need to write a full commercial proposal in English for an international client. I want to build it with you step by step, understanding each section. Let us start with the Executive Summary â€” the most important part. Explain to me what makes a strong executive summary in a business proposal and what mistakes people usually make. Then ask me what kind of agency I am representing and what client I am pitching to, and wait for my answer."
+                        "portfolioProject":  "Full commercial proposal in English for an international tech client: executive summary, services, pricing, timeline and why us – professional B2 level business document",
+                        "portfolioPrompt":  "Hello! I am a Marketing student at UNAD Colombia with English level B2. I need to write a full commercial proposal in English for an international client. I want to build it with you step by step, understanding each section. Let us start with the Executive Summary – the most important part. Explain to me what makes a strong executive summary in a business proposal and what mistakes people usually make. Then ask me what kind of agency I am representing and what client I am pitching to, and wait for my answer."
                     },
                     {
                         "id":  27,
@@ -806,7 +806,7 @@
                                    ],
                         "linkedinText":  "Diseño de planes de marketing 360°: análisis de mercado, definición de objetivos SMART, tácticas por canal, asignación de presupuesto y métricas de seguimiento para marcas y agencias",
                         "portfolioProject":  "Plan de marketing estratégico integrador: diagnóstico PESTEL y Porter, DOFA estratégico, objetivos SMART, estrategia de posicionamiento, tácticas por canal y dashboard de KPIs",
-                        "portfolioPrompt":  "Hola, soy estudiante de Ãºltimo semestre de Marketing y Negocios Digitales en la UNAD Colombia. Mi proyecto integrador es el plan de marketing estratÃ©gico mÃ¡s completo de toda la carrera y quiero hacerlo muy bien. Necesito que me guÃ­es paso a paso como un consultor senior que me estÃ¡ mentoreando. Para arrancar: explÃ­came cuÃ¡l es la lÃ³gica detrÃ¡s de la estructura de un plan de marketing â€” por quÃ© el anÃ¡lisis va primero que los objetivos, y los objetivos antes que la estrategia. Luego pregÃºntame quÃ© empresa quiero analizar y espera mi respuesta antes de continuar."
+                        "portfolioPrompt":  "Hola, soy estudiante de último semestre de Marketing y Negocios Digitales en la UNAD Colombia. Mi proyecto integrador es el plan de marketing estratégico más completo de toda la carrera y quiero hacerlo muy bien. Necesito que me guíes paso a paso como un consultor senior que me está mentoreando. Para arrancar: explícame cuál es la lógica detrás de la estructura de un plan de marketing – por qué el análisis va primero que los objetivos, y los objetivos antes que la estrategia. Luego pregúntame qué empresa quiero analizar y espera mi respuesta antes de continuar."
                     },
                     {
                         "id":  36,
@@ -853,7 +853,7 @@
                                    ],
                         "linkedinText":  "Publicidad y promoción 360°: estrategia creativa, planificación de medios pagados y orgánicos, briefing de campañas y evaluación de impacto en audiencias objetivo",
                         "portfolioProject":  "Campaña publicitaria 360° para lanzamiento de producto digital: concepto creativo central, piezas por canal (digital y offline), plan de medios con presupuesto y KPIs de evaluación",
-                        "portfolioPrompt":  "Hola, soy estudiante de Publicidad y PromociÃ³n en la UNAD Colombia y tengo que diseÃ±ar una campaÃ±a publicitaria 360Â° para el lanzamiento de un producto digital colombiano. Quiero entender el proceso creativo real, no solo llenar una plantilla. Para empezar: explÃ­came quÃ© es un insight del consumidor en publicidad â€” quÃ© lo diferencia de un dato o una observaciÃ³n â€” y dame un ejemplo real de una campaÃ±a colombiana o latinoamericana construida sobre un buen insight. Luego pregÃºntame quÃ© producto digital quiero lanzar y espera mi respuesta."
+                        "portfolioPrompt":  "Hola, soy estudiante de Publicidad y Promoción en la UNAD Colombia y tengo que diseñar una campaña publicitaria 360° para el lanzamiento de un producto digital colombiano. Quiero entender el proceso creativo real, no solo llenar una plantilla. Para empezar: explícame qué es un insight del consumidor en publicidad – qué lo diferencia de un dato o una observación – y dame un ejemplo real de una campaña colombiana o latinoamericana construida sobre un buen insight. Luego pregúntame qué producto digital quiero lanzar y espera mi respuesta."
                     },
                     {
                         "id":  38,
@@ -894,7 +894,7 @@
                                                    "outcomes":  "Consultor RSE, Brand Manager social, Director de Sostenibilidad",
                                                    "skills":  [
                                                                   "RSE",
-                                                                  "Ã‰tica empresarial",
+                                                                  "Ética empresarial",
                                                                   "Sostenibilidad corporativa"
                                                               ],
                                                    "linkedinText":  "RSE estratégica integrada a la marca: diseño de iniciativas de sostenibilidad, comunicación de impacto y construcción de reputación corporativa que conecte con consumidores conscientes",
@@ -930,7 +930,7 @@
                                                                   "Calidad",
                                                                   "Indicadores"
                                                               ],
-                                                   "linkedinText":  "GestiÃ³n integral de organizaciones: diseÃ±o de procesos, implementaciÃ³n de sistemas de calidad y mejora continua â€” aplicado a agencias, startups y equipos de marketing",
+                                                   "linkedinText":  "Gestión integral de organizaciones: diseño de procesos, implementación de sistemas de calidad y mejora continua – aplicado a agencias, startups y equipos de marketing",
                                                    "portfolioProject":  "Mapa de procesos y sistema de indicadores para una agencia de marketing digital",
                                                    "portfolioPrompt":  ""
                                                }
@@ -2268,13 +2268,13 @@
                                                    "credits":  1,
                                                    "summary":  "Aprenderás los fundamentos del instrumento como desarrollo personal y cultural",
                                                    "plainLanguage":  "Es aprender a tocar guitarra como hobby que desarrolla tu disciplina y creatividad",
-                                                   "outcomes":  "Creatividad, disciplina, trabajo en equipo â€” habilidades blandas",
+                                                   "outcomes":  "Creatividad, disciplina, trabajo en equipo – habilidades blandas",
                                                    "skills":  [
                                                                   "Disciplina",
                                                                   "Creatividad",
                                                                   "Expresión artística"
                                                               ],
-                                                   "linkedinText":  "Disciplina creativa a travÃ©s de la mÃºsica: desarrollo de la constancia, el aprendizaje progresivo y la creatividad aplicada â€” habilidades blandas que diferencian a los profesionales mÃ¡s completos",
+                                                   "linkedinText":  "Disciplina creativa a través de la música: desarrollo de la constancia, el aprendizaje progresivo y la creatividad aplicada – habilidades blandas que diferencian a los profesionales más completos",
                                                    "portfolioProject":  "Proyecto musical documentado como ejemplo de aprendizaje autodirigido y disciplina",
                                                    "portfolioPrompt":  ""
                                                },
@@ -2300,7 +2300,7 @@
                                                    "credits":  1,
                                                    "summary":  "Aprenderás a construir un CV y perfil profesional que te ayude a conseguir empleo",
                                                    "plainLanguage":  "Es aprender a escribir tu hoja de vida para que las empresas quieran contratarte",
-                                                   "outcomes":  "Todos los roles â€” un buen CV y perfil LinkedIn es fundamental",
+                                                   "outcomes":  "Todos los roles – un buen CV y perfil LinkedIn es fundamental",
                                                    "skills":  [
                                                                   "CV profesional",
                                                                   "LinkedIn",
@@ -2317,7 +2317,7 @@
                                                    "credits":  2,
                                                    "summary":  "Aprenderás hábitos de vida saludable y la importancia de la actividad física para el rendimiento",
                                                    "plainLanguage":  "Es aprender que hacer ejercicio y comer bien no solo te hace sentir mejor sino que trabajas mejor",
-                                                   "outcomes":  "Productividad personal â€” el bienestar mejora el desempeÃ±o en cualquier trabajo",
+                                                   "outcomes":  "Productividad personal – el bienestar mejora el desempeño en cualquier trabajo",
                                                    "skills":  [
                                                                   "Hábitos saludables",
                                                                   "Gestión del estrés",
@@ -2371,13 +2371,13 @@
                                                    "credits":  1,
                                                    "summary":  "Aprenderás los fundamentos del instrumento como desarrollo personal y cultural",
                                                    "plainLanguage":  "Es aprender a tocar guitarra como hobby que desarrolla tu disciplina y creatividad",
-                                                   "outcomes":  "Creatividad, disciplina, trabajo en equipo â€” habilidades blandas",
+                                                   "outcomes":  "Creatividad, disciplina, trabajo en equipo – habilidades blandas",
                                                    "skills":  [
                                                                   "Disciplina",
                                                                   "Creatividad",
                                                                   "Expresión artística"
                                                               ],
-                                                   "linkedinText":  "Disciplina creativa a travÃ©s de la mÃºsica: desarrollo de la constancia, el aprendizaje progresivo y la creatividad aplicada â€” habilidades blandas que diferencian a los profesionales mÃ¡s completos",
+                                                   "linkedinText":  "Disciplina creativa a través de la música: desarrollo de la constancia, el aprendizaje progresivo y la creatividad aplicada – habilidades blandas que diferencian a los profesionales más completos",
                                                    "portfolioProject":  "Proyecto musical documentado como ejemplo de aprendizaje autodirigido y disciplina",
                                                    "portfolioPrompt":  ""
                                                },
@@ -2419,7 +2419,7 @@
                                                    "credits":  1,
                                                    "summary":  "Aprenderás a construir un CV y perfil profesional que te ayude a conseguir empleo",
                                                    "plainLanguage":  "Es aprender a escribir tu hoja de vida para que las empresas quieran contratarte",
-                                                   "outcomes":  "Todos los roles â€” un buen CV es fundamental",
+                                                   "outcomes":  "Todos los roles – un buen CV es fundamental",
                                                    "skills":  [
                                                                   "CV profesional",
                                                                   "LinkedIn",
