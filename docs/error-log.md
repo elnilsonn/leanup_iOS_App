@@ -195,3 +195,25 @@ Como se soluciono:
 Regla:
 
 - Si un helper de SwiftUI consulta estado del modelo observable de pantalla, debe vivir en `MainActor` o recibir valores ya resueltos.
+
+### 10. Inventar controles custom cuando Apple ya ofrece un patron nativo
+
+Que paso:
+
+- Para la busqueda dentro del detalle de `Materia` y `Electiva` se intento primero un overlay custom con lupa flotante y panel propio.
+
+Por que paso:
+
+- Se priorizo resolver rapido la interaccion sin verificar primero si `SwiftUI` ya tenia una API nativa del sistema para ese flujo.
+- Eso rompia el criterio acordado del proyecto: antes de inventar UI nueva, revisar siempre la guia Apple y las APIs nativas disponibles.
+
+Como se soluciono:
+
+- Se reemplazo ese enfoque por busqueda nativa del sistema con `searchable`, disparada desde la barra superior.
+- Se dejo el comportamiento dentro del mismo panel, sin abrir una ventana nueva.
+
+Regla:
+
+- En LeanUp, antes de crear overlays, botones flotantes, buscadores o navegacion custom, revisar primero si Apple ya resuelve ese patron en `SwiftUI` o `UIKit`.
+- Si existe una solucion nativa razonable, usarla primero.
+- Solo crear una solucion custom cuando la alternativa nativa no cubra bien la necesidad real.
