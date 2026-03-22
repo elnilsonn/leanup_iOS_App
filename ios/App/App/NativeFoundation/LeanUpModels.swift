@@ -340,6 +340,19 @@ final class LeanUpAppModel: ObservableObject {
 
     private let store = LeanUpSnapshotStore()
     private let academicsStore = LeanUpAcademicsStore()
+    private static let monthYearFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_CO")
+        formatter.dateFormat = "MMMM 'de' yyyy"
+        return formatter
+    }()
+
+    private static let shortMonthYearFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "es_CO")
+        formatter.dateFormat = "MMM yyyy"
+        return formatter
+    }()
 
     init() {
         academics = academicsStore.load()
@@ -352,6 +365,11 @@ final class LeanUpAppModel: ObservableObject {
 
     var registeredCount: Int {
         allGrades.count
+    }
+
+    var averageValue: Double? {
+        guard !allGrades.isEmpty else { return nil }
+        return allGrades.reduce(0, +) / Double(allGrades.count)
     }
 
     var approvedCount: Int {
@@ -505,10 +523,20 @@ final class LeanUpAppModel: ObservableObject {
         ).sorted()
     }
 
+    var studiedPeriodsCount: Int {
+        Set(gradedItems.map(\.period)).count
+    }
+
+    var completedPeriodsCount: Int {
+        periods.filter {
+            let progress = progress(for: $0)
+            return progress.total > 0 && progress.approved == progress.total
+        }.count
+    }
+
     var averageText: String {
-        guard !allGrades.isEmpty else { return "-" }
-        let average = allGrades.reduce(0, +) / Double(allGrades.count)
-        return String(format: "%.2f", average)
+        guard let averageValue else { return "-" }
+        return String(format: "%.2f", averageValue)
     }
 
     var progressText: String {
@@ -595,6 +623,171 @@ final class LeanUpAppModel: ObservableObject {
         }
 
         return "Tu base academica ya esta bastante clara. El siguiente paso es convertirla en historias y proyectos que puedas mostrar afuera."
+    }
+
+    var completionRatio: Double {
+        guard totalTrackableItems > 0 else { return 0 }
+        return Double(approvedCount) / Double(totalTrackableItems)
+    }
+
+    var completedEquivalentPeriods: Double {
+        completionRatio * Double(max(periods.count, 1))
+    }
+
+    var paceEquivalentPeriodsPerStudiedPeriod: Double {
+        guard studiedPeriodsCount > 0 else { return 0 }
+        return completedEquivalentPeriods / Double(studiedPeriodsCount)
+    }
+
+    var estimatedRemainingPeriods: Double? {
+        let pace = paceEquivalentPeriodsPerStudiedPeriod
+        guard pace > 0 else { return nil }
+        let remainingEquivalent = max(Double(max(periods.count, 1)) - completedEquivalentPeriods, 0)
+        return remainingEquivalent / pace
+    }
+
+    var estimatedGraduationDate: Date? {
+        guard approvedCount < totalTrackableItems else { return Date() }
+        guard let remainingPeriods = estimatedRemainingPeriods else { return nil }
+        let months = Int((remainingPeriods * 6.0).rounded())
+        return Calendar.current.date(byAdding: .month, value: max(months, 0), to: Date())
+    }
+
+    var estimatedGraduationText: String? {
+        guard let estimatedGraduationDate else { return nil }
+        return Self.monthYearFormatter.string(from: estimatedGraduationDate)
+    }
+
+    var estimatedGraduationShortText: String? {
+        guard let estimatedGraduationDate else { return nil }
+        return Self.shortMonthYearFormatter.string(from: estimatedGraduationDate).capitalized
+    }
+
+    var paceTitle: String {
+        if approvedCount >= totalTrackableItems, totalTrackableItems > 0 {
+            return "Ya cerraste la malla completa."
+        }
+
+        guard registeredCount >= 3, let estimatedGraduationText else {
+            return "Aun no hay suficiente historial para proyectar tu grado."
+        }
+
+        return "Si mantienes este ritmo, podrias terminar hacia \(estimatedGraduationText)."
+    }
+
+    var paceDetail: String {
+        if approvedCount >= totalTrackableItems, totalTrackableItems > 0 {
+            return "Tu progreso academico ya no necesita proyeccion: la carrera esta cerrada en la app."
+        }
+
+        guard registeredCount >= 3 else {
+            return "Cuando registres mas notas en distintos periodos, LeanUp podra estimar mejor el cierre real de la carrera."
+        }
+
+        return "La lectura usa tu avance aprobado, los periodos donde ya tienes notas y la velocidad real con la que has venido cerrando la malla."
+    }
+
+    var paceValueText: String {
+        guard paceEquivalentPeriodsPerStudiedPeriod > 0 else { return "--" }
+        return String(format: "%.1f", paceEquivalentPeriodsPerStudiedPeriod)
+    }
+
+    var remainingPeriodsText: String {
+        guard let estimatedRemainingPeriods else { return "--" }
+        return String(format: "%.1f", estimatedRemainingPeriods)
+    }
+
+    var studiedPeriodsText: String {
+        studiedPeriodsCount == 0 ? "--" : "\(studiedPeriodsCount)"
+    }
+
+    var periodAverageSeries: [LeanUpPeriodAveragePoint] {
+        periods.compactMap { period in
+            let grades = gradeEntries(in: period).map(\.grade)
+            guard !grades.isEmpty else { return nil }
+            let average = grades.reduce(0, +) / Double(grades.count)
+            return LeanUpPeriodAveragePoint(period: period, average: average, count: grades.count)
+        }
+    }
+
+    var strongestCourses: [LeanUpGradedCourse] {
+        Array(
+            gradedCourses
+                .sorted {
+                    if $0.grade == $1.grade {
+                        return $0.period < $1.period
+                    }
+                    return $0.grade > $1.grade
+                }
+                .prefix(3)
+        )
+    }
+
+    var mostDemandingCourses: [LeanUpGradedCourse] {
+        Array(
+            gradedCourses
+                .sorted {
+                    if $0.grade == $1.grade {
+                        return $0.period < $1.period
+                    }
+                    return $0.grade < $1.grade
+                }
+                .prefix(3)
+        )
+    }
+
+    var achievements: [LeanUpAchievement] {
+        let halfThreshold = Int(ceil(Double(totalTrackableItems) / 2.0))
+        return [
+            LeanUpAchievement(
+                id: "first-period-complete",
+                title: "Primer periodo completo",
+                detail: "Cierra un periodo entero sin pendientes ni reprobadas.",
+                icon: "flag.checkered.2.crossed",
+                tone: .blue,
+                isUnlocked: completedPeriodsCount >= 1
+            ),
+            LeanUpAchievement(
+                id: "gpa-over-4",
+                title: "Promedio sobre 4.0",
+                detail: "Sostienes un promedio acumulado por encima de 4.0.",
+                icon: "star.circle.fill",
+                tone: .gold,
+                isUnlocked: (averageValue ?? 0) >= 4.0
+            ),
+            LeanUpAchievement(
+                id: "ten-approved",
+                title: "Diez aprobadas",
+                detail: "Ya construiste una base academica de doble digito.",
+                icon: "10.circle.fill",
+                tone: .green,
+                isUnlocked: approvedCount >= 10
+            ),
+            LeanUpAchievement(
+                id: "half-career",
+                title: "Mitad de la carrera",
+                detail: "Ya pasaste la mitad de la malla en terminos reales.",
+                icon: "seal.fill",
+                tone: .navy,
+                isUnlocked: approvedCount >= halfThreshold
+            ),
+            LeanUpAchievement(
+                id: "clean-record",
+                title: "Sin rojos activos",
+                detail: "No tienes notas reprobadas dentro de lo ya registrado.",
+                icon: "checkmark.shield.fill",
+                tone: .cyan,
+                isUnlocked: registeredCount >= 6 && failedCount == 0
+            )
+        ]
+    }
+
+    var unlockedAchievements: [LeanUpAchievement] {
+        achievements.filter(\.isUnlocked)
+    }
+
+    var nextLockedAchievement: LeanUpAchievement? {
+        achievements.first(where: { !$0.isUnlocked })
     }
 
     var preferredColorScheme: ColorScheme? {
@@ -726,6 +919,40 @@ final class LeanUpAppModel: ObservableObject {
         snapshot = updated.normalized()
         _ = try? store.saveSnapshot(snapshot)
     }
+
+    private var gradedCourses: [LeanUpGradedCourse] {
+        academics.courses.compactMap { course in
+            guard let grade = note(for: course) else { return nil }
+            return LeanUpGradedCourse(
+                id: "course-\(course.id)",
+                name: course.name,
+                period: course.period,
+                grade: grade
+            )
+        }
+    }
+
+    private var gradedItems: [LeanUpGradeEntry] {
+        let courseEntries = academics.courses.compactMap { course -> LeanUpGradeEntry? in
+            guard let grade = note(for: course) else { return nil }
+            return LeanUpGradeEntry(period: course.period, grade: grade)
+        }
+
+        let electiveEntries = academics.electiveGroups.compactMap { group -> LeanUpGradeEntry? in
+            guard let selected = selectedOption(in: group),
+                  let grade = electiveNote(groupName: group.name, optionCode: selected.code) else {
+                return nil
+            }
+
+            return LeanUpGradeEntry(period: group.period, grade: grade)
+        }
+
+        return courseEntries + electiveEntries
+    }
+
+    private func gradeEntries(in period: Int) -> [LeanUpGradeEntry] {
+        gradedItems.filter { $0.period == period }
+    }
 }
 
 enum LeanUpProgressStatus: Equatable {
@@ -775,6 +1002,43 @@ struct LeanUpCareerItem: Identifiable, Hashable {
     let linkedinText: String
     let portfolioProject: String
     let isElective: Bool
+}
+
+struct LeanUpPeriodAveragePoint: Identifiable, Hashable {
+    var id: Int { period }
+
+    let period: Int
+    let average: Double
+    let count: Int
+}
+
+struct LeanUpGradedCourse: Identifiable, Hashable {
+    let id: String
+    let name: String
+    let period: Int
+    let grade: Double
+}
+
+struct LeanUpGradeEntry: Hashable {
+    let period: Int
+    let grade: Double
+}
+
+enum LeanUpAchievementTone: Hashable {
+    case navy
+    case blue
+    case cyan
+    case gold
+    case green
+}
+
+struct LeanUpAchievement: Identifiable, Hashable {
+    let id: String
+    let title: String
+    let detail: String
+    let icon: String
+    let tone: LeanUpAchievementTone
+    let isUnlocked: Bool
 }
 
 

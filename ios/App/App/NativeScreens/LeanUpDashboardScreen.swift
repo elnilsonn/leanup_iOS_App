@@ -8,9 +8,10 @@ struct LeanUpDashboardView: View {
             VStack(alignment: .leading, spacing: 22) {
                 LeanUpDashboardHero(model: model)
                 LeanUpDashboardSnapshotBand(model: model)
-                LeanUpDashboardAcademicStageCard(model: model)
-                LeanUpDashboardMomentumCard(model: model)
-                LeanUpDashboardDirectionCard(model: model)
+                LeanUpDashboardPaceCard(model: model)
+                LeanUpDashboardGpaTrackerCard(model: model)
+                LeanUpDashboardPerformanceCard(model: model)
+                LeanUpDashboardAchievementsCard(model: model)
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
@@ -33,17 +34,17 @@ struct LeanUpDashboardHero: View {
                 .fill(heroGradient)
 
             Circle()
-                .stroke(Color.white.opacity(0.20), lineWidth: 1)
-                .frame(width: 220, height: 220)
-                .offset(x: 170, y: -82)
+                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                .frame(width: 216, height: 216)
+                .offset(x: 178, y: -84)
 
             Circle()
                 .fill(Color.unadGold.opacity(0.16))
-                .frame(width: 110, height: 110)
-                .offset(x: 190, y: -18)
+                .frame(width: 96, height: 96)
+                .offset(x: 216, y: -10)
 
             VStack(alignment: .leading, spacing: 18) {
-                HStack(alignment: .top) {
+                HStack(alignment: .top, spacing: 16) {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Panel de avance")
                             .font(.caption.weight(.bold))
@@ -62,29 +63,30 @@ struct LeanUpDashboardHero: View {
                     Spacer(minLength: 12)
 
                     VStack(alignment: .trailing, spacing: 8) {
-                        Image(systemName: "sparkles.rectangle.stack.fill")
+                        Image(systemName: heroBadgeIcon)
                             .font(.system(size: 28, weight: .semibold))
                             .foregroundStyle(Color.unadGold)
 
-                        Text("\(model.careerReadinessPercent)%")
+                        Text(heroBadgeValue)
                             .font(.title3.weight(.bold))
                             .foregroundStyle(.white)
+                            .multilineTextAlignment(.trailing)
 
-                        Text("Traccion")
+                        Text(heroBadgeLabel)
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(Color.white.opacity(0.68))
                     }
                 }
 
                 HStack(spacing: 12) {
-                    LeanUpInlineMetric(title: "Malla cerrada", value: model.completionPercentText)
-                    LeanUpInlineMetric(title: "Periodo foco", value: periodFocusText)
+                    LeanUpInlineMetric(title: "Promedio", value: model.averageText)
+                    LeanUpInlineMetric(title: "Periodo foco", value: model.focusPeriod.map(String.init) ?? "Listo")
                 }
 
                 HStack(spacing: 10) {
                     LeanUpPill(text: "\(model.earnedCredits) creditos", icon: "bolt.fill")
                     LeanUpPill(text: "\(model.registeredCount) notas", icon: "chart.bar.fill")
-                    LeanUpPill(text: model.themeDescription, icon: "circle.lefthalf.filled")
+                    LeanUpPill(text: "\(model.completedPeriodsCount) periodos cerrados", icon: "flag.checkered")
                 }
             }
             .padding(24)
@@ -105,23 +107,31 @@ struct LeanUpDashboardHero: View {
     }
 
     private var heroMessage: String {
+        if model.approvedCount >= model.totalTrackableItems, model.totalTrackableItems > 0 {
+            return "Tu carrera ya se puede leer como una historia academica cerrada dentro de LeanUp."
+        }
+
         if model.failedCount > 0 {
-            return "Tu avance ya es real, pero conviene corregir primero lo que hoy esta empujando el promedio hacia abajo."
+            return "Tu avance ya tiene suficiente informacion para tomar decisiones. Lo que mas puede acelerar tu ritmo ahora es recuperar los frentes en rojo."
         }
 
-        if model.electiveGroupsWithoutSelection > 0 {
-            return "Ya tienes base academica suficiente para empezar a orientar mejor el perfil. El siguiente paso es definir las electivas que faltan."
+        if model.registeredCount >= 3, model.estimatedGraduationText != nil {
+            return "Ya se puede proyectar el cierre de la carrera usando el ritmo real con el que vienes aprobando la malla."
         }
 
-        if let role = model.recommendedRoles.first {
-            return "Tu progreso ya empieza a dibujar una ruta profesional clara hacia \(role)."
-        }
-
-        return "Tu progreso esta bien organizado y listo para crecer con una lectura mas clara de carrera."
+        return "Registra mas notas y LeanUp podra leer con mas precision tu ritmo, la evolucion del promedio y la fecha estimada de grado."
     }
 
-    private var periodFocusText: String {
-        model.focusPeriod.map(String.init) ?? "Listo"
+    private var heroBadgeIcon: String {
+        model.estimatedGraduationShortText == nil ? "chart.xyaxis.line" : "calendar.badge.clock"
+    }
+
+    private var heroBadgeValue: String {
+        model.estimatedGraduationShortText ?? model.completionPercentText
+    }
+
+    private var heroBadgeLabel: String {
+        model.estimatedGraduationShortText == nil ? "Cierre actual" : "Grado estimado"
     }
 }
 
@@ -138,7 +148,7 @@ struct LeanUpDashboardSnapshotBand: View {
             LeanUpDashboardStatTile(
                 eyebrow: "Promedio",
                 value: model.averageText,
-                subtitle: "Rendimiento general",
+                subtitle: "Rendimiento acumulado",
                 tint: .unadBlue,
                 icon: "waveform.path.ecg"
             )
@@ -159,7 +169,7 @@ struct LeanUpDashboardSnapshotBand: View {
             LeanUpDashboardStatTile(
                 eyebrow: "Pendientes",
                 value: "\(model.pendingCount)",
-                subtitle: "Frentes abiertos",
+                subtitle: "Aun por cerrar",
                 tint: model.failedCount > 0 ? .orange : .unadCyan,
                 icon: "scope"
             )
@@ -167,229 +177,261 @@ struct LeanUpDashboardSnapshotBand: View {
     }
 }
 
-struct LeanUpDashboardAcademicStageCard: View {
+struct LeanUpDashboardPaceCard: View {
     @ObservedObject var model: LeanUpAppModel
 
     var body: some View {
         LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 16) {
                 LeanUpSectionHeader(
-                    eyebrow: "Momento academico",
-                    title: stageTitle,
-                    detail: stageDetail
+                    eyebrow: "Ritmo de avance",
+                    title: model.paceTitle,
+                    detail: model.paceDetail
                 )
 
                 HStack(spacing: 12) {
                     LeanUpDashboardAccentStat(
-                        title: "Alertas",
-                        value: "\(model.failedCount)",
-                        caption: model.failedCount > 0 ? "Por recuperar" : "Sin rojos",
-                        tint: model.failedCount > 0 ? .red : .green
+                        title: "Ritmo",
+                        value: model.paceValueText,
+                        caption: "Periodos equivalentes por tramo cursado",
+                        tint: .unadBlue
                     )
 
                     LeanUpDashboardAccentStat(
-                        title: "Electivas",
-                        value: "\(model.electiveGroupsWithoutSelection)",
-                        caption: "Por definir",
+                        title: "Restan",
+                        value: model.remainingPeriodsText,
+                        caption: "Periodos estimados",
                         tint: .unadGold
                     )
 
                     LeanUpDashboardAccentStat(
-                        title: "Impulso",
-                        value: model.completionPercentText,
-                        caption: "Malla cerrada",
+                        title: "Base",
+                        value: model.studiedPeriodsText,
+                        caption: "Periodos con notas",
                         tint: .unadCyan
                     )
                 }
 
                 LeanUpProgressTrack(
-                    title: "Tramo completado de la malla",
+                    title: "Malla aprobada hasta ahora",
                     valueText: model.completionPercentText,
-                    progress: completionRatio,
+                    progress: model.completionRatio,
                     tint: .unadBlue
-                )
-
-                LeanUpProgressTrack(
-                    title: "Lectura de preparación profesional",
-                    valueText: "\(model.careerReadinessPercent)%",
-                    progress: Double(model.careerReadinessPercent) / 100.0,
-                    tint: .unadGold
                 )
             }
         }
     }
-
-    private var completionRatio: Double {
-        guard model.totalTrackableItems > 0 else { return 0 }
-        return Double(model.approvedCount) / Double(model.totalTrackableItems)
-    }
-
-    private var stageTitle: String {
-        if model.failedCount > 0 {
-            return "Hay progreso, pero toca proteger el promedio."
-        }
-
-        if model.electiveGroupsWithoutSelection > 0 {
-            return "El siguiente salto esta en cerrar tu direccion."
-        }
-
-        return "Tu recorrido ya tiene una base academica consistente."
-    }
-
-    private var stageDetail: String {
-        if model.failedCount > 0 {
-            return "Antes de empujar mas carga nueva, conviene recuperar lo reprobado para que el avance se sienta mas solido."
-        }
-
-        if model.electiveGroupsWithoutSelection > 0 {
-            return "Definir las electivas pendientes va a hacer que Perfil y recomendaciones se vuelvan mas precisas y mas utiles."
-        }
-
-        return "Ya puedes leer tu progreso no solo como notas sueltas, sino como una historia academica con direccion."
-    }
 }
 
-struct LeanUpDashboardMomentumCard: View {
+struct LeanUpDashboardGpaTrackerCard: View {
     @ObservedObject var model: LeanUpAppModel
 
     var body: some View {
         LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 16) {
                 LeanUpSectionHeader(
-                    eyebrow: "Siguiente movimiento",
-                    title: nextMoveTitle,
-                    detail: model.nextProfessionalMove
+                    eyebrow: "GPA tracker",
+                    title: trendTitle,
+                    detail: trendDetail
                 )
 
-                VStack(alignment: .leading, spacing: 12) {
-                    ForEach(priorityItems) { item in
-                        LeanUpPriorityRow(
-                            icon: item.icon,
-                            tint: item.tint,
-                            title: item.title,
-                            detail: item.detail
+                if model.periodAverageSeries.isEmpty {
+                    LeanUpDashboardEmptyState(
+                        icon: "chart.line.uptrend.xyaxis",
+                        text: "Todavia no hay suficientes notas distribuidas por periodo para dibujar la evolucion del promedio."
+                    )
+                } else {
+                    LeanUpDashboardLineChart(points: model.periodAverageSeries)
+
+                    HStack(spacing: 12) {
+                        LeanUpDashboardAccentStat(
+                            title: "Ultimo",
+                            value: latestAverageText,
+                            caption: latestCaption,
+                            tint: .unadBlue
+                        )
+                        LeanUpDashboardAccentStat(
+                            title: "Mejor",
+                            value: bestAverageText,
+                            caption: bestCaption,
+                            tint: .green
                         )
                     }
                 }
-
-                if !periodRows.isEmpty {
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Pulso por periodos")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(.primary)
-
-                        ForEach(periodRows) { row in
-                            LeanUpDashboardPeriodRow(row: row)
-                        }
-                    }
-                }
             }
         }
     }
 
-    private var nextMoveTitle: String {
-        if model.failedCount > 0 {
-            return "Recuperar ahora vale mas que abrir mas frentes."
+    private var trendTitle: String {
+        guard let first = model.periodAverageSeries.first,
+              let last = model.periodAverageSeries.last else {
+            return "Tu evolucion del promedio aparecera aqui."
         }
 
-        if model.electiveGroupsWithoutSelection > 0 {
-            return "Tus decisiones de electivas ya empiezan a pesar."
+        let delta = last.average - first.average
+        if abs(delta) < 0.1 {
+            return "Tu promedio viene bastante estable entre periodos."
         }
 
-        return model.focusPeriod.map { "El periodo \($0) es tu siguiente tramo fuerte." } ?? "Tu mapa academico ya tiene inercia."
+        if delta > 0 {
+            return "Tu promedio muestra una evolucion positiva."
+        }
+
+        return "Tu promedio pide una correccion en los siguientes periodos."
     }
 
-    private var priorityItems: [LeanUpDashboardPriorityItem] {
-        [
-            LeanUpDashboardPriorityItem(
-                icon: model.failedCount > 0 ? "exclamationmark.triangle.fill" : "checkmark.circle.fill",
-                tint: model.failedCount > 0 ? .red : .green,
-                title: model.failedCount > 0 ? "\(model.failedCount) elementos necesitan recuperacion" : "No tienes alertas criticas",
-                detail: model.failedCount > 0
-                    ? "Esa es la accion con mas impacto inmediato sobre el promedio y la tranquilidad del semestre."
-                    : "Tu base actual esta limpia y te deja enfocarte en avanzar con orden."
-            ),
-            LeanUpDashboardPriorityItem(
-                icon: "flag.fill",
-                tint: .unadBlue,
-                title: model.focusPeriod.map { "Periodo foco: \($0)" } ?? "Ruta general activa",
-                detail: model.focusPeriod.map { _ in
-                    "Ese bloque es donde conviene concentrar energia para que el avance se note rapido."
-                } ?? "Tu avance actual te permite seguir construyendo desde varias areas sin perder coherencia."
-            ),
-            LeanUpDashboardPriorityItem(
-                icon: "square.grid.2x2.fill",
-                tint: .unadGold,
-                title: model.electiveGroupsWithoutSelection == 0
-                    ? "Las electivas ya tienen rumbo"
-                    : "\(model.electiveGroupsWithoutSelection) grupos electivos esperan decision",
-                detail: model.electiveGroupsWithoutSelection == 0
-                    ? "Eso ya esta empujando una narrativa profesional mas clara."
-                    : "Resolverlo pronto te va a ayudar a conectar mejor lo academico con el perfil que quieres mostrar."
-            ),
-        ]
+    private var trendDetail: String {
+        guard model.periodAverageSeries.count > 1 else {
+            return "A medida que registres mas periodos, podras ver si tu rendimiento se esta estabilizando o no."
+        }
+
+        return "Este grafico usa tus notas reales por periodo para mostrar si el promedio ha venido subiendo, bajando o sosteniendose."
     }
 
-    private var periodRows: [LeanUpDashboardPeriodSummary] {
-        model.periods.prefix(4).map { period in
-            let progress = model.progress(for: period)
-            return LeanUpDashboardPeriodSummary(
-                period: period,
-                approved: progress.approved,
-                failed: progress.failed,
-                total: progress.total,
-                ratio: progress.completionRatio,
-                isFocus: model.focusPeriod == period
-            )
-        }
+    private var latestAverageText: String {
+        guard let latest = model.periodAverageSeries.last else { return "--" }
+        return String(format: "%.2f", latest.average)
+    }
+
+    private var latestCaption: String {
+        guard let latest = model.periodAverageSeries.last else { return "Sin periodo" }
+        return "Periodo \(latest.period)"
+    }
+
+    private var bestAverageText: String {
+        guard let best = model.periodAverageSeries.max(by: { $0.average < $1.average }) else { return "--" }
+        return String(format: "%.2f", best.average)
+    }
+
+    private var bestCaption: String {
+        guard let best = model.periodAverageSeries.max(by: { $0.average < $1.average }) else { return "Sin pico" }
+        return "Pico en P\(best.period)"
     }
 }
 
-struct LeanUpDashboardDirectionCard: View {
+struct LeanUpDashboardPerformanceCard: View {
     @ObservedObject var model: LeanUpAppModel
 
     var body: some View {
         LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 16) {
                 LeanUpSectionHeader(
-                    eyebrow: "Direccion profesional",
-                    title: model.professionalHeadline,
-                    detail: model.professionalSummary
+                    eyebrow: "Lectura de rendimiento",
+                    title: "Tus notas ya dejan ver donde te fue mejor y donde te costo mas.",
+                    detail: "La idea no es etiquetar materias faciles o dificiles en abstracto, sino leer tu desempeno real para encontrar patrones."
                 )
 
-                if !focusItems.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Focos que ya se estan notando")
-                            .font(.subheadline.weight(.semibold))
-                        FlowTagList(items: focusItems)
+                if model.strongestCourses.isEmpty && model.mostDemandingCourses.isEmpty {
+                    LeanUpDashboardEmptyState(
+                        icon: "graduationcap.circle",
+                        text: "Cuando registres notas de materias normales, aqui apareceran tus mejores resultados y las materias mas retadoras."
+                    )
+                } else {
+                    HStack(alignment: .top, spacing: 12) {
+                        LeanUpDashboardPerformanceColumn(
+                            title: "Mejor te fue en",
+                            tint: .green,
+                            items: model.strongestCourses
+                        )
+
+                        LeanUpDashboardPerformanceColumn(
+                            title: "Mas retadoras",
+                            tint: model.mostDemandingCourses.contains(where: { $0.grade < 3.0 }) ? .red : .orange,
+                            items: model.mostDemandingCourses
+                        )
                     }
                 }
+            }
+        }
+    }
+}
 
-                if !roleItems.isEmpty {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Roles que ya empiezan a tomar forma")
-                            .font(.subheadline.weight(.semibold))
-                        ForEach(roleItems, id: \.self) { role in
-                            LeanUpChecklistRow(text: role)
+struct LeanUpDashboardAchievementsCard: View {
+    @ObservedObject var model: LeanUpAppModel
+
+    private let columns = [
+        GridItem(.flexible(), spacing: 12),
+        GridItem(.flexible(), spacing: 12)
+    ]
+
+    var body: some View {
+        LeanUpSurfaceCard {
+            VStack(alignment: .leading, spacing: 16) {
+                LeanUpSectionHeader(
+                    eyebrow: "Logros desbloqueados",
+                    title: unlockedTitle,
+                    detail: unlockedDetail
+                )
+
+                if model.unlockedAchievements.isEmpty {
+                    LeanUpDashboardEmptyState(
+                        icon: "rosette",
+                        text: "Todavia no hay badges activos. A medida que cierres periodos y sostengas el promedio, apareceran aqui."
+                    )
+                } else {
+                    LazyVGrid(columns: columns, spacing: 12) {
+                        ForEach(model.unlockedAchievements) { achievement in
+                            LeanUpDashboardAchievementBadge(achievement: achievement)
                         }
                     }
                 }
 
-                LeanUpDashboardSignalStrip(
-                    readiness: "\(model.careerReadinessPercent)%",
-                    electives: "\(model.selectedElectivesCount)",
-                    evidence: "\(model.approvedCount)"
-                )
+                if let next = model.nextLockedAchievement {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Siguiente por desbloquear")
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(.primary)
+
+                        HStack(alignment: .top, spacing: 12) {
+                            Image(systemName: next.icon)
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundStyle(toneColor(for: next.tone))
+                                .frame(width: 34, height: 34)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                        .fill(toneColor(for: next.tone).opacity(0.12))
+                                )
+
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(next.title)
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text(next.detail)
+                                    .font(.footnote)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
-    private var focusItems: [String] {
-        Array(model.activeFocusNames.prefix(4))
+    private var unlockedTitle: String {
+        if model.unlockedAchievements.isEmpty {
+            return "Tus badges apareceran a medida que avances."
+        }
+
+        return "Ya desbloqueaste \(model.unlockedAchievements.count) hitos reales de tu carrera."
     }
 
-    private var roleItems: [String] {
-        Array(model.recommendedRoles.prefix(3))
+    private var unlockedDetail: String {
+        "Estos logros salen de tus notas, tu promedio y el cierre efectivo de la malla."
+    }
+
+    private func toneColor(for tone: LeanUpAchievementTone) -> Color {
+        switch tone {
+        case .navy:
+            return .unadNavy
+        case .blue:
+            return .unadBlue
+        case .cyan:
+            return .unadCyan
+        case .gold:
+            return .unadGold
+        case .green:
+            return .green
+        }
     }
 }
 
@@ -455,92 +497,47 @@ struct LeanUpDashboardAccentStat: View {
     }
 }
 
-struct LeanUpDashboardSignalStrip: View {
-    let readiness: String
-    let electives: String
-    let evidence: String
-
-    var body: some View {
-        HStack(spacing: 12) {
-            LeanUpDashboardSignalPill(label: "Preparacion", value: readiness, tint: .unadBlue)
-            LeanUpDashboardSignalPill(label: "Electivas", value: electives, tint: .unadGold)
-            LeanUpDashboardSignalPill(label: "Evidencia", value: evidence, tint: .green)
-        }
-    }
-}
-
-struct LeanUpDashboardSignalPill: View {
-    let label: String
-    let value: String
+struct LeanUpDashboardPerformanceColumn: View {
+    let title: String
     let tint: Color
+    let items: [LeanUpGradedCourse]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(value)
-                .font(.headline.weight(.bold))
+        VStack(alignment: .leading, spacing: 12) {
+            Text(title)
+                .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.primary)
-            Text(label)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 10)
-        .background(
-            Capsule()
-                .fill(tint.opacity(0.10))
-        )
-    }
-}
 
-struct LeanUpDashboardPeriodRow: View {
-    let row: LeanUpDashboardPeriodSummary
+            if items.isEmpty {
+                Text("Aun sin lectura suficiente.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(items) { item in
+                    HStack(alignment: .top, spacing: 10) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(item.name)
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                                .lineLimit(2)
+                            Text("Periodo \(item.period)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                HStack(spacing: 8) {
-                    Text("Periodo \(row.period)")
-                        .font(.subheadline.weight(.semibold))
-                    if row.isFocus {
-                        Text("FOCO")
-                            .font(.caption2.weight(.bold))
-                            .tracking(0.8)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Capsule().fill(Color.unadGold.opacity(0.18)))
-                            .foregroundStyle(Color.unadGold)
+                        Spacer(minLength: 8)
+
+                        Text(String(format: "%.1f", item.grade))
+                            .font(.caption.weight(.bold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(Capsule().fill(tint.opacity(0.12)))
+                            .foregroundStyle(tint)
                     }
                 }
-                Spacer()
-                Text("\(row.approved)/\(row.total)")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(row.isFocus ? Color.unadBlue : .secondary)
             }
-
-            GeometryReader { proxy in
-                let width = max(proxy.size.width, 0)
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(Color.primary.opacity(0.08))
-
-                    Capsule()
-                        .fill(
-                            LinearGradient(
-                                colors: [Color.unadBlue.opacity(0.55), Color.unadCyan],
-                                startPoint: .leading,
-                                endPoint: .trailing
-                            )
-                        )
-                        .frame(width: max(width * row.ratio, 10))
-                }
-            }
-            .frame(height: 8)
-
-            Text(row.detailText)
-                .font(.footnote)
-                .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
@@ -549,33 +546,158 @@ struct LeanUpDashboardPeriodRow: View {
     }
 }
 
-struct LeanUpDashboardPriorityItem: Identifiable {
-    let id = UUID()
-    let icon: String
-    let tint: Color
-    let title: String
-    let detail: String
+struct LeanUpDashboardAchievementBadge: View {
+    let achievement: LeanUpAchievement
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Image(systemName: achievement.icon)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(toneColor)
+                .frame(width: 38, height: 38)
+                .background(
+                    RoundedRectangle(cornerRadius: 14, style: .continuous)
+                        .fill(toneColor.opacity(0.14))
+                )
+
+            Text(achievement.title)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.primary)
+
+            Text(achievement.detail)
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .lineLimit(3)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 22, style: .continuous)
+                .fill(Color.primary.opacity(0.05))
+        )
+    }
+
+    private var toneColor: Color {
+        switch achievement.tone {
+        case .navy:
+            return .unadNavy
+        case .blue:
+            return .unadBlue
+        case .cyan:
+            return .unadCyan
+        case .gold:
+            return .unadGold
+        case .green:
+            return .green
+        }
+    }
 }
 
-struct LeanUpDashboardPeriodSummary: Identifiable {
-    var id: Int { period }
+struct LeanUpDashboardLineChart: View {
+    let points: [LeanUpPeriodAveragePoint]
 
-    let period: Int
-    let approved: Int
-    let failed: Int
-    let total: Int
-    let ratio: Double
-    let isFocus: Bool
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            GeometryReader { proxy in
+                let chartPoints = linePoints(in: proxy.size)
 
-    var detailText: String {
-        if failed > 0 {
-            return "\(failed) elementos en rojo. Conviene estabilizar este bloque antes de seguir acelerando."
+                ZStack {
+                    VStack(spacing: proxy.size.height / 3) {
+                        ForEach(0..<3, id: \.self) { _ in
+                            Rectangle()
+                                .fill(Color.primary.opacity(0.05))
+                                .frame(height: 1)
+                        }
+                    }
+
+                    Path { path in
+                        guard chartPoints.count > 1 else { return }
+                        path.move(to: chartPoints[0])
+                        chartPoints.dropFirst().forEach { path.addLine(to: $0) }
+                    }
+                    .stroke(
+                        LinearGradient(
+                            colors: [Color.unadBlue, Color.unadCyan],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        ),
+                        style: StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round)
+                    )
+
+                    ForEach(Array(chartPoints.enumerated()), id: \.offset) { index, point in
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 12, height: 12)
+                            .overlay(
+                                Circle()
+                                    .stroke(Color.unadBlue, lineWidth: 3)
+                            )
+                            .position(point)
+                    }
+                }
+            }
+            .frame(height: 150)
+
+            HStack {
+                ForEach(points) { point in
+                    Text("P\(point.period)")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
         }
+    }
 
-        if approved == total {
-            return "Este periodo ya se ve muy bien cerrado y aporta solidez al perfil."
+    private func linePoints(in size: CGSize) -> [CGPoint] {
+        guard !points.isEmpty else { return [] }
+
+        let values = points.map(\.average)
+        let minValue = values.min() ?? 0
+        let maxValue = values.max() ?? 5
+        let valueRange = max(maxValue - minValue, 0.4)
+        let width = max(size.width, 1)
+        let height = max(size.height, 1)
+
+        return points.enumerated().map { index, point in
+            let x: CGFloat
+            if points.count == 1 {
+                x = width / 2
+            } else {
+                x = CGFloat(index) / CGFloat(points.count - 1) * width
+            }
+
+            let normalizedY = (point.average - minValue) / valueRange
+            let y = height - CGFloat(normalizedY) * max(height - 12, 1) - 6
+            return CGPoint(x: x, y: y)
         }
+    }
+}
 
-        return "Tiene avance, pero aun guarda espacio claro para seguir sumando evidencia academica."
+struct LeanUpDashboardEmptyState: View {
+    let icon: String
+    let text: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(Color.unadBlue)
+                .frame(width: 36, height: 36)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill(Color.unadBlue.opacity(0.10))
+                )
+
+            Text(text)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color.primary.opacity(0.05))
+        )
     }
 }

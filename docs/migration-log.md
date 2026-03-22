@@ -457,6 +457,23 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - buscador de malla
   - `Configuracion`
 
+### 41. Dashboard reorganizado alrededor del avance real
+
+- Se elimino por completo el bloque de `Direccion profesional` del dashboard.
+- La pantalla ahora queda organizada en 6 bloques claros:
+  - hero
+  - resumen rapido
+  - ritmo de avance
+  - GPA tracker
+  - lectura de rendimiento
+  - logros desbloqueados
+- Tambien se movio mas logica al modelo nativo para que el dashboard no sea solo acomodo visual:
+  - proyeccion estimada de grado basada en velocidad real
+  - promedio por periodo para mini grafico
+  - materias con mejor y peor desempeno segun notas reales
+  - sistema de badges/logros desbloqueables
+- Con esto `Dashboard` deja de repetir ideas sueltas y pasa a leer de verdad la carrera desde datos concretos.
+
 ## Estado actual
 
 ### Ya funcional
@@ -488,6 +505,7 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Malla vuelve a incluir textos exactos de LinkedIn y prompts de portafolio del HTML original
 - Malla ahora funciona por periodo visible con filtros rapidos y busqueda flotante
 - Malla ahora deja fija la barra de periodos fuera del scroll y vuelve a patrones mas nativos del sistema para buscar y volver
+- Dashboard reorganizado con enfoque en ritmo, promedio, rendimiento y logros
 
 ### Riesgos actuales
 
@@ -498,6 +516,6 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 
 ## Siguiente foco recomendado
 
-1. Empezar la fase de polish visual y consistencia total sobre la base nativa ya consolidada.
-2. Extender el lenguaje visual del nuevo `Dashboard` a `Malla`, `Perfil` y `Configuracion`.
-3. Luego retomar nuevas funciones nativas de valor.
+1. Ajustar fino el nuevo dashboard segun uso real en iPhone.
+2. Llevar la misma claridad estructural a `Perfil` y `Configuracion`.
+3. Luego entrar a la pasada grande de polish visual y consistencia total.
