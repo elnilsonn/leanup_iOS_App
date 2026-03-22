@@ -709,6 +709,7 @@ struct LeanUpCourseDetailView: View {
     let course: LeanUpCourse
     var onSelectRoute: (LeanUpMallaDetailRoute) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
+    @State private var isSearchPresented = false
     @State private var searchQuery = ""
 
     var body: some View {
@@ -814,6 +815,7 @@ struct LeanUpCourseDetailView: View {
             .modifier(
                 LeanUpNativeDetailSearchModifier(
                     query: $searchQuery,
+                    isPresented: $isSearchPresented,
                     prompt: "Busca otra materia o electiva"
                 )
             )
@@ -836,6 +838,7 @@ struct LeanUpElectiveGroupDetailView: View {
     var onSelectRoute: (LeanUpMallaDetailRoute) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
     @State private var selectedDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack?
+    @State private var isSearchPresented = false
     @State private var searchQuery = ""
 
     var body: some View {
@@ -1021,6 +1024,7 @@ struct LeanUpElectiveGroupDetailView: View {
             .modifier(
                 LeanUpNativeDetailSearchModifier(
                     query: $searchQuery,
+                    isPresented: $isSearchPresented,
                     prompt: "Busca una opcion dentro de esta electiva"
                 )
             )
@@ -1063,12 +1067,12 @@ private extension LeanUpElectiveGroupDetailView {
     var displayedOptions: [LeanUpElectiveOption] {
         let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmedQuery.isEmpty else { return filteredOptions }
-        return filteredOptions.filter { leanUpElectiveOptionMatches($0, query: trimmedQuery) }
+        return group.options.filter { leanUpElectiveOptionMatches($0, query: trimmedQuery) }
     }
 
     var optionCountText: String {
         if hasActiveSearch {
-            return "Periodo \(group.period) - \(displayedOptions.count) resultados dentro de \(filteredOptions.count) opciones visibles"
+            return "Periodo \(group.period) - \(displayedOptions.count) resultados dentro de \(group.options.count) opciones de este electivo"
         }
 
         return "Periodo \(group.period) - \(filteredOptions.count) de \(group.options.count) opciones"
@@ -1469,18 +1473,15 @@ private struct LeanUpDetailInlineResultsCard: View {
 
 private struct LeanUpNativeDetailSearchModifier: ViewModifier {
     @Binding var query: String
+    @Binding var isPresented: Bool
     let prompt: String
 
     @ViewBuilder
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
-            content
-                .searchable(
-                    text: $query,
-                    placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: prompt
-                )
-                .searchToolbarBehavior(.minimize)
+            searchableContentIOS26(content)
+        } else if #available(iOS 17.0, *) {
+            searchableContentIOS17(content)
         } else {
             content
                 .searchable(
@@ -1489,6 +1490,29 @@ private struct LeanUpNativeDetailSearchModifier: ViewModifier {
                     prompt: prompt
                 )
         }
+    }
+
+    @available(iOS 26.0, *)
+    private func searchableContentIOS26(_ content: Content) -> some View {
+        content
+            .searchable(
+                text: $query,
+                isPresented: $isPresented,
+                placement: .automatic,
+                prompt: prompt
+            )
+            .searchToolbarBehavior(.minimize)
+    }
+
+    @available(iOS 17.0, *)
+    private func searchableContentIOS17(_ content: Content) -> some View {
+        content
+            .searchable(
+                text: $query,
+                isPresented: $isPresented,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: prompt
+            )
     }
 }
 
