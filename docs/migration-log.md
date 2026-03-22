@@ -605,3 +605,41 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - La investigacion final mostro que el fallo no dependia de un numero magico de materias en curso, sino de ciertas combinaciones de contenido que empujaban el ancho ideal del `Dashboard`.
 - Se fijo el ancho del contenido principal del `Dashboard` al ancho real disponible mediante `GeometryReader`.
 - Con esto se mantiene el mismo diseno visual, pero el `ScrollView` ya no deberia poder negociar un ancho mayor que el viewport.
+
+## Actualizacion 2026-03-22 - Nueva cabecera util para Malla
+
+- Se reemplazo la parte alta de `Malla` por una cabecera mas util y menos pesada:
+  - resumen rapido muy compacto
+  - banner de recordatorios manuales del periodo
+  - mensaje motivacional dinamico
+- Se mantuvo la barra de periodos y filtros como bloque separado debajo de esa cabecera.
+
+## Actualizacion 2026-03-22 - En curso desde la lista
+
+- Las materias y electivas seleccionadas ahora permiten marcar o quitar `En curso` con `swipeActions`.
+- El flujo mantiene el toggle dentro del detalle como respaldo, pero ya no obliga a abrir cada panel para registrar carga actual.
+
+## Actualizacion 2026-03-22 - Recordatorios manuales por periodo
+
+- Se agrego persistencia nativa de recordatorios de periodo en `LeanUpSnapshot`.
+- Cada recordatorio guarda:
+  - titulo
+  - fecha limite
+  - periodo
+  - notas
+  - estado completado
+- El banner superior muestra solo los 3 proximos y desde `Expandir` se abre una vista nativa para:
+  - ver todos los del periodo
+  - volver atras
+  - agregar recordatorio
+  - editar cada recordatorio
+
+## Actualizacion 2026-03-22 - Mensaje motivacional dinamico
+
+- `Malla` ahora muestra un mensaje dinamico ligado al estado real del usuario.
+- La seleccion depende de variables reales del modelo como:
+  - materias en curso
+  - reprobadas
+  - aprobadas
+  - nombre de usuario
+- Cuando la frase usa nombre, toma siempre el `username` actual guardado en la app.

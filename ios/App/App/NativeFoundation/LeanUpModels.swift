@@ -6,12 +6,43 @@ enum LeanUpThemeMode: String, Codable, CaseIterable {
     case system
 }
 
+struct LeanUpPeriodReminder: Codable, Equatable, Identifiable, Hashable {
+    let id: String
+    var title: String
+    var dueDate: Date
+    var period: Int
+    var notes: String
+    var isDone: Bool
+
+    init(
+        id: String = UUID().uuidString,
+        title: String = "",
+        dueDate: Date = Date(),
+        period: Int = 1,
+        notes: String = "",
+        isDone: Bool = false
+    ) {
+        self.id = id
+        self.title = title
+        self.dueDate = dueDate
+        self.period = period
+        self.notes = notes
+        self.isDone = isDone
+    }
+}
+
+struct LeanUpMotivationMessage: Equatable {
+    let title: String
+    let detail: String
+}
+
 struct LeanUpSnapshot: Codable, Equatable {
     var notas: [String: Double]
     var electivosSeleccionados: [String: String]
     var electivosNotas: [String: Double]
     var cursosEnCurso: [String: Bool]
     var electivosEnCurso: [String: Bool]
+    var periodReminders: [LeanUpPeriodReminder]
     var username: String
     var darkMode: Bool
     var themeMode: LeanUpThemeMode
@@ -24,6 +55,7 @@ struct LeanUpSnapshot: Codable, Equatable {
         electivosNotas: [String: Double] = [:],
         cursosEnCurso: [String: Bool] = [:],
         electivosEnCurso: [String: Bool] = [:],
+        periodReminders: [LeanUpPeriodReminder] = [],
         username: String = "Usuario",
         darkMode: Bool = false,
         themeMode: LeanUpThemeMode = .light
@@ -33,6 +65,7 @@ struct LeanUpSnapshot: Codable, Equatable {
         self.electivosNotas = electivosNotas
         self.cursosEnCurso = cursosEnCurso
         self.electivosEnCurso = electivosEnCurso
+        self.periodReminders = periodReminders
         self.username = username
         self.darkMode = darkMode
         self.themeMode = themeMode
@@ -46,6 +79,7 @@ struct LeanUpSnapshot: Codable, Equatable {
         electivosNotas = try container.decodeIfPresent([String: Double].self, forKey: .electivosNotas) ?? [:]
         cursosEnCurso = try container.decodeIfPresent([String: Bool].self, forKey: .cursosEnCurso) ?? [:]
         electivosEnCurso = try container.decodeIfPresent([String: Bool].self, forKey: .electivosEnCurso) ?? [:]
+        periodReminders = try container.decodeIfPresent([LeanUpPeriodReminder].self, forKey: .periodReminders) ?? []
         username = try container.decodeIfPresent(String.self, forKey: .username) ?? "Usuario"
         darkMode = try container.decodeIfPresent(Bool.self, forKey: .darkMode) ?? false
         themeMode = try container.decodeIfPresent(LeanUpThemeMode.self, forKey: .themeMode) ?? .light
@@ -73,6 +107,22 @@ struct LeanUpSnapshot: Codable, Equatable {
             let noteKey = "\(groupName):::\(selectedCode)"
             return copy.electivosNotas[noteKey] == nil
         }
+
+        copy.periodReminders = copy.periodReminders
+            .map { reminder in
+                var normalized = reminder
+                let trimmedTitle = normalized.title.trimmingCharacters(in: .whitespacesAndNewlines)
+                normalized.title = trimmedTitle.isEmpty ? "Recordatorio" : trimmedTitle
+                normalized.notes = normalized.notes.trimmingCharacters(in: .whitespacesAndNewlines)
+                normalized.period = max(normalized.period, 1)
+                return normalized
+            }
+            .sorted {
+                if $0.dueDate == $1.dueDate {
+                    return $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+                }
+                return $0.dueDate < $1.dueDate
+            }
 
         switch copy.themeMode {
         case .light:
@@ -746,6 +796,90 @@ final class LeanUpAppModel: ObservableObject {
         inProgressCount == 0 ? "--" : "\(inProgressCount)"
     }
 
+    var preferredDisplayName: String? {
+        let trimmed = snapshot.username.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, trimmed.caseInsensitiveCompare("Usuario") != .orderedSame else {
+            return nil
+        }
+        return trimmed
+    }
+
+    var mallaMotivationMessage: LeanUpMotivationMessage {
+        let todaySeed = Calendar.current.ordinality(of: .day, in: .year, for: Date()) ?? 0
+        let personalizationOffset = preferredDisplayName?.count ?? 0
+        let seed = todaySeed + approvedCount + inProgressCount + failedCount + personalizationOffset
+
+        if failedCount > 0 {
+            let options = [
+                LeanUpMotivationMessage(
+                    title: "Cada rojo que cierras te devuelve aire.",
+                    detail: personalized("No necesitas resolver toda la carrera hoy\(namePause). Empieza por una de las materias que mas pesa y vuelve a agarrar impulso.")
+                ),
+                LeanUpMotivationMessage(
+                    title: "Recuperar tambien es avanzar.",
+                    detail: personalized("Tu progreso no se mide solo por lo nuevo\(namePause), sino por lo que logras enderezar con constancia.")
+                ),
+                LeanUpMotivationMessage(
+                    title: "Lo importante es no soltar el hilo.",
+                    detail: personalized("Incluso cuando una materia se complica\(namePause), seguir registrando y ordenando tu avance evita que todo se te venga encima.")
+                )
+            ]
+            return options[seed % options.count]
+        }
+
+        if inProgressCount >= 4 {
+            let options = [
+                LeanUpMotivationMessage(
+                    title: "Llevas una carga fuerte, pero ya esta mapeada.",
+                    detail: personalized("Tener varias materias en curso tambien es una senal de compromiso\(namePause). Lo clave ahora es cerrarlas una por una.")
+                ),
+                LeanUpMotivationMessage(
+                    title: "Mucha carga no significa desorden.",
+                    detail: personalized("LeanUp ya te esta ayudando a ver que tienes encima\(namePause), para que la carga no se convierta en ruido.")
+                ),
+                LeanUpMotivationMessage(
+                    title: "Tu ritmo actual merece respeto.",
+                    detail: personalized("No es poco sostener varias materias al tiempo\(namePause). Lo importante es seguirlas con cabeza fria y constancia.")
+                )
+            ]
+            return options[seed % options.count]
+        }
+
+        if approvedCount >= 20 {
+            let options = [
+                LeanUpMotivationMessage(
+                    title: "Ya no vas empezando: ya construiste camino.",
+                    detail: personalized("Todo lo que has aprobado hasta aqui ya cuenta como evidencia real\(namePause). No minimices lo que llevas.")
+                ),
+                LeanUpMotivationMessage(
+                    title: "Tu carrera ya tiene forma.",
+                    detail: personalized("Cuando miras lo aprobado y lo que sigue\(namePause), se nota que ya no estas improvisando tu avance.")
+                ),
+                LeanUpMotivationMessage(
+                    title: "La mitad del esfuerzo ya habla por ti.",
+                    detail: personalized("Seguir asi no es solo completar materias\(namePause), es demostrarte que si puedes sostener el proceso.")
+                )
+            ]
+            return options[seed % options.count]
+        }
+
+        let options = [
+            LeanUpMotivationMessage(
+                title: "Un avance claro siempre pesa mas que un avance perfecto.",
+                detail: personalized("Lo importante es que no pierdas de vista lo que estas construyendo\(namePause), materia por materia.")
+            ),
+            LeanUpMotivationMessage(
+                title: "La constancia tambien se ve en pequeno.",
+                detail: personalized("Cada nota que registras y cada materia que ordenas\(namePause), le baja ruido a la carrera y te devuelve control.")
+            ),
+            LeanUpMotivationMessage(
+                title: "Tu proceso merece verse con claridad.",
+                detail: personalized("No se trata de correr mas que nadie\(namePause), sino de seguir avanzando sin soltarte del todo.")
+            )
+        ]
+        return options[seed % options.count]
+    }
+
     var periodAverageSeries: [LeanUpPeriodAveragePoint] {
         periods.compactMap { period in
             let grades = gradeEntries(in: period).map(\.grade)
@@ -914,6 +1048,28 @@ final class LeanUpAppModel: ObservableObject {
         )
     }
 
+    func reminders(for period: Int? = nil) -> [LeanUpPeriodReminder] {
+        snapshot.periodReminders
+            .filter { period == nil || $0.period == period }
+            .sorted {
+                if $0.isDone != $1.isDone {
+                    return !$0.isDone && $1.isDone
+                }
+                if $0.dueDate == $1.dueDate {
+                    return $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
+                }
+                return $0.dueDate < $1.dueDate
+            }
+    }
+
+    func upcomingReminders(for period: Int? = nil, limit: Int = 3) -> [LeanUpPeriodReminder] {
+        Array(
+            reminders(for: period)
+                .filter { !$0.isDone }
+                .prefix(limit)
+        )
+    }
+
     func progress(for period: Int) -> LeanUpPeriodProgress {
         let periodCourses = courses(in: period)
         let periodElectives = electiveGroups(in: period)
@@ -1004,6 +1160,29 @@ final class LeanUpAppModel: ObservableObject {
         }
     }
 
+    func saveReminder(_ reminder: LeanUpPeriodReminder) {
+        writeSnapshot { snapshot in
+            if let index = snapshot.periodReminders.firstIndex(where: { $0.id == reminder.id }) {
+                snapshot.periodReminders[index] = reminder
+            } else {
+                snapshot.periodReminders.append(reminder)
+            }
+        }
+    }
+
+    func deleteReminder(_ reminderID: String) {
+        writeSnapshot { snapshot in
+            snapshot.periodReminders.removeAll { $0.id == reminderID }
+        }
+    }
+
+    func setReminderDone(_ isDone: Bool, reminderID: String) {
+        writeSnapshot { snapshot in
+            guard let index = snapshot.periodReminders.firstIndex(where: { $0.id == reminderID }) else { return }
+            snapshot.periodReminders[index].isDone = isDone
+        }
+    }
+
     private func writeSnapshot(_ mutate: (inout LeanUpSnapshot) -> Void) {
         var updated = snapshot
         mutate(&updated)
@@ -1061,6 +1240,17 @@ final class LeanUpAppModel: ObservableObject {
     private var inProgressEquivalentPeriods: Double {
         guard averageItemsPerPeriod > 0 else { return 0 }
         return Double(inProgressCount) / averageItemsPerPeriod
+    }
+
+    private var namePause: String {
+        if let preferredDisplayName {
+            return ", \(preferredDisplayName)"
+        }
+        return ""
+    }
+
+    private func personalized(_ text: String) -> String {
+        text
     }
 }
 

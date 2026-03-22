@@ -7,14 +7,20 @@ struct LeanUpMallaView: View {
     @State private var selectedPeriod: Int?
     @State private var selectedFilter: LeanUpMallaFilter = .all
     @State private var isSearchPresented = false
+    @State private var isReminderListPresented = false
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
-                LeanUpMallaOverviewCard(model: model)
-
                 if !model.academics.courses.isEmpty {
-                    LeanUpMallaFocusCard(model: model, selectedPeriod: effectiveSelectedPeriod)
+                    LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
+                    LeanUpMallaReminderPreviewCard(
+                        reminders: model.upcomingReminders(for: effectiveSelectedPeriod),
+                        selectedPeriod: effectiveSelectedPeriod
+                    ) {
+                        isReminderListPresented = true
+                    }
+                    LeanUpMallaMotivationCard(message: model.mallaMotivationMessage)
                 }
 
                 if !model.academics.courses.isEmpty {
@@ -65,6 +71,9 @@ struct LeanUpMallaView: View {
                 isSearchPresented = false
             }
         }
+        .sheet(isPresented: $isReminderListPresented) {
+            LeanUpReminderListView(model: model, period: effectiveSelectedPeriod)
+        }
         .sheet(item: $route) { route in
             LeanUpMallaDetailContainerView(model: model, initialRoute: route)
         }
@@ -82,131 +91,418 @@ private extension LeanUpMallaView {
     }
 }
 
-struct LeanUpMallaOverviewCard: View {
-    @ObservedObject var model: LeanUpAppModel
-
-    var body: some View {
-        LeanUpSurfaceCard {
-            VStack(alignment: .leading, spacing: 14) {
-                LeanUpSectionHeader(
-                    eyebrow: "Control academico",
-                    title: "La malla es tu tablero de seguimiento real.",
-                    detail: "Aqui lo importante es revisar materias, registrar notas definitivas y detectar rapido que conviene recuperar o cerrar."
-                )
-
-                LazyVGrid(
-                    columns: [
-                        GridItem(.flexible(), spacing: 12),
-                        GridItem(.flexible(), spacing: 12)
-                    ],
-                    spacing: 12
-                ) {
-                    LeanUpInlineMetric(title: "Promedio", value: model.averageText)
-                    LeanUpInlineMetric(title: "Creditos", value: "\(model.earnedCredits)")
-                    LeanUpInlineMetric(title: "Por recuperar", value: "\(model.failedCount)")
-                    LeanUpInlineMetric(title: "En curso", value: "\(model.inProgressCount)")
-                }
-
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(summaryLine)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.primary)
-
-                    Text(secondaryLine)
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            }
-        }
-    }
-
-    private var summaryLine: String {
-        if model.failedCount > 0 {
-            return "Tu prioridad inmediata es recuperar \(model.failedCount) materia(s)."
-        }
-
-        if model.inProgressCount > 0 {
-            return "Tienes \(model.inProgressCount) elemento(s) en curso que ya cuentan para leer mejor tu ritmo."
-        }
-
-        if let period = model.focusPeriod {
-            return "El periodo \(period) es el siguiente bloque natural para seguir avanzando."
-        }
-
-        return "Tu base academica ya esta ordenada para seguir registrando avance con claridad."
-    }
-
-    private var secondaryLine: String {
-        if model.selectedElectivesCount > 0 {
-            return "Las electivas siguen apareciendo como complemento, pero el foco principal de esta pantalla esta en tus materias obligatorias."
-        }
-
-        return "Las electivas se mantienen como complemento y no como el centro de la lectura academica."
-    }
-}
-
-struct LeanUpMallaFocusCard: View {
+struct LeanUpMallaCompactOverviewCard: View {
     @ObservedObject var model: LeanUpAppModel
     let selectedPeriod: Int
 
     var body: some View {
         LeanUpSurfaceCard {
-            VStack(alignment: .leading, spacing: 14) {
-                LeanUpSectionHeader(
-                    eyebrow: "Siguiente paso",
-                    title: focusTitle,
-                    detail: focusDetail
-                )
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Text("Resumen rapido")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    LeanUpPriorityRow(
-                        icon: model.failedCount > 0 ? "exclamationmark.triangle.fill" : "checkmark.circle.fill",
-                        tint: model.failedCount > 0 ? .red : .green,
-                        title: model.failedCount > 0 ? "\(model.failedCount) materias por recuperar" : "No tienes materias en rojo",
-                        detail: model.failedCount > 0
-                            ? "Empieza por esas materias antes de abrir mas carga nueva."
-                            : "Eso te deja concentrarte en seguir cerrando periodos con orden."
-                    )
+                    Spacer()
 
-                    LeanUpPriorityRow(
-                        icon: "square.and.pencil",
-                        tint: model.inProgressCount > 0 ? .unadCyan : .unadBlue,
-                        title: model.inProgressCount > 0
-                            ? "\(model.inProgressCount) materias o electivas estan en curso"
-                            : "\(model.pendingCourses.count) materias aun sin nota registrada",
-                        detail: model.inProgressCount > 0
-                            ? "Ese bloque alimenta mejor la proyeccion de ritmo mientras llegan tus notas finales."
-                            : "Si ya tienes calificaciones definitivas, esta pantalla es donde mas valor ganas al actualizarlas."
-                    )
+                    Text("P\(selectedPeriod)")
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Capsule().fill(Color.unadBlue.opacity(0.12)))
+                        .foregroundStyle(Color.unadBlue)
                 }
 
-                let progress = model.progress(for: selectedPeriod)
-                if progress.total > 0 {
-                    LeanUpProgressTrack(
-                        title: "Avance del periodo \(selectedPeriod)",
-                        valueText: progress.completionText,
-                        progress: progress.completionRatio,
-                        tint: .unadBlue
-                    )
+                LazyVGrid(
+                    columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4),
+                    spacing: 8
+                ) {
+                    LeanUpMallaCompactMetric(title: "Prom.", value: model.averageText)
+                    LeanUpMallaCompactMetric(title: "Cred.", value: "\(model.earnedCredits)")
+                    LeanUpMallaCompactMetric(title: "Rojos", value: "\(model.failedCount)")
+                    LeanUpMallaCompactMetric(title: "Curso", value: "\(model.inProgressCount)")
                 }
             }
         }
     }
+}
 
-    private var focusTitle: String {
-        if model.failedCount > 0 {
-            return "Primero estabiliza lo que hoy esta frenando el promedio."
+struct LeanUpMallaCompactMetric: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value)
+                .font(.headline.weight(.bold))
+                .foregroundStyle(.primary)
+            Text(title)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color.primary.opacity(0.05))
+        )
+    }
+}
 
-        return "El periodo \(selectedPeriod) es el tramo que estas revisando ahora."
+struct LeanUpMallaReminderPreviewCard: View {
+    let reminders: [LeanUpPeriodReminder]
+    let selectedPeriod: Int
+    let onExpand: () -> Void
+
+    var body: some View {
+        LeanUpSurfaceCard {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Fechas del periodo \(selectedPeriod)")
+                            .font(.subheadline.weight(.semibold))
+                        Text("Tus proximas 3 entregas manuales.")
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    Spacer()
+
+                    Button("Expandir") {
+                        onExpand()
+                    }
+                    .font(.subheadline.weight(.semibold))
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Color.unadBlue)
+                }
+
+                if reminders.isEmpty {
+                    Text("Aun no tienes recordatorios en este periodo.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                } else {
+                    VStack(spacing: 10) {
+                        ForEach(reminders) { reminder in
+                            LeanUpReminderPreviewRow(reminder: reminder)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct LeanUpReminderPreviewRow: View {
+    let reminder: LeanUpPeriodReminder
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: reminder.isDone ? "checkmark.circle.fill" : "calendar.badge.clock")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(reminder.isDone ? Color.green : Color.unadBlue)
+                .frame(width: 30, height: 30)
+                .background(
+                    RoundedRectangle(cornerRadius: 12, style: .continuous)
+                        .fill((reminder.isDone ? Color.green : Color.unadBlue).opacity(0.12))
+                )
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(reminder.title)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                    .lineLimit(2)
+                Text(reminder.dueDate, format: .dateTime.day().month(.wide))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                if !reminder.notes.isEmpty {
+                    Text(reminder.notes)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+
+            Spacer()
+        }
+    }
+}
+
+struct LeanUpMallaMotivationCard: View {
+    let message: LeanUpMotivationMessage
+
+    var body: some View {
+        LeanUpSurfaceCard {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("Mensaje para hoy")
+                    .font(.caption.weight(.bold))
+                    .tracking(0.8)
+                    .foregroundStyle(Color.unadBlue)
+
+                Text(message.title)
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.primary)
+
+                Text(message.detail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+}
+
+struct LeanUpReminderListView: View {
+    @ObservedObject var model: LeanUpAppModel
+    let period: Int
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var editingReminder: LeanUpPeriodReminder?
+    @State private var isPresentingAddReminder = false
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    LeanUpSurfaceCard {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Periodo \(period)")
+                                .font(.headline.weight(.semibold))
+                            Text("Aqui puedes ver todas tus fechas limite manuales, editar lo que ya tienes y agregar nuevas entregas sin salir de Malla.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    if reminders.isEmpty {
+                        LeanUpSurfaceCard {
+                            Text("Aun no has agregado recordatorios para este periodo.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    } else {
+                        ForEach(reminders) { reminder in
+                            LeanUpReminderListRow(
+                                reminder: reminder,
+                                onToggleDone: {
+                                    model.setReminderDone(!reminder.isDone, reminderID: reminder.id)
+                                },
+                                onEdit: {
+                                    editingReminder = reminder
+                                }
+                            )
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 18)
+            }
+            .background(LeanUpPageBackground())
+            .navigationTitle("Recordatorios")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Label("Volver", systemImage: "chevron.backward")
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Agregar recordatorio") {
+                        isPresentingAddReminder = true
+                    }
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+        .sheet(isPresented: $isPresentingAddReminder) {
+            LeanUpReminderEditorView(model: model, period: period)
+        }
+        .sheet(item: $editingReminder) { reminder in
+            LeanUpReminderEditorView(model: model, period: period, reminder: reminder)
+        }
     }
 
-    private var focusDetail: String {
-        if model.failedCount > 0 {
-            return "La malla tiene que ayudarte a tomar decisiones academicas claras, no solo a ver datos. Por eso la prioridad se marca aqui arriba."
-        }
+    private var reminders: [LeanUpPeriodReminder] {
+        model.reminders(for: period)
+    }
+}
 
-        return "La idea es que esta pantalla te diga rapido donde mirar y que registrar, sin ruido innecesario."
+struct LeanUpReminderListRow: View {
+    let reminder: LeanUpPeriodReminder
+    let onToggleDone: () -> Void
+    let onEdit: () -> Void
+
+    var body: some View {
+        LeanUpSurfaceCard {
+            HStack(alignment: .top, spacing: 12) {
+                Button(action: onToggleDone) {
+                    Image(systemName: reminder.isDone ? "checkmark.circle.fill" : "circle")
+                        .font(.title3)
+                        .foregroundStyle(reminder.isDone ? Color.green : Color.secondary)
+                }
+                .buttonStyle(.plain)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(reminder.title)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                    Text(reminder.dueDate, format: .dateTime.day().month(.wide).year())
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                    if !reminder.notes.isEmpty {
+                        Text(reminder.notes)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Spacer()
+
+                Button("Editar") {
+                    onEdit()
+                }
+                .font(.subheadline.weight(.semibold))
+                .buttonStyle(.plain)
+                .foregroundStyle(Color.unadBlue)
+            }
+        }
+    }
+}
+
+struct LeanUpReminderEditorView: View {
+    @ObservedObject var model: LeanUpAppModel
+    let period: Int
+    let reminder: LeanUpPeriodReminder?
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var title: String
+    @State private var dueDate: Date
+    @State private var reminderPeriod: Int
+    @State private var notes: String
+
+    init(model: LeanUpAppModel, period: Int, reminder: LeanUpPeriodReminder? = nil) {
+        self.model = model
+        self.period = period
+        self.reminder = reminder
+        _title = State(initialValue: reminder?.title ?? "")
+        _dueDate = State(initialValue: reminder?.dueDate ?? Date())
+        _reminderPeriod = State(initialValue: reminder?.period ?? period)
+        _notes = State(initialValue: reminder?.notes ?? "")
+    }
+
+    var body: some View {
+        NavigationView {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    LeanUpSurfaceCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Label("Titulo del recordatorio", systemImage: "text.cursor")
+                                .font(.headline.weight(.semibold))
+
+                            TextField("Ej. Entrega actividad 3", text: $title)
+                                .padding(.horizontal, 14)
+                                .padding(.vertical, 14)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                        .fill(Color.primary.opacity(0.06))
+                                )
+                        }
+                    }
+
+                    LeanUpSurfaceCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Label("Fecha limite", systemImage: "calendar")
+                                .font(.headline.weight(.semibold))
+
+                            DatePicker(
+                                "Selecciona la fecha",
+                                selection: $dueDate,
+                                displayedComponents: [.date]
+                            )
+                            .datePickerStyle(.graphical)
+                            .labelsHidden()
+                        }
+                    }
+
+                    LeanUpSurfaceCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Label("Periodo", systemImage: "square.grid.2x2")
+                                .font(.headline.weight(.semibold))
+
+                            Picker("Periodo", selection: $reminderPeriod) {
+                                ForEach(model.periods, id: \.self) { period in
+                                    Text("Periodo \(period)").tag(period)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                        }
+                    }
+
+                    LeanUpSurfaceCard {
+                        VStack(alignment: .leading, spacing: 14) {
+                            Label("Notas", systemImage: "note.text")
+                                .font(.headline.weight(.semibold))
+
+                            TextEditor(text: $notes)
+                                .frame(minHeight: 120)
+                                .padding(10)
+                                .background(
+                                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                                        .fill(Color.primary.opacity(0.06))
+                                )
+                        }
+                    }
+
+                    if reminder != nil {
+                        Button {
+                            model.deleteReminder(reminder!.id)
+                            dismiss()
+                        } label: {
+                            Label("Eliminar recordatorio", systemImage: "trash")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                        }
+                        .buttonStyle(LeanUpSecondaryButtonStyle())
+                        .tint(.red)
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.vertical, 18)
+            }
+            .background(LeanUpPageBackground())
+            .navigationTitle(reminder == nil ? "Nuevo recordatorio" : "Editar recordatorio")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Cancelar") {
+                        dismiss()
+                    }
+                }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Guardar") {
+                        saveReminder()
+                    }
+                    .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+    }
+
+    private func saveReminder() {
+        let updated = LeanUpPeriodReminder(
+            id: reminder?.id ?? UUID().uuidString,
+            title: title,
+            dueDate: dueDate,
+            period: reminderPeriod,
+            notes: notes,
+            isDone: reminder?.isDone ?? false
+        )
+        model.saveReminder(updated)
+        dismiss()
     }
 }
 
@@ -407,6 +703,17 @@ struct LeanUpSelectedPeriodSection: View {
                                     )
                                 }
                                 .buttonStyle(.plain)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    Button {
+                                        model.setCourseInProgress(!model.isCourseInProgress(course), for: course.id)
+                                    } label: {
+                                        Label(
+                                            model.isCourseInProgress(course) ? "Quitar en curso" : "Marcar en curso",
+                                            systemImage: model.isCourseInProgress(course) ? "xmark.circle" : "calendar.badge.clock"
+                                        )
+                                    }
+                                    .tint(model.isCourseInProgress(course) ? .gray : .unadCyan)
+                                }
                             }
                         }
                     }
@@ -441,6 +748,19 @@ struct LeanUpSelectedPeriodSection: View {
                                     )
                                 }
                                 .buttonStyle(.plain)
+                                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                                    if model.selectedOption(in: group) != nil {
+                                        Button {
+                                            model.setElectiveInProgress(!model.isElectiveInProgress(group), groupName: group.name)
+                                        } label: {
+                                            Label(
+                                                model.isElectiveInProgress(group) ? "Quitar en curso" : "Marcar en curso",
+                                                systemImage: model.isElectiveInProgress(group) ? "xmark.circle" : "calendar.badge.clock"
+                                            )
+                                        }
+                                        .tint(model.isElectiveInProgress(group) ? .gray : .unadCyan)
+                                    }
+                                }
                             }
                         }
                     }
