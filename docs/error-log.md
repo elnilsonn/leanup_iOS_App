@@ -372,3 +372,22 @@ Como se soluciono:
 Regla:
 
 - Si la busqueda inline debe dominar la pantalla, esconder temporalmente la cabecera para no mezclar dos jerarquias visuales al mismo tiempo.
+
+### 19. Firma moderna de `onChange` incompatible con iOS 15
+
+Que paso:
+
+- `Malla` volvio a romper compilacion despues del ajuste de busqueda inline.
+
+Por que paso:
+
+- Se uso la variante moderna de `onChange` con dos parametros (`oldValue`, `newValue`).
+- Esa firma no es valida para el target minimo actual del proyecto, que sigue compilando contra iOS 15.
+
+Como se soluciono:
+
+- Se volvio a la firma compatible `onChange(of:) { newValue in ... }`.
+
+Regla:
+
+- Aunque la app se pruebe en iOS 26, cualquier firma nueva de SwiftUI debe validarse contra el deployment target real del proyecto antes de dejarla en codigo.

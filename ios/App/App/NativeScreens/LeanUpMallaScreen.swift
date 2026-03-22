@@ -83,7 +83,7 @@ struct LeanUpMallaView: View {
                 selectedPeriod = model.focusPeriod ?? model.periods.first
             }
         }
-        .onChange(of: isSearchPresented) { _, isPresented in
+        .onChange(of: isSearchPresented) { isPresented in
             if !isPresented {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
                     if !isSearchPresented {
