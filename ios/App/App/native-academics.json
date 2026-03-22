@@ -1172,6 +1172,40 @@
           "linkedinText": "Storytelling de marca en entornos digitales: creación de narrativas transmedia que generan engagement, construyen comunidad y posicionan a las marcas como referentes en su sector",
           "portfolioProject": "Estrategia de narrativa de marca en formatos video, texto y audio",
           "portfolioPrompt": ""
+        },
+        {
+          "code": "213034",
+          "name": "Seguridad Informática",
+          "credits": 3,
+          "summary": "Aprenderás los fundamentos de ciberseguridad y cómo proteger datos de clientes y empresas",
+          "plainLanguage": "Es aprender a no ser hackeado y a proteger la información de tus clientes en internet",
+          "outcomes": "Data Privacy Manager, Marketing compliance, RGPD specialist",
+          "skills": [
+            "Ciberseguridad básica",
+            "RGPD",
+            "Protección de datos",
+            "Compliance digital"
+          ],
+          "linkedinText": "Ciberseguridad y privacidad de datos para marketers: cumplimiento RGPD/Habeas Data, gestión de cookies, protección de bases de clientes y marketing digital dentro del marco legal",
+          "portfolioProject": "Auditoría de seguridad y privacidad digital para tienda online con plan de cumplimiento",
+          "portfolioPrompt": ""
+        },
+        {
+          "code": "126017",
+          "name": "Intraemprendimiento e Innovación Social",
+          "credits": 3,
+          "summary": "Aprenderás a innovar dentro de empresas existentes y crear proyectos con impacto social",
+          "plainLanguage": "Es aprender a ser emprendedor dentro de una empresa donde ya trabajas, mejorando desde adentro",
+          "outcomes": "Innovation Manager, Corporate Entrepreneur, consultor de innovación",
+          "skills": [
+            "Intraemprendimiento",
+            "Design Thinking",
+            "Innovación abierta",
+            "Gestión del cambio"
+          ],
+          "linkedinText": "Intraemprendimiento e innovación corporativa: liderazgo de proyectos de transformación desde adentro de organizaciones, con Design Thinking y metodologías ágiles para generar impacto real",
+          "portfolioProject": "Propuesta de innovación para empresa existente con prototipo y plan de implementación",
+          "portfolioPrompt": ""
         }
       ]
     },
@@ -1259,6 +1293,22 @@
           ],
           "linkedinText": "Estrategias de expansión en mercados emergentes: análisis de economías de alto crecimiento, modelos de entrada, adaptación de oferta y posicionamiento competitivo en contextos globales",
           "portfolioProject": "Estudio de mercado y estrategia de entrada en un mercado emergente de alto potencial",
+          "portfolioPrompt": ""
+        },
+        {
+          "code": "101067145",
+          "name": "Finanzas Internacionales",
+          "credits": 3,
+          "summary": "Aprenderás sobre mercados financieros internacionales, tipos de cambio y riesgo cambiario",
+          "plainLanguage": "Es entender cómo el valor del dólar o el euro afecta a los negocios colombianos",
+          "outcomes": "Analista de finanzas internacionales, gestión de riesgo cambiario",
+          "skills": [
+            "Tipo de cambio",
+            "Riesgo cambiario",
+            "Mercados financieros internacionales"
+          ],
+          "linkedinText": "Finanzas internacionales y gestión del riesgo cambiario para negocios con operaciones globales",
+          "portfolioProject": "Análisis de riesgo cambiario para empresa colombiana que exporta o paga en dólares",
           "portfolioPrompt": ""
         }
       ]
@@ -2041,6 +2091,22 @@
           "linkedinText": "Proyectos empresariales socialmente responsables con metodología de medición de impacto",
           "portfolioProject": "Proyecto socialmente responsable: diseño, implementación y medición de impacto",
           "portfolioPrompt": ""
+        },
+        {
+          "code": "101067145",
+          "name": "Finanzas Internacionales",
+          "credits": 3,
+          "summary": "Aprenderás sobre mercados financieros internacionales, tipos de cambio y riesgo cambiario",
+          "plainLanguage": "Es entender cómo el valor del dólar o el euro afecta a los negocios colombianos",
+          "outcomes": "Analista de finanzas internacionales, gestión de riesgo cambiario",
+          "skills": [
+            "Tipo de cambio",
+            "Riesgo cambiario",
+            "Mercados financieros internacionales"
+          ],
+          "linkedinText": "Finanzas internacionales y gestión del riesgo cambiario para negocios con operaciones globales",
+          "portfolioProject": "Análisis de riesgo cambiario para empresa colombiana que exporta o paga en dólares",
+          "portfolioPrompt": ""
         }
       ]
     },
@@ -2125,6 +2191,22 @@
           ],
           "linkedinText": "Finanzas internacionales y gestión del riesgo cambiario para negocios con operaciones globales",
           "portfolioProject": "Análisis de riesgo cambiario para empresa colombiana que exporta o paga en dólares",
+          "portfolioPrompt": ""
+        },
+        {
+          "code": "126015",
+          "name": "Mercados Globales Emergentes",
+          "credits": 3,
+          "summary": "Aprenderás sobre los mercados en crecimiento del mundo y cómo posicionarse en ellos",
+          "plainLanguage": "Es aprender sobre países que están creciendo mucho y cómo aprovechar eso para vender",
+          "outcomes": "International Marketing Manager, estratega de expansión global",
+          "skills": [
+            "Mercados emergentes",
+            "Expansión internacional",
+            "Entry strategy"
+          ],
+          "linkedinText": "Estrategias de expansión en mercados emergentes: análisis de economías de alto crecimiento, modelos de entrada, adaptación de oferta y posicionamiento competitivo en contextos globales",
+          "portfolioProject": "Estudio de mercado y estrategia de entrada en un mercado emergente de alto potencial",
           "portfolioPrompt": ""
         }
       ]

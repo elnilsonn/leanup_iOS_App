@@ -500,6 +500,17 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - El contenido se tomo del HTML historico cuando ya existia texto legado util, y se reutilizo de forma consistente dentro del recurso academico nativo.
 - No fue necesario tocar la UI ni la logica de persistencia para este ajuste; la mejora vive en la fuente academica nativa que ya consume la app.
 
+### 44. Electivos disciplinares completados y exploracion por ruta dentro del detalle
+
+- Se completaron opciones faltantes en `Electivo Disciplinar Especifico` para que las rutas de:
+  - Transformacion Digital
+  - Competitividad
+  - Sustentabilidad
+  queden mas consistentes con la estructura que el usuario esperaba.
+- Se reutilizaron textos exactos del `index.html` cuando existian, y cuando una misma materia ya estaba modelada en otra variante nativa se reutilizo esa descripcion para no inventar redacciones nuevas.
+- El filtro por ruta no se metio en la malla general. Quedo dentro del detalle de la electiva en `LeanUpMallaScreen.swift`, que era el lugar correcto segun la aclaracion del usuario.
+- Desde el panel de detalle ya se puede cambiar entre rutas disciplinares sin salir de la electiva, manteniendo la seleccion y el contexto de cada bloque.
+
 ## Estado actual
 
 ### Ya funcional
