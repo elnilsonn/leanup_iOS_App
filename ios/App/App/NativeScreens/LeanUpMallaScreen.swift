@@ -14,18 +14,17 @@ struct LeanUpMallaView: View {
         GeometryReader { proxy in
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    if !model.academics.courses.isEmpty {
+                    if !model.academics.courses.isEmpty && !isSearchMode {
                         LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
                         LeanUpMallaMotivationCard(message: model.mallaMotivationMessage)
                         LeanUpMallaReminderPreviewCard(
-                            reminders: model.upcomingReminders(for: effectiveSelectedPeriod),
-                            selectedPeriod: effectiveSelectedPeriod
+                            reminders: model.upcomingReminders()
                         ) {
                             isReminderListPresented = true
                         }
                     }
 
-                    if !model.academics.courses.isEmpty {
+                    if !model.academics.courses.isEmpty && !isSearchMode {
                         LeanUpMallaStickyHeader(
                             periods: model.periods,
                             selectedPeriod: effectiveSelectedPeriod,
@@ -74,7 +73,7 @@ struct LeanUpMallaView: View {
             )
         )
         .sheet(isPresented: $isReminderListPresented) {
-            LeanUpReminderListView(model: model, period: effectiveSelectedPeriod)
+            LeanUpReminderListView(model: model, defaultPeriod: effectiveSelectedPeriod)
         }
         .sheet(item: $route) { route in
             LeanUpMallaDetailContainerView(model: model, initialRoute: route)
@@ -82,6 +81,15 @@ struct LeanUpMallaView: View {
         .onAppear {
             if selectedPeriod == nil {
                 selectedPeriod = model.focusPeriod ?? model.periods.first
+            }
+        }
+        .onChange(of: isSearchPresented) { _, isPresented in
+            if !isPresented {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+                    if !isSearchPresented {
+                        searchQuery = ""
+                    }
+                }
             }
         }
     }
@@ -98,6 +106,10 @@ private extension LeanUpMallaView {
 
     var hasActiveSearch: Bool {
         !trimmedSearchQuery.isEmpty
+    }
+
+    var isSearchMode: Bool {
+        isSearchPresented || hasActiveSearch
     }
 
     var searchResults: [LeanUpMallaSearchResult] {
@@ -263,7 +275,6 @@ struct LeanUpMallaCompactMetric: View {
 
 struct LeanUpMallaReminderPreviewCard: View {
     let reminders: [LeanUpPeriodReminder]
-    let selectedPeriod: Int
     let onExpand: () -> Void
 
     var body: some View {
@@ -271,9 +282,9 @@ struct LeanUpMallaReminderPreviewCard: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Fechas del periodo \(selectedPeriod)")
+                        Text("Fechas Importantes")
                             .font(.headline.weight(.semibold))
-                        Text("Tus proximas 3 entregas manuales.")
+                        Text("Tus proximas 3 fechas manuales, sin importar el periodo.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                     }
@@ -319,10 +330,17 @@ struct LeanUpReminderPreviewRow: View {
                 Text(reminder.title)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.primary)
-                    .lineLimit(2)
-                Text(reminder.dueDate, format: .dateTime.day().month(.wide).year())
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                HStack(spacing: 8) {
+                    Text("P\(reminder.period)")
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Capsule().fill(Color.unadBlue.opacity(0.12)))
+                        .foregroundStyle(Color.unadBlue)
+                    Text(reminder.dueDate, format: .dateTime.day().month(.wide).year())
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
                 if !reminder.notes.isEmpty {
                     Text(reminder.notes)
                         .font(.footnote)
@@ -341,7 +359,7 @@ struct LeanUpMallaMotivationCard: View {
 
     var body: some View {
         LeanUpMallaBannerCard(compact: true) {
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 10) {
                 Text("Mensaje para hoy")
                     .font(.caption.weight(.bold))
                     .tracking(0.8)
@@ -350,12 +368,12 @@ struct LeanUpMallaMotivationCard: View {
                 Text(message.title)
                     .font(.headline.weight(.semibold))
                     .foregroundStyle(.primary)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
 
                 Text(message.detail)
                     .font(.footnote)
                     .foregroundStyle(.secondary)
-                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
     }
@@ -398,7 +416,7 @@ struct LeanUpAnimatedExpandButton: View {
 
 struct LeanUpReminderListView: View {
     @ObservedObject var model: LeanUpAppModel
-    let period: Int
+    let defaultPeriod: Int
 
     @Environment(\.dismiss) private var dismiss
     @State private var editingReminder: LeanUpPeriodReminder?
@@ -410,9 +428,9 @@ struct LeanUpReminderListView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     LeanUpSurfaceCard {
                         VStack(alignment: .leading, spacing: 8) {
-                            Text("Periodo \(period)")
+                            Text("Fechas importantes")
                                 .font(.headline.weight(.semibold))
-                            Text("Aqui puedes ver todas tus fechas limite manuales, editar lo que ya tienes y agregar nuevas entregas sin salir de Malla.")
+                            Text("Aqui puedes ver todas tus fechas limite manuales, de cualquier periodo, editar lo que ya tienes y agregar nuevas entregas sin salir de Malla.")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
@@ -462,15 +480,15 @@ struct LeanUpReminderListView: View {
         }
         .navigationViewStyle(.stack)
         .sheet(isPresented: $isPresentingAddReminder) {
-            LeanUpReminderEditorView(model: model, period: period)
+            LeanUpReminderEditorView(model: model, period: defaultPeriod)
         }
         .sheet(item: $editingReminder) { reminder in
-            LeanUpReminderEditorView(model: model, period: period, reminder: reminder)
+            LeanUpReminderEditorView(model: model, period: defaultPeriod, reminder: reminder)
         }
     }
 
     private var reminders: [LeanUpPeriodReminder] {
-        model.reminders(for: period)
+        model.reminders()
     }
 }
 
@@ -493,9 +511,17 @@ struct LeanUpReminderListRow: View {
                     Text(reminder.title)
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.primary)
-                    Text(reminder.dueDate, format: .dateTime.day().month(.wide).year())
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
+                    HStack(spacing: 8) {
+                        Text("P\(reminder.period)")
+                            .font(.caption.weight(.bold))
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Capsule().fill(Color.unadBlue.opacity(0.12)))
+                            .foregroundStyle(Color.unadBlue)
+                        Text(reminder.dueDate, format: .dateTime.day().month(.wide).year())
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                    }
                     if !reminder.notes.isEmpty {
                         Text(reminder.notes)
                             .font(.footnote)
@@ -836,18 +862,17 @@ struct LeanUpSelectedPeriodSection: View {
                             .font(.subheadline.weight(.semibold))
                             .foregroundStyle(.primary)
 
-                        VStack(spacing: 12) {
+                        LazyVStack(spacing: 12) {
                             ForEach(courses) { course in
-                                Button {
+                                LeanUpCourseRow(
+                                    course: course,
+                                    note: model.note(for: course),
+                                    status: model.courseStatus(for: course)
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
                                     onOpen(.course(course))
-                                } label: {
-                                    LeanUpCourseRow(
-                                        course: course,
-                                        note: model.note(for: course),
-                                        status: model.courseStatus(for: course)
-                                    )
                                 }
-                                .buttonStyle(.plain)
                                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                     Button {
                                         model.setCourseInProgress(!model.isCourseInProgress(course), for: course.id)
@@ -880,19 +905,18 @@ struct LeanUpSelectedPeriodSection: View {
                             .font(.footnote)
                             .foregroundStyle(.secondary)
 
-                        VStack(spacing: 12) {
+                        LazyVStack(spacing: 12) {
                             ForEach(electiveGroups) { group in
-                                Button {
+                                LeanUpElectiveGroupRow(
+                                    group: group,
+                                    selectedOption: model.selectedOption(in: group),
+                                    note: model.selectedOption(in: group).flatMap { model.electiveNote(groupName: group.name, optionCode: $0.code) },
+                                    status: model.electiveStatus(for: group)
+                                )
+                                .contentShape(Rectangle())
+                                .onTapGesture {
                                     onOpen(.electiveGroup(group))
-                                } label: {
-                                    LeanUpElectiveGroupRow(
-                                        group: group,
-                                        selectedOption: model.selectedOption(in: group),
-                                        note: model.selectedOption(in: group).flatMap { model.electiveNote(groupName: group.name, optionCode: $0.code) },
-                                        status: model.electiveStatus(for: group)
-                                    )
                                 }
-                                .buttonStyle(.plain)
                                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                                     if model.selectedOption(in: group) != nil {
                                         Button {
@@ -1174,8 +1198,6 @@ struct LeanUpCourseDetailView: View {
     let course: LeanUpCourse
     var onSelectRoute: (LeanUpMallaDetailRoute) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
-    @State private var isSearchPresented = false
-    @State private var searchQuery = ""
 
     var body: some View {
         NavigationView {
@@ -1192,13 +1214,6 @@ struct LeanUpCourseDetailView: View {
                                 Text(course.summary)
                                     .font(.subheadline)
                                     .foregroundStyle(.primary)
-                            }
-                        }
-
-                        if hasActiveSearch {
-                            LeanUpDetailInlineResultsCard(results: searchResults) { route in
-                                searchQuery = ""
-                                onSelectRoute(route)
                             }
                         }
 
@@ -1277,23 +1292,8 @@ struct LeanUpCourseDetailView: View {
                     }
                 }
             }
-            .modifier(
-                LeanUpNativeDetailSearchModifier(
-                    query: $searchQuery,
-                    isPresented: $isSearchPresented,
-                    prompt: "Busca otra materia o electiva"
-                )
-            )
         }
         .navigationViewStyle(.stack)
-    }
-
-    private var hasActiveSearch: Bool {
-        !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
-    private var searchResults: [LeanUpMallaSearchResult] {
-        leanUpMallaSearchResults(model: model, query: searchQuery.trimmingCharacters(in: .whitespacesAndNewlines))
     }
 }
 
@@ -1303,8 +1303,6 @@ struct LeanUpElectiveGroupDetailView: View {
     var onSelectRoute: (LeanUpMallaDetailRoute) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
     @State private var selectedDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack?
-    @State private var isSearchPresented = false
-    @State private var searchQuery = ""
 
     var body: some View {
         NavigationView {
@@ -1354,18 +1352,6 @@ struct LeanUpElectiveGroupDetailView: View {
 
                                     Text("Cada disciplinar especifico trae el mismo catalogo completo. Esta franja solo te ayuda a filtrar por ruta dentro del mismo grupo.")
                                         .font(.footnote)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-
-                        if hasActiveSearch, displayedOptions.isEmpty {
-                            LeanUpSurfaceCard {
-                                VStack(alignment: .leading, spacing: 10) {
-                                    Label("Sin resultados", systemImage: "magnifyingglass")
-                                        .font(.headline.weight(.semibold))
-                                    Text("No encontramos una opcion dentro de este electivo que coincida con \"\(searchQuery.trimmingCharacters(in: .whitespacesAndNewlines))\".")
-                                        .font(.subheadline)
                                         .foregroundStyle(.secondary)
                                 }
                             }
@@ -1486,13 +1472,6 @@ struct LeanUpElectiveGroupDetailView: View {
                     }
                 }
             }
-            .modifier(
-                LeanUpNativeDetailSearchModifier(
-                    query: $searchQuery,
-                    isPresented: $isSearchPresented,
-                    prompt: "Busca una opcion dentro de esta electiva"
-                )
-            )
         }
         .navigationViewStyle(.stack)
         .onAppear {
@@ -1505,10 +1484,6 @@ struct LeanUpElectiveGroupDetailView: View {
 }
 
 private extension LeanUpElectiveGroupDetailView {
-    var hasActiveSearch: Bool {
-        !searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-    }
-
     var activeDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack? {
         selectedDisciplinaryTrack ?? group.electiveDisciplinaryTrack ?? availableDisciplinaryTracks.first
     }
@@ -1530,9 +1505,7 @@ private extension LeanUpElectiveGroupDetailView {
     }
 
     var displayedOptions: [LeanUpElectiveOption] {
-        let trimmedQuery = searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedQuery.isEmpty else { return filteredOptions }
-        return group.options.filter { leanUpElectiveOptionMatches($0, query: trimmedQuery) }
+        filteredOptions
     }
 
     var optionCountText: String {

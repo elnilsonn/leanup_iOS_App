@@ -673,3 +673,19 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 
 - En el editor de recordatorios, el selector de periodo ahora usa etiquetas cortas `P1`, `P2`, `P3`... para que el control respire mejor en iPhone.
 - El boton `Expandir` del banner de fechas se reforzo con una microanimacion para que la accion se sienta mas viva sin salirnos de un patron nativo sencillo.
+
+## Actualizacion 2026-03-22 - Ajuste fino de Malla tras feedback
+
+- `Malla` ahora oculta sus banners y la barra de periodos mientras la busqueda principal esta activa, para que los resultados aparezcan desde arriba.
+- La busqueda principal limpia su texto al cerrarse para reducir glitches visuales en la transicion de la lupa.
+- Se quitaron las barras de busqueda internas de detalle en `Materia` y `Electiva`, porque la busqueda principal de `Malla` ya cubre ese flujo.
+- El banner de mensaje se amplio un poco y sus textos ya no se recortan artificialmente.
+- El banner de fechas ahora es global:
+  - muestra las proximas 3 fechas sin depender del periodo activo
+  - cada recordatorio indica su `P#`
+  - la vista expandida tambien muestra recordatorios de todos los periodos
+
+## Actualizacion 2026-03-22 - Blanco por defecto para las cards base
+
+- `LeanUpSurfaceCard` paso a fondo blanco como base visual compartida.
+- Con esto el tono blanco ya no queda solo en la cabecera de `Malla`, sino que se vuelve el default visual para los banners y cards principales de la app.

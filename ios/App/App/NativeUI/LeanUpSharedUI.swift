@@ -200,7 +200,7 @@ struct LeanUpSurfaceCard<Content: View>: View {
     }
 
     private var cardFill: Color {
-        Color(uiColor: .secondarySystemBackground).opacity(0.92)
+        Color.white.opacity(0.98)
     }
 
     private var cardStroke: Color {

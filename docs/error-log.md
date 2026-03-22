@@ -334,3 +334,41 @@ Regla:
 
 - Si el requerimiento de busqueda es "ahi mismo", no resolverlo con una pantalla aparte aunque sea funcional.
 - En iOS 26, priorizar `searchable` y el comportamiento del toolbar del sistema antes que un sheet o una vista secundaria.
+
+### 17. `swipeActions` chocando con filas envueltas en `Button`
+
+Que paso:
+
+- El gesto para marcar `En curso` desde la lista de `Malla` no estaba respondiendo aunque la logica del cambio de estado si existia.
+
+Por que paso:
+
+- Las filas estaban envueltas en `Button`, lo que hacia mas facil que el tap y el gesto horizontal compitieran en lugar de dejar pasar el swipe.
+
+Como se soluciono:
+
+- Se quitaron los `Button` contenedores de las filas principales.
+- Las filas quedaron como vistas con `contentShape(Rectangle())`, `onTapGesture` para abrir el detalle y `swipeActions` sobre la propia fila.
+
+Regla:
+
+- Si una fila necesita tap + swipe en SwiftUI, evitar envolver toda la fila en `Button` salvo que este comprobado que el gesto no se rompe.
+
+### 18. La busqueda principal de Malla necesita ocultar cabecera durante el foco
+
+Que paso:
+
+- Aunque la busqueda principal ya era inline, seguian quedando banners visibles arriba y la transicion al cerrar la lupa se sentia sucia.
+
+Por que paso:
+
+- El contenido superior seguia vivo mientras el sistema minimizaba o cerraba la busqueda.
+
+Como se soluciono:
+
+- Mientras la busqueda esta presentada o tiene texto, `Malla` oculta banners y sticky header.
+- Al cerrarse la busqueda, se limpia el query con un pequeno delay para acompanar mejor la animacion del sistema.
+
+Regla:
+
+- Si la busqueda inline debe dominar la pantalla, esconder temporalmente la cabecera para no mezclar dos jerarquias visuales al mismo tiempo.
