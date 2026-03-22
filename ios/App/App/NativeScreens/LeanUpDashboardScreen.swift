@@ -4,19 +4,24 @@ struct LeanUpDashboardView: View {
     @ObservedObject var model: LeanUpAppModel
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 22) {
-                LeanUpDashboardHero(model: model)
-                LeanUpDashboardSnapshotBand(model: model)
-                LeanUpDashboardPaceCard(model: model)
-                LeanUpDashboardGpaTrackerCard(model: model)
-                LeanUpDashboardPerformanceCard(model: model)
-                LeanUpDashboardAchievementsCard(model: model)
+        GeometryReader { proxy in
+            let contentWidth = max(proxy.size.width - 40, 0)
+
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    LeanUpDashboardHero(model: model)
+                    LeanUpDashboardSnapshotBand(model: model)
+                    LeanUpDashboardPaceCard(model: model)
+                    LeanUpDashboardGpaTrackerCard(model: model)
+                    LeanUpDashboardPerformanceCard(model: model)
+                    LeanUpDashboardAchievementsCard(model: model)
+                }
+                .frame(width: contentWidth, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.top, 12)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, 24)
-            .frame(maxWidth: .infinity, alignment: .leading)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
         .background(LeanUpPageBackground())
         .navigationTitle("LeanUp")

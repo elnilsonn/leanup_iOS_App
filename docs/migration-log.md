@@ -599,3 +599,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Se mantuvo el mismo look del dashboard, pero se volvio mas estable el layout interno:
   - las 3 metricas de ritmo ahora viven en una `LazyVGrid` de 3 columnas flexibles
   - los textos de `LeanUpDashboardAccentStat` ahora toleran mejor cambios de ancho sin empujar lateralmente la pantalla
+
+## Actualizacion 2026-03-22 - Dashboard anclado al ancho real de pantalla
+
+- La investigacion final mostro que el fallo no dependia de un numero magico de materias en curso, sino de ciertas combinaciones de contenido que empujaban el ancho ideal del `Dashboard`.
+- Se fijo el ancho del contenido principal del `Dashboard` al ancho real disponible mediante `GeometryReader`.
+- Con esto se mantiene el mismo diseno visual, pero el `ScrollView` ya no deberia poder negociar un ancho mayor que el viewport.

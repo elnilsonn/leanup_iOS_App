@@ -274,3 +274,23 @@ Como se soluciono:
 Regla:
 
 - Si una fila de metricas del `Dashboard` depende de valores dinamicos, preferir `LazyVGrid` o columnas flexibles controladas antes que un `HStack` simple en ancho compacto.
+
+### 14. El problema no era un numero magico, sino el ancho efectivo del dashboard
+
+Que paso:
+
+- El fallo parecia activarse con 5 o 7 materias en curso, pero no con 6, lo que indicaba que no habia una regla logica fija sino una reaccion del layout a ciertos contenidos.
+
+Por que paso:
+
+- El `Dashboard` no tenia su ancho util completamente fijado al viewport.
+- Segun la combinacion de textos y metricas, algunas composiciones empujaban ligeramente el ancho ideal del contenido y activaban el rebote lateral.
+
+Como se soluciono:
+
+- Se fijo el ancho del `VStack` principal del `Dashboard` al ancho real disponible de la pantalla mediante `GeometryReader`.
+- Asi el contenido ya no puede negociar un ancho mayor que el viewport aunque cambien los datos.
+
+Regla:
+
+- Si un `ScrollView` vertical de LeanUp empieza a moverse lateralmente solo con ciertos datos, fijar primero el ancho real del contenido al viewport antes de perseguir "umbrales" numericos.
