@@ -577,3 +577,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Se corrigio la codificacion de `ios/App/App/native-academics.json`, que estaba provocando jeroglificos visibles en la app.
 - Se verifico el target iPhone completo (`ios/App/App`) para confirmar que ya no quedaran patrones tipicos de mojibake en archivos `.swift`, `.json` o `.plist`.
 - No se tocaron `Dashboard`, `Malla`, `NativeRoot` ni `LeanUpSharedUI` para esta reparacion.
+
+## Actualizacion 2026-03-22 - Dashboard estabilizado frente a texto real
+
+- Se aislo que el unico bloque del `Dashboard` sensible al contenido textual de `native-academics.json` era `Lectura de rendimiento`.
+- Se reforzo `LeanUpDashboardPerformanceCard` para iPhone: en ancho compacto ahora apila sus columnas y fija mejor el wrapping de nombres largos de materias.
+- No se tocaron `NativeRoot` ni el comportamiento global del scroll para esta correccion.

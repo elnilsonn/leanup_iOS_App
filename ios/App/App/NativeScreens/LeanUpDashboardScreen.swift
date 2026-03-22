@@ -311,6 +311,7 @@ struct LeanUpDashboardGpaTrackerCard: View {
 
 struct LeanUpDashboardPerformanceCard: View {
     @ObservedObject var model: LeanUpAppModel
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -327,22 +328,36 @@ struct LeanUpDashboardPerformanceCard: View {
                         text: "Cuando registres notas de materias normales, aqui apareceran tus mejores resultados y las materias mas retadoras."
                     )
                 } else {
-                    HStack(alignment: .top, spacing: 12) {
-                        LeanUpDashboardPerformanceColumn(
-                            title: "Mejor te fue en",
-                            tint: .green,
-                            items: model.strongestCourses
-                        )
-
-                        LeanUpDashboardPerformanceColumn(
-                            title: "Mas retadoras",
-                            tint: model.mostDemandingCourses.contains(where: { $0.grade < 3.0 }) ? .red : .orange,
-                            items: model.mostDemandingCourses
-                        )
+                    if horizontalSizeClass == .compact {
+                        VStack(alignment: .leading, spacing: 12) {
+                            strongestColumn
+                            demandingColumn
+                        }
+                    } else {
+                        HStack(alignment: .top, spacing: 12) {
+                            strongestColumn
+                            demandingColumn
+                        }
                     }
                 }
             }
         }
+    }
+
+    private var strongestColumn: some View {
+        LeanUpDashboardPerformanceColumn(
+            title: "Mejor te fue en",
+            tint: .green,
+            items: model.strongestCourses
+        )
+    }
+
+    private var demandingColumn: some View {
+        LeanUpDashboardPerformanceColumn(
+            title: "Mas retadoras",
+            tint: model.mostDemandingCourses.contains(where: { $0.grade < 3.0 }) ? .red : .orange,
+            items: model.mostDemandingCourses
+        )
     }
 }
 
@@ -520,10 +535,13 @@ struct LeanUpDashboardPerformanceColumn: View {
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.primary)
                                 .lineLimit(2)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
                             Text("Periodo \(item.period)")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                         Spacer(minLength: 8)
 

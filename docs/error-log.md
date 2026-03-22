@@ -216,3 +216,24 @@ Regla:
 
 - Si aparecen jeroglificos en LeanUp, revisar primero `native-academics.json` antes de tocar vistas o layout.
 - Despues de editar o importar texto masivo, pasar una verificacion automatica de mojibake sobre `ios/App/App`.
+
+### 11. Rebound lateral del Dashboard provocado por texto dinamico
+
+Que paso:
+
+- El `Dashboard` parecia "moverse" o estirarse lateralmente solo con ciertas versiones de `native-academics.json`.
+
+Por que paso:
+
+- El problema no venia de toda la pantalla ni del contenedor general.
+- El unico bloque del `Dashboard` que usa texto dinamico real del JSON es `Lectura de rendimiento`.
+- Esa tarjeta mostraba dos columnas lado a lado en iPhone con nombres reales de materias. Al corregir acentos y volver a cadenas Unicode normales, pequenas diferencias de ancho hacian mas facil que esa composicion empujara lateralmente.
+
+Como se soluciono:
+
+- Se reforzo solo `LeanUpDashboardPerformanceCard` para que en ancho compacto apile las columnas en vertical.
+- Dentro de cada fila se fijo mejor el wrapping del nombre de la materia con `fixedSize(horizontal: false, vertical: true)` y un `frame` lider para el bloque de texto.
+
+Regla:
+
+- Si un bug visual del `Dashboard` cambia segun el contenido del JSON, revisar primero las tarjetas que pintan texto dinamico real antes de tocar `NativeRoot` o el scroll global.
