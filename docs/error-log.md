@@ -217,3 +217,24 @@ Regla:
 - En LeanUp, antes de crear overlays, botones flotantes, buscadores o navegacion custom, revisar primero si Apple ya resuelve ese patron en `SwiftUI` o `UIKit`.
 - Si existe una solucion nativa razonable, usarla primero.
 - Solo crear una solucion custom cuando la alternativa nativa no cubra bien la necesidad real.
+
+### 11. Asumir que `if #available` basta dentro de un `ViewModifier`
+
+Que paso:
+
+- La busqueda nativa del detalle de `Malla` rompio compilacion al usar `.searchSuggestions`.
+
+Por que paso:
+
+- El proyecto compila con target minimo `iOS 15.0`.
+- Aunque la llamada estaba dentro de `if #available(iOS 16.0, *)`, el compilador no acepto esa API reciente dentro de un `ViewModifier` generico sin helpers con disponibilidad explicita.
+
+Como se soluciono:
+
+- Se separo la implementacion en helpers privados marcados con `@available(iOS 17.0, *)` y `@available(iOS 16.0, *)`.
+- Para `iOS 15` se dejo fallback nativo con `searchable`, pero sin `searchSuggestions`.
+
+Regla:
+
+- Si una API de SwiftUI tiene disponibilidad reciente, no asumir que un `if #available` dentro de un `ViewModifier` o un builder complejo sera suficiente.
+- Cuando el compilador siga fallando por disponibilidad, mover esa logica a helpers o tipos con `@available` explicito.

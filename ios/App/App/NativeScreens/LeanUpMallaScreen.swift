@@ -1444,21 +1444,9 @@ private struct LeanUpNativeDetailSearchModifier: ViewModifier {
     @ViewBuilder
     func body(content: Content) -> some View {
         if #available(iOS 17.0, *) {
-            content
-                .searchable(
-                    text: $query,
-                    isPresented: $isPresented,
-                    placement: .navigationBarDrawer(displayMode: .always),
-                    prompt: "Busca otra materia o electiva"
-                )
-                .searchSuggestions {
-                    LeanUpDetailSearchSuggestions(results: results) {
-                        onSelect($0)
-                    } onClose: {
-                        query = ""
-                        isPresented = false
-                    }
-                }
+            searchableContentIOS17(content)
+        } else if #available(iOS 16.0, *) {
+            searchableContentIOS16(content)
         } else {
             content
                 .searchable(
@@ -1466,15 +1454,44 @@ private struct LeanUpNativeDetailSearchModifier: ViewModifier {
                     placement: .navigationBarDrawer(displayMode: .always),
                     prompt: "Busca otra materia o electiva"
                 )
-                .searchSuggestions {
-                    LeanUpDetailSearchSuggestions(results: results) {
-                        onSelect($0)
-                    } onClose: {
-                        query = ""
-                        isPresented = false
-                    }
-                }
         }
+    }
+
+    @available(iOS 17.0, *)
+    private func searchableContentIOS17(_ content: Content) -> some View {
+        content
+            .searchable(
+                text: $query,
+                isPresented: $isPresented,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Busca otra materia o electiva"
+            )
+            .searchSuggestions {
+                LeanUpDetailSearchSuggestions(results: results) {
+                    onSelect($0)
+                } onClose: {
+                    query = ""
+                    isPresented = false
+                }
+            }
+    }
+
+    @available(iOS 16.0, *)
+    private func searchableContentIOS16(_ content: Content) -> some View {
+        content
+            .searchable(
+                text: $query,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: "Busca otra materia o electiva"
+            )
+            .searchSuggestions {
+                LeanUpDetailSearchSuggestions(results: results) {
+                    onSelect($0)
+                } onClose: {
+                    query = ""
+                    isPresented = false
+                }
+            }
     }
 }
 
