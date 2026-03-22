@@ -2799,10 +2799,10 @@
                                                                   "Proyectos sociales",
                                                                   "Impacto social",
                                                                   "RSE",
-                                                                  "MediciÃ³n de impacto"
+                                                                  "Medición de impacto"
                                                               ],
-                                                   "linkedinText":  "Proyectos empresariales socialmente responsables con metodologÃ­a de mediciÃ³n de impacto",
-                                                   "portfolioProject":  "Proyecto socialmente responsable: diseÃ±o, implementaciÃ³n y mediciÃ³n de impacto",
+                                                   "linkedinText":  "Proyectos empresariales socialmente responsables con metodología de medición de impacto",
+                                                   "portfolioProject":  "Proyecto socialmente responsable: diseño, implementación y medición de impacto",
                                                    "portfolioPrompt":  "",
                                                    "disciplinaryTracks":  [
                                                                               "sustainability"
@@ -2811,39 +2811,39 @@
                                            ]
                            },
                            {
-                               "name":  "Electivo Disciplinar ComÃºn III",
+                               "name":  "Electivo Disciplinar Común III",
                                "period":  7,
                                "options":  [
                                                {
                                                    "code":  "126001",
                                                    "name":  "Habilidades para la Toma de Decisiones",
                                                    "credits":  3,
-                                                   "summary":  "AprenderÃ¡s herramientas para tomar mejores decisiones en entornos complejos",
-                                                   "plainLanguage":  "Es aprender a elegir bien cuando la situaciÃ³n es difÃ­cil",
-                                                   "outcomes":  "Manager, Director, Consultor estratÃ©gico",
+                                                   "summary":  "Aprenderás herramientas para tomar mejores decisiones en entornos complejos",
+                                                   "plainLanguage":  "Es aprender a elegir bien cuando la situación es difícil",
+                                                   "outcomes":  "Manager, Director, Consultor estratégico",
                                                    "skills":  [
                                                                   "Toma de decisiones",
-                                                                  "Pensamiento crÃ­tico",
+                                                                  "Pensamiento crítico",
                                                                   "Risk management"
                                                               ],
-                                                   "linkedinText":  "Herramientas para toma de decisiones estratÃ©gicas en entornos de alta incertidumbre",
-                                                   "portfolioProject":  "AnÃ¡lisis de decisiÃ³n estratÃ©gica usando marcos de decisiÃ³n multicriterio",
+                                                   "linkedinText":  "Herramientas para toma de decisiones estratégicas en entornos de alta incertidumbre",
+                                                   "portfolioProject":  "Análisis de decisión estratégica usando marcos de decisión multicriterio",
                                                    "portfolioPrompt":  ""
                                                },
                                                {
                                                    "code":  "121003",
-                                                   "name":  "GestiÃ³n de la InnovaciÃ³n y Transferencia TecnolÃ³gica",
+                                                   "name":  "Gestión de la Innovación y Transferencia Tecnológica",
                                                    "credits":  3,
-                                                   "summary":  "AprenderÃ¡s a gestionar procesos de innovaciÃ³n y transferencia tecnolÃ³gica",
-                                                   "plainLanguage":  "Es aprender cÃ³mo las empresas adoptan tecnologÃ­a nueva",
-                                                   "outcomes":  "Innovation Manager, consultor de transformaciÃ³n digital",
+                                                   "summary":  "Aprenderás a gestionar procesos de innovación y transferencia tecnológica",
+                                                   "plainLanguage":  "Es aprender cómo las empresas adoptan tecnología nueva",
+                                                   "outcomes":  "Innovation Manager, consultor de transformación digital",
                                                    "skills":  [
-                                                                  "GestiÃ³n de la innovaciÃ³n",
-                                                                  "Transferencia tecnolÃ³gica",
+                                                                  "Gestión de la innovación",
+                                                                  "Transferencia tecnológica",
                                                                   "Open innovation"
                                                               ],
-                                                   "linkedinText":  "InnovaciÃ³n y transferencia tecnolÃ³gica: gestiÃ³n de proyectos de I+D, open innovation, adopciÃ³n de nuevas tecnologÃ­as y construcciÃ³n de ventajas competitivas en organizaciones digitales",
-                                                   "portfolioProject":  "Mapa de innovaciÃ³n para empresa colombiana con roadmap y alianzas",
+                                                   "linkedinText":  "Innovación y transferencia tecnológica: gestión de proyectos de I+D, open innovation, adopción de nuevas tecnologías y construcción de ventajas competitivas en organizaciones digitales",
+                                                   "portfolioProject":  "Mapa de innovación para empresa colombiana con roadmap y alianzas",
                                                    "portfolioPrompt":  ""
                                                },
                                                {
