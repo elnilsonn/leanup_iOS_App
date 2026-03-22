@@ -2900,100 +2900,100 @@
                                "name":  "Electivo Formacion Complementaria III",
                                "period":  7,
                                "options":  [
-                                               {
+                                                {
                                                    "code":  "80010",
                                                    "name":  "Teatro",
                                                    "credits":  1,
-                                                   "summary":  "TÃ©cnicas de expresiÃ³n corporal y vocal para mejorar tu comunicaciÃ³n",
-                                                   "plainLanguage":  "Es aprender a actuar para perder el miedo al pÃºblico y expresarte mejor",
-                                                   "outcomes":  "Presentaciones pÃºblicas, storytelling, comunicaciÃ³n con clientes",
+                                                   "summary":  "Aprenderás técnicas de expresión corporal y vocal que mejoran tu comunicación",
+                                                   "plainLanguage":  "Es aprender a actuar un poco para perder el miedo al público y expresarte mejor",
+                                                   "outcomes":  "Presentaciones públicas, storytelling, comunicación con clientes",
                                                    "skills":  [
-                                                                  "ExpresiÃ³n corporal",
-                                                                  "ComunicaciÃ³n no verbal",
-                                                                  "Confianza en pÃºblico"
+                                                                  "Expresión corporal",
+                                                                  "Comunicación no verbal",
+                                                                  "Confianza en público"
                                                               ],
-                                                   "linkedinText":  "Teatro aplicado a comunicaciÃ³n persuasiva y presentaciones de alto impacto",
-                                                   "portfolioProject":  "Video de presentaciÃ³n o pitch aplicando tÃ©cnicas teatrales",
+                                                   "linkedinText":  "Comunicación persuasiva con técnicas teatrales: presencia escénica, manejo de voz y cuerpo, storytelling en vivo y presentaciones de alto impacto que captan y retienen audiencias",
+                                                   "portfolioProject":  "Video de presentación o pitch aplicando técnicas teatrales de impacto",
                                                    "portfolioPrompt":  ""
                                                },
                                                {
                                                    "code":  "80005",
                                                    "name":  "Guitarra",
                                                    "credits":  1,
-                                                   "summary":  "Los fundamentos de la guitarra como desarrollo personal y cultural",
-                                                   "plainLanguage":  "Es aprender a tocar guitarra como hobby que desarrolla disciplina y creatividad",
-                                                   "outcomes":  "Habilidades blandas: creatividad, disciplina, trabajo en equipo",
+                                                   "summary":  "Aprenderás los fundamentos del instrumento como desarrollo personal y cultural",
+                                                   "plainLanguage":  "Es aprender a tocar guitarra como hobby que desarrolla tu disciplina y creatividad",
+                                                   "outcomes":  "Creatividad, disciplina, trabajo en equipo â€” habilidades blandas",
                                                    "skills":  [
                                                                   "Disciplina",
                                                                   "Creatividad",
-                                                                  "ExpresiÃ³n artÃ­stica"
+                                                                  "Expresión artística"
                                                               ],
-                                                   "linkedinText":  "FormaciÃ³n artÃ­stica que desarrolla disciplina y creatividad para el entorno profesional",
-                                                   "portfolioProject":  "Proyecto musical documentado como ejemplo de aprendizaje autodirigido",
+                                                   "linkedinText":  "Disciplina creativa a travÃ©s de la mÃºsica: desarrollo de la constancia, el aprendizaje progresivo y la creatividad aplicada â€” habilidades blandas que diferencian a los profesionales mÃ¡s completos",
+                                                   "portfolioProject":  "Proyecto musical documentado como ejemplo de aprendizaje autodirigido y disciplina",
+                                                   "portfolioPrompt":  ""
+                                               },
+                                               {
+                                                   "code":  "404086996",
+                                                   "name":  "Apreciación de las Imágenes del Arte",
+                                                   "credits":  1,
+                                                   "summary":  "Aprenderás a leer y apreciar imágenes artísticas, desarrollando tu sentido estético",
+                                                   "plainLanguage":  "Es aprender a ver cuadros y fotos artísticas y entender por qué son especiales",
+                                                   "outcomes":  "Creatividad, dirección de arte, content creation, diseño de campañas",
+                                                   "skills":  [
+                                                                  "Alfabetidad visual",
+                                                                  "Sentido estético",
+                                                                  "Análisis de imágenes"
+                                                              ],
+                                                   "linkedinText":  "Apreciación estética y alfabetidad visual aplicada al diseño de campañas y dirección de arte",
+                                                   "portfolioProject":  "Análisis visual de 5 campañas publicitarias icónicas desde perspectiva estética y conceptual",
                                                    "portfolioPrompt":  ""
                                                },
                                                {
                                                    "code":  "80007",
                                                    "name":  "Protocolo",
                                                    "credits":  1,
-                                                   "summary":  "Normas de etiqueta empresarial para reuniones y eventos",
+                                                   "summary":  "Aprenderás las normas de etiqueta empresarial para reuniones y eventos",
                                                    "plainLanguage":  "Es aprender a comportarte bien en reuniones importantes",
-                                                   "outcomes":  "Account Manager, relaciones con clientes VIP",
+                                                   "outcomes":  "Account Manager, relaciones con clientes VIP, eventos corporativos",
                                                    "skills":  [
                                                                   "Protocolo empresarial",
                                                                   "Etiqueta",
                                                                   "Imagen profesional"
                                                               ],
                                                    "linkedinText":  "Protocolo empresarial para entornos corporativos de alto nivel",
-                                                   "portfolioProject":  "GuÃ­a de protocolo para eventos corporativos",
+                                                   "portfolioProject":  "Guía de protocolo para eventos corporativos y reuniones de negocio",
                                                    "portfolioPrompt":  ""
                                                },
                                                {
                                                    "code":  "300040",
                                                    "name":  "Hoja de Vida",
                                                    "credits":  1,
-                                                   "summary":  "ConstruirÃ¡s un CV y perfil profesional para conseguir empleo",
-                                                   "plainLanguage":  "Es aprender a escribir tu hoja de vida para que las empresas te quieran contratar",
-                                                   "outcomes":  "Todos los roles â€” fundamental para cualquier trabajo",
+                                                   "summary":  "Aprenderás a construir un CV y perfil profesional que te ayude a conseguir empleo",
+                                                   "plainLanguage":  "Es aprender a escribir tu hoja de vida para que las empresas quieran contratarte",
+                                                   "outcomes":  "Todos los roles â€” un buen CV es fundamental",
                                                    "skills":  [
                                                                   "CV profesional",
                                                                   "LinkedIn",
                                                                   "Personal branding"
                                                               ],
                                                    "linkedinText":  "Perfil profesional y personal branding para el mercado laboral digital",
-                                                   "portfolioProject":  "CV y perfil LinkedIn optimizado para marketing digital",
+                                                   "portfolioProject":  "CV profesional y perfil LinkedIn optimizado para marketing digital",
                                                    "portfolioPrompt":  ""
                                                },
                                                {
                                                    "code":  "80020",
-                                                   "name":  "Actividad FÃ­sica y para la Salud",
+                                                   "name":  "Actividad Física y para la Salud",
                                                    "credits":  2,
-                                                   "summary":  "HÃ¡bitos de vida saludable y actividad fÃ­sica para el rendimiento profesional",
-                                                   "plainLanguage":  "Es aprender que el ejercicio y comer bien te hace trabajar mejor",
-                                                   "outcomes":  "Productividad personal en cualquier trabajo",
+                                                   "summary":  "Aprenderás hábitos de vida saludable y la importancia de la actividad física para el rendimiento",
+                                                   "plainLanguage":  "Es aprender que hacer ejercicio y comer bien no solo te hace sentir mejor sino que trabajas mejor",
+                                                   "outcomes":  "Productividad personal â€” el bienestar mejora el desempeÃ±o en cualquier trabajo",
                                                    "skills":  [
-                                                                  "HÃ¡bitos saludables",
-                                                                  "GestiÃ³n del estrÃ©s",
-                                                                  "Productividad"
+                                                                  "Hábitos saludables",
+                                                                  "Gestión del estrés",
+                                                                  "Productividad personal"
                                                               ],
-                                                   "linkedinText":  "HÃ¡bitos de bienestar para alto desempeÃ±o profesional bajo presiÃ³n",
-                                                   "portfolioProject":  "Plan de bienestar y productividad con objetivos medibles",
-                                                   "portfolioPrompt":  ""
-                                               },
-                                               {
-                                                   "code":  "404086996",
-                                                   "name":  "ApreciaciÃ³n de las ImÃ¡genes del Arte",
-                                                   "credits":  1,
-                                                   "summary":  "AprenderÃ¡s a leer y apreciar imÃ¡genes artÃ­sticas, desarrollando tu sentido estÃ©tico",
-                                                   "plainLanguage":  "Es aprender a ver cuadros y fotos artÃ­sticas y entender por quÃ© son especiales",
-                                                   "outcomes":  "Creatividad, direcciÃ³n de arte, content creation, diseÃ±o de campaÃ±as",
-                                                   "skills":  [
-                                                                  "Alfabetidad visual",
-                                                                  "Sentido estÃ©tico",
-                                                                  "AnÃ¡lisis de imÃ¡genes"
-                                                              ],
-                                                   "linkedinText":  "ApreciaciÃ³n estÃ©tica y alfabetidad visual aplicada al diseÃ±o de campaÃ±as y direcciÃ³n de arte",
-                                                   "portfolioProject":  "AnÃ¡lisis visual de 5 campaÃ±as publicitarias icÃ³nicas desde perspectiva estÃ©tica y conceptual",
+                                                   "linkedinText":  "Hábitos de bienestar para alto desempeño profesional y trabajo bajo presión",
+                                                   "portfolioProject":  "Plan personal de bienestar y productividad con objetivos medibles y seguimiento semanal",
                                                    "portfolioPrompt":  ""
                                                }
                                            ]
