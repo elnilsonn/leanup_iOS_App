@@ -145,6 +145,27 @@ Important rules:
 - the group must also have a selected option in `electivosSeleccionados`
 - if the selected elective already has a final grade in `electivosNotas`, the group must not remain in `electivosEnCurso`
 
+## Native academics resource notes
+
+Within `native-academics.json`, some elective options can now include:
+
+### `disciplinaryTracks`
+
+Array of internal route identifiers used only by the native UI to filter options inside disciplinary elective groups.
+
+Allowed values currently:
+
+- `digitalTransformation`
+- `competitiveness`
+- `sustainability`
+
+Important rules:
+
+- this field belongs to the academic resource, not to the user snapshot
+- complementary electives do not need it
+- disciplinary electives can have one or more tracks
+- if the same course belongs to more than one route, it can carry multiple values in this array
+
 ## Normalization rules
 
 Any future native code should follow these rules before saving:

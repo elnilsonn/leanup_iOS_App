@@ -685,6 +685,8 @@ struct LeanUpCourseDetailView: View {
     @ObservedObject var model: LeanUpAppModel
     let course: LeanUpCourse
     @Environment(\.dismiss) private var dismiss
+    @State private var isSearchPresented = false
+    @State private var searchRoute: LeanUpMallaDetailRoute?
 
     var body: some View {
         NavigationView {
@@ -778,9 +780,31 @@ struct LeanUpCourseDetailView: View {
                         Label("Atras", systemImage: "chevron.backward")
                     }
                 }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isSearchPresented = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                }
             }
         }
         .navigationViewStyle(.stack)
+        .sheet(isPresented: $isSearchPresented) {
+            LeanUpMallaSearchView(model: model) { item in
+                searchRoute = item
+                isSearchPresented = false
+            }
+        }
+        .sheet(item: $searchRoute) { route in
+            switch route {
+            case .course(let course):
+                LeanUpCourseDetailView(model: model, course: course)
+            case .electiveGroup(let group):
+                LeanUpElectiveGroupDetailView(model: model, group: group)
+            }
+        }
     }
 }
 
@@ -789,6 +813,8 @@ struct LeanUpElectiveGroupDetailView: View {
     let group: LeanUpElectiveGroup
     @Environment(\.dismiss) private var dismiss
     @State private var selectedDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack?
+    @State private var isSearchPresented = false
+    @State private var searchRoute: LeanUpMallaDetailRoute?
 
     var body: some View {
         NavigationView {
@@ -797,9 +823,9 @@ struct LeanUpElectiveGroupDetailView: View {
                     VStack(alignment: .leading, spacing: 18) {
                         LeanUpSurfaceCard {
                             VStack(alignment: .leading, spacing: 10) {
-                                Text(displayedGroup.name)
+                                Text(group.name)
                                     .font(.title2.weight(.bold))
-                                Text("Periodo \(displayedGroup.period) - \(displayedGroup.options.count) opciones")
+                                Text("Periodo \(group.period) - \(filteredOptions.count) opciones visibles")
                                     .font(.subheadline)
                                     .foregroundStyle(.secondary)
                                 Text(headerDescription)
@@ -843,7 +869,7 @@ struct LeanUpElectiveGroupDetailView: View {
                             }
                         }
 
-                        ForEach(displayedGroup.options) { option in
+                        ForEach(filteredOptions) { option in
                             LeanUpSurfaceCard {
                                 VStack(alignment: .leading, spacing: 12) {
                                     HStack(alignment: .top, spacing: 12) {
@@ -857,7 +883,7 @@ struct LeanUpElectiveGroupDetailView: View {
 
                                         Spacer()
 
-                                        if model.selectedOption(in: displayedGroup)?.code == option.code {
+                                        if model.selectedOption(in: group)?.code == option.code {
                                             Text("Activa")
                                                 .font(.footnote.weight(.semibold))
                                                 .padding(.horizontal, 10)
@@ -871,9 +897,25 @@ struct LeanUpElectiveGroupDetailView: View {
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
 
-                                    Text(option.plainLanguage)
-                                        .font(.footnote)
-                                        .foregroundStyle(.secondary)
+                                    LeanUpSurfaceInsetCard {
+                                        VStack(alignment: .leading, spacing: 10) {
+                                            Label("En palabras simples", systemImage: "lightbulb.fill")
+                                                .font(.subheadline.weight(.semibold))
+                                            Text(option.plainLanguage)
+                                                .font(.footnote)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
+
+                                    LeanUpSurfaceInsetCard {
+                                        VStack(alignment: .leading, spacing: 10) {
+                                            Label("Salidas y aplicacion", systemImage: "briefcase.fill")
+                                                .font(.subheadline.weight(.semibold))
+                                            Text(option.outcomes)
+                                                .font(.footnote)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                    }
 
                                     if !option.skills.isEmpty {
                                         FlowTagList(items: Array(option.skills.prefix(6)))
@@ -891,11 +933,11 @@ struct LeanUpElectiveGroupDetailView: View {
                                     }
 
                                     Button {
-                                        model.selectElectiveOption(groupName: displayedGroup.name, optionCode: option.code)
+                                        model.selectElectiveOption(groupName: group.name, optionCode: option.code)
                                     } label: {
                                         Label(
-                                            model.selectedOption(in: displayedGroup)?.code == option.code ? "Electiva seleccionada" : "Elegir esta electiva",
-                                            systemImage: model.selectedOption(in: displayedGroup)?.code == option.code ? "checkmark.circle.fill" : "circle"
+                                            model.selectedOption(in: group)?.code == option.code ? "Electiva seleccionada" : "Elegir esta electiva",
+                                            systemImage: model.selectedOption(in: group)?.code == option.code ? "checkmark.circle.fill" : "circle"
                                         )
                                         .font(.subheadline.weight(.semibold))
                                         .frame(maxWidth: .infinity)
@@ -903,22 +945,22 @@ struct LeanUpElectiveGroupDetailView: View {
                                     }
                                     .buttonStyle(LeanUpPrimaryButtonStyle())
 
-                                    if model.selectedOption(in: displayedGroup)?.code == option.code {
+                                    if model.selectedOption(in: group)?.code == option.code {
                                         LeanUpGradeEditorCard(
                                             title: "Nota de esta electiva",
                                             subtitle: "Si aun no la cursas, puedes dejarla vacia.",
-                                            currentGrade: model.electiveNote(groupName: displayedGroup.name, optionCode: option.code)
+                                            currentGrade: model.electiveNote(groupName: group.name, optionCode: option.code)
                                         ) { value in
-                                            model.setElectiveGrade(value, groupName: displayedGroup.name, optionCode: option.code)
+                                            model.setElectiveGrade(value, groupName: group.name, optionCode: option.code)
                                         }
 
                                         LeanUpAcademicStateCard(
                                             title: "Estado actual",
                                             subtitle: "Usa en curso para que LeanUp entienda tu carga activa aun sin nota final.",
-                                            isOn: model.isElectiveInProgress(displayedGroup),
-                                            canToggle: model.electiveNote(groupName: displayedGroup.name, optionCode: option.code) == nil
+                                            isOn: model.isElectiveInProgress(group),
+                                            canToggle: model.electiveNote(groupName: group.name, optionCode: option.code) == nil
                                         ) { isOn in
-                                            model.setElectiveInProgress(isOn, groupName: displayedGroup.name)
+                                            model.setElectiveInProgress(isOn, groupName: group.name)
                                         }
                                     }
                                 }
@@ -941,12 +983,34 @@ struct LeanUpElectiveGroupDetailView: View {
                         Label("Atras", systemImage: "chevron.backward")
                     }
                 }
+
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        isSearchPresented = true
+                    } label: {
+                        Image(systemName: "magnifyingglass")
+                    }
+                }
             }
         }
         .navigationViewStyle(.stack)
         .onAppear {
             if selectedDisciplinaryTrack == nil {
-                selectedDisciplinaryTrack = group.electiveDisciplinaryTrack
+                selectedDisciplinaryTrack = group.defaultDisciplinaryTrack ?? availableDisciplinaryTracks.first
+            }
+        }
+        .sheet(isPresented: $isSearchPresented) {
+            LeanUpMallaSearchView(model: model) { item in
+                searchRoute = item
+                isSearchPresented = false
+            }
+        }
+        .sheet(item: $searchRoute) { route in
+            switch route {
+            case .course(let course):
+                LeanUpCourseDetailView(model: model, course: course)
+            case .electiveGroup(let group):
+                LeanUpElectiveGroupDetailView(model: model, group: group)
             }
         }
     }
@@ -954,26 +1018,21 @@ struct LeanUpElectiveGroupDetailView: View {
 
 private extension LeanUpElectiveGroupDetailView {
     var activeDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack? {
-        selectedDisciplinaryTrack ?? group.electiveDisciplinaryTrack
+        selectedDisciplinaryTrack
     }
 
     var availableDisciplinaryTracks: [LeanUpElectiveDisciplinaryTrack] {
-        guard group.electiveDisciplinaryTrack != nil else { return [] }
-
-        let tracks = model.academics.electiveGroups.compactMap(\.electiveDisciplinaryTrack)
+        let tracks = group.options.flatMap(\.electiveDisciplinaryTrackValues)
         var seen = Set<LeanUpElectiveDisciplinaryTrack>()
         return tracks.filter { seen.insert($0).inserted }
     }
 
-    var displayedGroup: LeanUpElectiveGroup {
-        guard
-            let track = activeDisciplinaryTrack,
-            let match = preferredGroup(for: track)
-        else {
-            return group
+    var filteredOptions: [LeanUpElectiveOption] {
+        guard let selectedDisciplinaryTrack else {
+            return group.options
         }
 
-        return match
+        return group.options.filter { $0.electiveDisciplinaryTrackValues.contains(selectedDisciplinaryTrack) }
     }
 
     var headerDescription: String {
@@ -981,21 +1040,7 @@ private extension LeanUpElectiveGroupDetailView {
             return "Selecciona la electiva que realmente quieres cursar en este grupo. Solo una puede estar activa a la vez."
         }
 
-        return "Puedes cambiar de ruta dentro del electivo disciplinar y revisar sus opciones sin salir de este panel. Cada bloque conserva su propia seleccion."
-    }
-
-    func preferredGroup(for track: LeanUpElectiveDisciplinaryTrack) -> LeanUpElectiveGroup? {
-        model.academics.electiveGroups
-            .filter { $0.electiveDisciplinaryTrack == track }
-            .sorted {
-                let lhsDistance = abs($0.period - group.period)
-                let rhsDistance = abs($1.period - group.period)
-                if lhsDistance == rhsDistance {
-                    return $0.period < $1.period
-                }
-                return lhsDistance < rhsDistance
-            }
-            .first
+        return "Este electivo disciplinar incluye varias rutas. Usa el banner para cambiar entre Transformacion Digital, Competitividad y Sustentabilidad sin mezclar todas las opciones de golpe."
     }
 }
 
@@ -1016,7 +1061,7 @@ enum LeanUpElectiveDisciplinaryTrack: String, CaseIterable, Identifiable, Hashab
 }
 
 private extension LeanUpElectiveGroup {
-    var electiveDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack? {
+    var defaultDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack? {
         if name.contains("Transformación Digital") {
             return .digitalTransformation
         }
@@ -1030,6 +1075,12 @@ private extension LeanUpElectiveGroup {
         }
 
         return nil
+    }
+}
+
+private extension LeanUpElectiveOption {
+    var electiveDisciplinaryTrackValues: [LeanUpElectiveDisciplinaryTrack] {
+        disciplinaryTracks.compactMap(LeanUpElectiveDisciplinaryTrack.init(rawValue:))
     }
 }
 

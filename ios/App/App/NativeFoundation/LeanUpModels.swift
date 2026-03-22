@@ -236,6 +236,7 @@ struct LeanUpElectiveOption: Codable, Identifiable, Hashable {
     let linkedinText: String
     let portfolioProject: String
     let portfolioPrompt: String
+    let disciplinaryTracks: [String]
 
     init(
         code: String,
@@ -247,7 +248,8 @@ struct LeanUpElectiveOption: Codable, Identifiable, Hashable {
         skills: [String] = [],
         linkedinText: String = "",
         portfolioProject: String = "",
-        portfolioPrompt: String = ""
+        portfolioPrompt: String = "",
+        disciplinaryTracks: [String] = []
     ) {
         self.code = code
         self.name = name
@@ -259,6 +261,7 @@ struct LeanUpElectiveOption: Codable, Identifiable, Hashable {
         self.linkedinText = linkedinText
         self.portfolioProject = portfolioProject
         self.portfolioPrompt = portfolioPrompt
+        self.disciplinaryTracks = disciplinaryTracks
     }
 
     init(from decoder: Decoder) throws {
@@ -273,6 +276,7 @@ struct LeanUpElectiveOption: Codable, Identifiable, Hashable {
         linkedinText = try container.decodeIfPresent(String.self, forKey: .linkedinText) ?? ""
         portfolioProject = try container.decodeIfPresent(String.self, forKey: .portfolioProject) ?? ""
         portfolioPrompt = try container.decodeIfPresent(String.self, forKey: .portfolioPrompt) ?? ""
+        disciplinaryTracks = try container.decodeIfPresent([String].self, forKey: .disciplinaryTracks) ?? []
     }
 }
 
@@ -682,7 +686,7 @@ final class LeanUpAppModel: ObservableObject {
     var estimatedGraduationDate: Date? {
         guard approvedCount < totalTrackableItems else { return Date() }
         guard let remainingPeriods = estimatedRemainingPeriods else { return nil }
-        let months = Int((remainingPeriods * 4.0).rounded())
+        let months = Int((remainingPeriods * 6.0).rounded())
         return Calendar.current.date(byAdding: .month, value: max(months, 0), to: Date())
     }
 
@@ -718,10 +722,10 @@ final class LeanUpAppModel: ObservableObject {
         }
 
         if inProgressCount > 0 {
-            return "La lectura usa tu avance aprobado, tu carga actual marcada como en curso y la duracion real de ciclos de 4 meses."
+            return "La lectura usa tu avance aprobado, tu carga actual marcada como en curso y un calendario real de 2 semestres por ano."
         }
 
-        return "La lectura usa tu avance aprobado, los periodos donde ya tienes notas y una duracion estimada de 4 meses por ciclo."
+        return "La lectura usa tu avance aprobado, los periodos donde ya tienes notas y un calendario real de 2 semestres por ano."
     }
 
     var paceValueText: String {

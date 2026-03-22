@@ -511,6 +511,31 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - El filtro por ruta no se metio en la malla general. Quedo dentro del detalle de la electiva en `LeanUpMallaScreen.swift`, que era el lugar correcto segun la aclaracion del usuario.
 - Desde el panel de detalle ya se puede cambiar entre rutas disciplinares sin salir de la electiva, manteniendo la seleccion y el contexto de cada bloque.
 
+### 45. Disciplinares especificos unificados y detalles con busqueda nativa
+
+- Se corrigio la interpretacion funcional de los electivos disciplinares especificos:
+  - ahora los 6 grupos disciplinares especificos cargan el mismo catalogo completo de opciones
+  - cada opcion lleva su metadato `disciplinaryTracks` para que la UI filtre por ruta sin duplicar pantallas
+- El banner de rutas quedo dentro del detalle de la electiva y no en la malla general.
+- `LeanUpCourseDetailView` y `LeanUpElectiveGroupDetailView` ahora incluyen acceso nativo de busqueda en la esquina superior derecha usando el buscador ya existente de Malla.
+- El detalle de opciones electivas se acerco mucho mas al de materias normales:
+  - resumen
+  - explicacion simple
+  - salidas y aplicacion
+  - habilidades
+  - traductor de LinkedIn
+  - portafolio y prompt si existe
+
+### 46. Dashboard protegido contra scroll horizontal y ritmo ajustado al calendario real
+
+- Se rebajaron varios `HStack` del dashboard a grids o stacks mas seguros para iPhone:
+  - hero pills
+  - metricas de ritmo
+  - lectura de rendimiento
+- Se reforzo `LeanUpPill` para que reduzca escala antes de forzar overflow horizontal.
+- La proyeccion de grado ya no asume calendario corrido de 4 meses por semestre.
+- Ahora LeanUp calcula la fecha estimada usando 2 semestres por ano, lo que equivale a una separacion calendaria de 6 meses entre periodos academicos.
+
 ## Estado actual
 
 ### Ya funcional
