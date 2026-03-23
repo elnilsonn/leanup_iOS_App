@@ -759,3 +759,10 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - El recentrado de `Periodos` y `Filtros` ahora se ejecuta despues del ciclo de layout para evitar desalineaciones entre el chip azul y el scroll horizontal del banner.
 - La capa que escucha el gesto rapido de `En curso` quedo anclada solo a la parte superior util de la fila.
 - Con esto, la zona inferior de tags vuelve a quedar libre para el scroll horizontal sin competir con la materia.
+
+## Actualizacion 2026-03-23 - Recentrado solo en segundo toque real
+
+- La logica de `Periodos` y `Filtros` se ajusto para que el recentrado automatico del banner horizontal ocurra solo cuando el usuario toca dos veces el mismo chip activo.
+- Cambios normales entre chips distintos vuelven a comportarse como antes, sin recentrado extra.
+- En `Periodos`, ese segundo toque vuelve al `focusPeriod` real.
+- En `Filtros`, ese segundo toque vuelve a `Todas`.

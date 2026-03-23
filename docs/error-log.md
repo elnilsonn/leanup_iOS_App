@@ -684,3 +684,42 @@ Como se soluciono:
 Regla:
 
 - Si un `ScrollViewReader` horizontal se desincroniza del estado visual, primero asegurar que el recentrado ocurra despues del layout y no en paralelo a la mutacion.
+
+### 35. Tratar dos toques seguidos sobre chips distintos como si fuera "segundo toque"
+
+Que paso:
+
+- La UX esperada del usuario era: solo resetear cuando se repite el mismo chip activo.
+- Pero la implementacion se estaba sintiendo como si cualquier toque posterior pudiera contar como "segundo toque".
+
+Por que paso:
+
+- Faltaba separar dos casos:
+  - cambio normal a otro chip
+  - repeticion intencional del mismo chip activo
+
+Como se soluciono:
+
+- El reset y el recentrado automatico ahora se disparan solo cuando se toca exactamente el mismo periodo o filtro que ya estaba activo.
+- Cambiar de un chip a otro vuelve a ser una seleccion normal.
+
+Regla:
+
+- En chips con gesto de "segundo toque para reset", solo debe contar la repeticion exacta del elemento activo, nunca un toque posterior sobre otro distinto.
+
+### 36. Regla operativa para requerimientos vagos de UX
+
+Que paso:
+
+- Varias iteraciones se desviaron porque el usuario tenia clara la idea visual, pero no siempre la podia describir con especificacion tecnica exacta.
+
+Como se soluciono:
+
+- A partir de ahora, antes de cambios de UX, se debe:
+  - reformular la intencion en lenguaje mas logico
+  - distinguir que debe pasar y que no debe pasar
+  - pedir confirmacion breve antes de editar
+
+Regla:
+
+- Si el requerimiento viene expresado de forma vaga pero la intencion es detectable, ayudar a convertirlo en una regla de interaccion clara antes de implementar.

@@ -8,6 +8,8 @@ struct LeanUpMallaView: View {
     @State private var selectedFilter: LeanUpMallaFilter = .all
     @State private var searchQuery = ""
     @State private var isReminderListPresented = false
+    @State private var periodResetScrollToken = 0
+    @State private var filterResetScrollToken = 0
 
     var body: some View {
         GeometryReader { proxy in
@@ -29,15 +31,23 @@ struct LeanUpMallaView: View {
                                 periods: model.periods,
                                 selectedPeriod: effectiveSelectedPeriod,
                                 selectedFilter: selectedFilter,
+                                periodResetScrollToken: periodResetScrollToken,
+                                filterResetScrollToken: filterResetScrollToken,
                                 onSelectPeriod: { tappedPeriod in
                                     if tappedPeriod == effectiveSelectedPeriod {
                                         selectedPeriod = nil
+                                        periodResetScrollToken += 1
                                     } else {
                                         selectedPeriod = tappedPeriod
                                     }
                                 },
                                 onSelectFilter: { tappedFilter in
-                                    selectedFilter = selectedFilter == tappedFilter ? .all : tappedFilter
+                                    if selectedFilter == tappedFilter {
+                                        selectedFilter = .all
+                                        filterResetScrollToken += 1
+                                    } else {
+                                        selectedFilter = tappedFilter
+                                    }
                                 }
                             )
                         }
@@ -785,6 +795,8 @@ struct LeanUpMallaStickyHeader: View {
     let periods: [Int]
     let selectedPeriod: Int
     let selectedFilter: LeanUpMallaFilter
+    let periodResetScrollToken: Int
+    let filterResetScrollToken: Int
     let onSelectPeriod: (Int) -> Void
     let onSelectFilter: (LeanUpMallaFilter) -> Void
 
@@ -816,7 +828,7 @@ struct LeanUpMallaStickyHeader: View {
                 .onAppear {
                     scrollPeriodBanner(using: proxy, animated: false)
                 }
-                .onChange(of: selectedPeriod) { _ in
+                .onChange(of: periodResetScrollToken) { _ in
                     scrollPeriodBanner(using: proxy, animated: true)
                 }
             }
@@ -847,7 +859,7 @@ struct LeanUpMallaStickyHeader: View {
                 .onAppear {
                     scrollFilterBanner(using: proxy, animated: false)
                 }
-                .onChange(of: selectedFilter) { _ in
+                .onChange(of: filterResetScrollToken) { _ in
                     scrollFilterBanner(using: proxy, animated: true)
                 }
             }
