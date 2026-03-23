@@ -781,3 +781,8 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 
 - `Periodos` recibio una pasada adicional de recentrado diferido para reforzar el primer reset del banner horizontal.
 - `Filtros` no se tocaron porque ya estaban funcionando bien.
+
+## Actualizacion 2026-03-23 - Rebuild puntual de la banda de Periodos en reset
+
+- La banda horizontal de `Periodos` ahora se reconstruye solo en el flujo de reset por segundo toque.
+- Con eso, el recentrado del primer reset deja de depender de la instancia anterior del `ScrollViewReader` y aterriza desde una banda nueva ya alineada con el target correcto.

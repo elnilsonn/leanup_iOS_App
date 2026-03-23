@@ -833,11 +833,13 @@ struct LeanUpMallaStickyHeader: View {
                     }
                     .padding(.horizontal, 2)
                 }
+                .id("period-strip-\(periodResetScrollToken)")
                 .onAppear {
-                    scrollPeriodBanner(using: proxy, animated: false)
-                }
-                .onChange(of: periodResetScrollToken) { _ in
-                    scrollPeriodBanner(using: proxy, targetPeriod: periodResetScrollTarget, animated: true)
+                    scrollPeriodBanner(
+                        using: proxy,
+                        targetPeriod: periodResetScrollToken == 0 ? selectedPeriod : periodResetScrollTarget,
+                        animated: periodResetScrollToken != 0
+                    )
                 }
             }
 

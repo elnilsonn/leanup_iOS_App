@@ -780,3 +780,22 @@ Como se soluciono:
 Regla:
 
 - Si un banner horizontal falla solo la primera vez pero luego funciona, reforzar el timing inicial del recentrado en esa banda concreta, no en todas.
+
+### 40. Seguir parchando delays cuando la instancia del banner ya quedo desfasada
+
+Que paso:
+
+- Aunque se reforzaron delays, `Periodos` seguia fallando en el primer reset.
+
+Por que paso:
+
+- El problema ya no era solo el tiempo.
+- La primera instancia del banner podia quedarse desfasada respecto al target final del reset.
+
+Como se soluciono:
+
+- En el reset de `Periodos`, la banda horizontal se recrea y se centra desde cero con el target explicito.
+
+Regla:
+
+- Si un `ScrollViewReader` sigue fallando solo en un primer flujo especifico, considerar recrear esa banda puntual antes de seguir agregando retardos.
