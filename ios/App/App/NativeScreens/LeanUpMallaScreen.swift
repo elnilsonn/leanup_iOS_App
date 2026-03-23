@@ -95,7 +95,7 @@ struct LeanUpMallaView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
                             LeanUpMallaInlineSearchSection(
-                                query: trimmedSearchQuery,
+                                query: activeSearchQuery,
                                 results: searchResults
                             ) { item in
                                 route = item
@@ -117,7 +117,7 @@ struct LeanUpMallaView: View {
         .leanUpKeyboardFriendlyScroll()
         .background(LeanUpPageBackground())
         .navigationTitle("Malla")
-        .navigationBarTitleDisplayMode(isSearchChromeActive ? .inline : .large)
+        .navigationBarTitleDisplayMode(.large)
         .modifier(
             LeanUpNativeMallaSearchModifier(
                 query: $searchQuery,
@@ -197,8 +197,6 @@ private extension LeanUpMallaView {
     }
 
     var showsSearchResults: Bool { !activeSearchQuery.isEmpty }
-
-    var isSearchChromeActive: Bool { isSearchPresented || isSearchClosing }
 
     var searchResults: [LeanUpMallaSearchResult] {
         leanUpMallaSearchResults(model: model, query: activeSearchQuery)

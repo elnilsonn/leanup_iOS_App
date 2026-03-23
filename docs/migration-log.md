@@ -822,3 +822,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - la capa de resultados se mantiene viva un instante corto mientras el sistema termina de cerrar la barra
   - luego `Malla` vuelve a su estado normal ya estable
 - La correccion se hizo solo sobre el handoff visual de cierre, sin cambiar la apertura ni el contenido principal.
+
+## Actualizacion 2026-03-23 - El titulo grande deja de forzarse a inline al cerrar busqueda
+
+- En `Malla` se mantuvo el latch visual del cierre de busqueda, pero se retiro el cambio forzado de `navigationBarTitleDisplayMode(.inline)`.
+- La pantalla vuelve a confiar en el comportamiento nativo de `.large` para el titulo.
+- Con eso desaparece el `Malla` pequeno fantasma que se alcanzaba a ver solo cuando la pantalla estaba arriba del todo durante el cierre.

@@ -936,3 +936,24 @@ Como se soluciono:
 Regla:
 
 - Si una animacion de `searchable` falla solo al cerrar, no desmontar la UI de busqueda solo porque el texto ya esta vacio; primero esperar a que el sistema termine de cerrar la barra.
+
+### 48. Forzar el titulo inline durante el cierre aunque el problema solo existiera en el estado de titulo grande
+
+Que paso:
+
+- Despues del arreglo anterior, seguia apareciendo un `Malla` pequeno fantasma durante el cierre de la busqueda cuando la pantalla estaba arriba del todo.
+
+Por que paso:
+
+- El cierre seguia forzando `navigationBarTitleDisplayMode(.inline)` mientras la barra del sistema terminaba de animarse.
+- Eso ayudaba al handoff visual general, pero introducia justo el titulo pequeno que no debia verse en el estado de `large title`.
+
+Como se soluciono:
+
+- Se mantuvo el latch visual del cierre de busqueda.
+- Pero se retiro el forzado de `.inline` en `Malla`.
+- El titulo vuelve a depender de `.large`, dejando que el sistema maneje la transicion del encabezado sin ese fantasma intermedio.
+
+Regla:
+
+- Si un bug de cierre aparece solo en la variante de `large title`, no forzar `.inline` como parche global; primero conservar el comportamiento nativo del titulo y aislar solo el handoff del `searchable`.
