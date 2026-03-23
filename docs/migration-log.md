@@ -813,3 +813,12 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - La capa de resultados de busqueda de `Malla` ahora usa la misma respiracion estructural de la pantalla base.
 - Se le dio el mismo tratamiento de fondo y scroll friendly que la vista principal.
 - Tambien se anadio espacio inferior de seguridad dentro del contenido de resultados para respetar mejor la tab bar flotante.
+
+## Actualizacion 2026-03-23 - Cierre nativo de la barra de busqueda en Malla
+
+- La busqueda de `Malla` ahora rastrea si la barra sigue presentada por el sistema.
+- Al cerrar la lupa/barra con resultados recientes:
+  - el titulo grande no reaparece en mitad de la animacion
+  - la capa de resultados se mantiene viva un instante corto mientras el sistema termina de cerrar la barra
+  - luego `Malla` vuelve a su estado normal ya estable
+- La correccion se hizo solo sobre el handoff visual de cierre, sin cambiar la apertura ni el contenido principal.

@@ -7,6 +7,10 @@ struct LeanUpMallaView: View {
     @State private var selectedPeriod: Int?
     @State private var selectedFilter: LeanUpMallaFilter = .all
     @State private var searchQuery = ""
+    @State private var isSearchPresented = false
+    @State private var isSearchClosing = false
+    @State private var closingSearchQuery = ""
+    @State private var lastNonEmptySearchQuery = ""
     @State private var isReminderListPresented = false
     @State private var periodResetScrollToken = 0
     @State private var filterResetScrollToken = 0
@@ -113,10 +117,11 @@ struct LeanUpMallaView: View {
         .leanUpKeyboardFriendlyScroll()
         .background(LeanUpPageBackground())
         .navigationTitle("Malla")
-        .navigationBarTitleDisplayMode(.large)
+        .navigationBarTitleDisplayMode(isSearchChromeActive ? .inline : .large)
         .modifier(
             LeanUpNativeMallaSearchModifier(
                 query: $searchQuery,
+                isPresented: $isSearchPresented,
                 prompt: "Busca una materia"
             )
         )
@@ -129,6 +134,38 @@ struct LeanUpMallaView: View {
         .onAppear {
             if selectedPeriod == nil {
                 selectedPeriod = model.focusPeriod ?? model.periods.first
+            }
+        }
+        .onChange(of: searchQuery) { newValue in
+            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if !trimmed.isEmpty {
+                lastNonEmptySearchQuery = trimmed
+                isSearchClosing = false
+                closingSearchQuery = ""
+            }
+        }
+        .onChange(of: isSearchPresented) { newValue in
+            if newValue {
+                isSearchClosing = false
+                closingSearchQuery = ""
+                return
+            }
+
+            let fallbackQuery = trimmedSearchQuery.isEmpty ? lastNonEmptySearchQuery : trimmedSearchQuery
+            guard !fallbackQuery.isEmpty else {
+                isSearchClosing = false
+                closingSearchQuery = ""
+                return
+            }
+
+            closingSearchQuery = fallbackQuery
+            isSearchClosing = true
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.26) {
+                guard !isSearchPresented, trimmedSearchQuery.isEmpty else { return }
+                isSearchClosing = false
+                closingSearchQuery = ""
             }
         }
     }
@@ -147,10 +184,24 @@ private extension LeanUpMallaView {
 
     var isSearchMode: Bool { hasActiveSearch }
 
-    var showsSearchResults: Bool { hasActiveSearch }
+    var activeSearchQuery: String {
+        if hasActiveSearch {
+            return trimmedSearchQuery
+        }
+
+        if isSearchClosing {
+            return closingSearchQuery
+        }
+
+        return ""
+    }
+
+    var showsSearchResults: Bool { !activeSearchQuery.isEmpty }
+
+    var isSearchChromeActive: Bool { isSearchPresented || isSearchClosing }
 
     var searchResults: [LeanUpMallaSearchResult] {
-        leanUpMallaSearchResults(model: model, query: trimmedSearchQuery)
+        leanUpMallaSearchResults(model: model, query: activeSearchQuery)
     }
 }
 
@@ -2229,18 +2280,15 @@ private struct LeanUpNativeDetailSearchModifier: ViewModifier {
 
 private struct LeanUpNativeMallaSearchModifier: ViewModifier {
     @Binding var query: String
+    @Binding var isPresented: Bool
     let prompt: String
 
     @ViewBuilder
     func body(content: Content) -> some View {
         if #available(iOS 26.0, *) {
-            content
-                .searchable(
-                    text: $query,
-                    placement: .automatic,
-                    prompt: prompt
-                )
-                .searchToolbarBehavior(.minimize)
+            searchableContentIOS26(content)
+        } else if #available(iOS 17.0, *) {
+            searchableContentIOS17(content)
         } else {
             content
                 .searchable(
@@ -2249,6 +2297,29 @@ private struct LeanUpNativeMallaSearchModifier: ViewModifier {
                     prompt: prompt
                 )
         }
+    }
+
+    @available(iOS 26.0, *)
+    private func searchableContentIOS26(_ content: Content) -> some View {
+        content
+            .searchable(
+                text: $query,
+                isPresented: $isPresented,
+                placement: .automatic,
+                prompt: prompt
+            )
+            .searchToolbarBehavior(.minimize)
+    }
+
+    @available(iOS 17.0, *)
+    private func searchableContentIOS17(_ content: Content) -> some View {
+        content
+            .searchable(
+                text: $query,
+                isPresented: $isPresented,
+                placement: .navigationBarDrawer(displayMode: .always),
+                prompt: prompt
+            )
     }
 }
 

@@ -912,3 +912,27 @@ Como se soluciono:
 Regla:
 
 - Si una vista de busqueda vive dentro de una pantalla base que ya se comporta bien, su capa de resultados debe heredar la misma estructura visual antes de inventar soluciones nuevas.
+
+### 47. Cortar la capa de resultados apenas el query queda vacio aunque la barra del sistema siga cerrandose
+
+Que paso:
+
+- Al cerrar la lupa/barra de busqueda en `Malla`, aparecia una franja visual fea arriba antes de que todo quedara normal.
+
+Por que paso:
+
+- La vista estaba atando el cierre solo a `query.isEmpty`.
+- En cuanto el texto desaparecia, la capa de resultados y el contexto visual de busqueda se desmontaban de inmediato.
+- Pero la barra `searchable` del sistema seguia cerrandose unos instantes mas, asi que el titulo grande y el contenido base reaparecian demasiado pronto.
+
+Como se soluciono:
+
+- `Malla` ahora observa tambien si la barra sigue presentada.
+- Durante el cierre se conserva un estado transitorio corto:
+  - el titulo sigue en modo inline
+  - la capa de resultados sigue viva con el ultimo query util
+  - y solo cuando la animacion del sistema termina vuelve la `Malla` grande normal
+
+Regla:
+
+- Si una animacion de `searchable` falla solo al cerrar, no desmontar la UI de busqueda solo porque el texto ya esta vacio; primero esperar a que el sistema termine de cerrar la barra.
