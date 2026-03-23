@@ -8,74 +8,65 @@ struct LeanUpMallaView: View {
     @State private var selectedFilter: LeanUpMallaFilter = .all
     @State private var searchQuery = ""
     @State private var isReminderListPresented = false
-    private let topAnchorID = "malla-top-anchor"
 
     var body: some View {
         GeometryReader { proxy in
             ZStack(alignment: .topLeading) {
-                ScrollViewReader { scrollProxy in
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 20) {
-                            Color.clear
-                                .frame(height: 0)
-                                .id(topAnchorID)
-
-                            if !model.academics.courses.isEmpty && !isSearchMode {
-                                LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
-                                LeanUpMallaMotivationCard(model: model)
-                                LeanUpMallaReminderPreviewCard(
-                                    reminders: model.upcomingReminders()
-                                ) {
-                                    isReminderListPresented = true
-                                }
-                            }
-
-                            if !model.academics.courses.isEmpty && !isSearchMode {
-                                LeanUpMallaStickyHeader(
-                                    periods: model.periods,
-                                    selectedPeriod: effectiveSelectedPeriod,
-                                    selectedFilter: selectedFilter,
-                                    onSelectPeriod: { tappedPeriod in
-                                        if tappedPeriod == effectiveSelectedPeriod {
-                                            selectedPeriod = nil
-                                        } else {
-                                            selectedPeriod = tappedPeriod
-                                        }
-                                        scrollToTop(using: scrollProxy)
-                                    },
-                                    onSelectFilter: { tappedFilter in
-                                        selectedFilter = selectedFilter == tappedFilter ? .all : tappedFilter
-                                        scrollToTop(using: scrollProxy)
-                                    }
-                                )
-                            }
-
-                            if model.academics.courses.isEmpty {
-                                LeanUpSurfaceCard {
-                                    Text("No pudimos cargar la base academica en este momento. Tu progreso guardado sigue intacto.")
-                                        .font(.subheadline)
-                                        .foregroundStyle(.secondary)
-                                }
-                            } else {
-                                LeanUpSelectedPeriodSection(
-                                    period: effectiveSelectedPeriod,
-                                    model: model,
-                                    filter: selectedFilter
-                                ) { item in
-                                    route = item
-                                }
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 20) {
+                        if !model.academics.courses.isEmpty && !isSearchMode {
+                            LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
+                            LeanUpMallaMotivationCard(model: model)
+                            LeanUpMallaReminderPreviewCard(
+                                reminders: model.upcomingReminders()
+                            ) {
+                                isReminderListPresented = true
                             }
                         }
-                        .frame(width: max(proxy.size.width - 40, 0), alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 18)
+
+                        if !model.academics.courses.isEmpty && !isSearchMode {
+                            LeanUpMallaStickyHeader(
+                                periods: model.periods,
+                                selectedPeriod: effectiveSelectedPeriod,
+                                selectedFilter: selectedFilter,
+                                onSelectPeriod: { tappedPeriod in
+                                    if tappedPeriod == effectiveSelectedPeriod {
+                                        selectedPeriod = nil
+                                    } else {
+                                        selectedPeriod = tappedPeriod
+                                    }
+                                },
+                                onSelectFilter: { tappedFilter in
+                                    selectedFilter = selectedFilter == tappedFilter ? .all : tappedFilter
+                                }
+                            )
+                        }
+
+                        if model.academics.courses.isEmpty {
+                            LeanUpSurfaceCard {
+                                Text("No pudimos cargar la base academica en este momento. Tu progreso guardado sigue intacto.")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } else {
+                            LeanUpSelectedPeriodSection(
+                                period: effectiveSelectedPeriod,
+                                model: model,
+                                filter: selectedFilter
+                            ) { item in
+                                route = item
+                            }
+                        }
                     }
-                    .opacity(showsSearchResults ? 0 : 1)
-                    .allowsHitTesting(!showsSearchResults)
-                    .accessibilityHidden(showsSearchResults)
-                    .transaction { transaction in
-                        transaction.animation = nil
-                    }
+                    .frame(width: max(proxy.size.width - 40, 0), alignment: .leading)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 18)
+                }
+                .opacity(showsSearchResults ? 0 : 1)
+                .allowsHitTesting(!showsSearchResults)
+                .accessibilityHidden(showsSearchResults)
+                .transaction { transaction in
+                    transaction.animation = nil
                 }
 
                 if showsSearchResults {
@@ -135,10 +126,6 @@ private extension LeanUpMallaView {
 
     var searchResults: [LeanUpMallaSearchResult] {
         leanUpMallaSearchResults(model: model, query: trimmedSearchQuery)
-    }
-
-    func scrollToTop(using proxy: ScrollViewProxy) {
-        proxy.scrollTo(topAnchorID, anchor: .top)
     }
 }
 
@@ -975,8 +962,9 @@ struct LeanUpSelectedPeriodSection: View {
                                 }
                                 .modifier(
                                     LeanUpQuickInProgressGesture(
-                                        isEnabled: isPendingCourse(course),
+                                        isEnabled: canQuickToggle(course: course),
                                         isActive: model.isCourseInProgress(course),
+                                        bottomGestureExclusionHeight: 44,
                                         onToggle: {
                                             model.setCourseInProgress(!model.isCourseInProgress(course), for: course.id)
                                         }
@@ -1019,6 +1007,7 @@ struct LeanUpSelectedPeriodSection: View {
                                     LeanUpQuickInProgressGesture(
                                         isEnabled: canQuickToggle(group: group),
                                         isActive: model.isElectiveInProgress(group),
+                                        bottomGestureExclusionHeight: 0,
                                         onToggle: {
                                             model.setElectiveInProgress(!model.isElectiveInProgress(group), groupName: group.name)
                                         }
@@ -1040,16 +1029,23 @@ struct LeanUpSelectedPeriodSection: View {
         model.electiveGroups(in: period).filter { filter.matches(group: $0, model: model) }
     }
 
-    private func isPendingCourse(_ course: LeanUpCourse) -> Bool {
-        if case .pending = model.courseStatus(for: course) {
+    private func canQuickToggle(course: LeanUpCourse) -> Bool {
+        switch model.courseStatus(for: course) {
+        case .pending, .inProgress:
             return true
+        default:
+            return false
         }
-        return false
     }
 
     private func canQuickToggle(group: LeanUpElectiveGroup) -> Bool {
         guard let selected = model.selectedOption(in: group) else { return false }
-        guard case .pending = model.electiveStatus(for: group) else { return false }
+        switch model.electiveStatus(for: group) {
+        case .pending, .inProgress:
+            break
+        default:
+            return false
+        }
         return model.electiveNote(groupName: group.name, optionCode: selected.code) == nil
     }
 
@@ -1078,6 +1074,7 @@ struct LeanUpSelectedPeriodSection: View {
 private struct LeanUpQuickInProgressGesture: ViewModifier {
     let isEnabled: Bool
     let isActive: Bool
+    let bottomGestureExclusionHeight: CGFloat
     let onToggle: () -> Void
 
     @State private var dragOffset: CGFloat = 0
@@ -1092,37 +1089,45 @@ private struct LeanUpQuickInProgressGesture: ViewModifier {
                 }
             }
             .offset(x: max(0, dragOffset * 0.14))
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 28)
-                    .onChanged { value in
-                        guard isEnabled else { return }
-                        let horizontal = value.translation.width
-                        let vertical = abs(value.translation.height)
+            .overlay {
+                GeometryReader { proxy in
+                    Color.clear
+                        .contentShape(Rectangle())
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 28)
+                                .onChanged { value in
+                                    guard isEnabled else { return }
+                                    let interactiveHeight = max(0, proxy.size.height - bottomGestureExclusionHeight)
+                                    guard value.startLocation.y <= interactiveHeight else { return }
+                                    let horizontal = value.translation.width
+                                    let vertical = abs(value.translation.height)
 
-                        if !hasLockedHorizontalSwipe {
-                            guard horizontal > 52, horizontal > vertical * 2.4 else { return }
-                            hasLockedHorizontalSwipe = true
-                        }
+                                    if !hasLockedHorizontalSwipe {
+                                        guard horizontal > 64, horizontal > vertical * 3.0 else { return }
+                                        hasLockedHorizontalSwipe = true
+                                    }
 
-                        guard hasLockedHorizontalSwipe else { return }
+                                    guard hasLockedHorizontalSwipe else { return }
 
-                        let translation = max(0, horizontal)
-                        dragOffset = min(translation, 124)
+                                    let translation = max(0, horizontal)
+                                    dragOffset = min(translation, 124)
 
-                        if translation > 112 && !didTrigger {
-                            didTrigger = true
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            onToggle()
-                        }
-                    }
-                    .onEnded { _ in
-                        didTrigger = false
-                        hasLockedHorizontalSwipe = false
-                        withAnimation(.spring(response: 0.26, dampingFraction: 0.84)) {
-                            dragOffset = 0
-                        }
-                    }
-            )
+                                    if translation > 118 && !didTrigger {
+                                        didTrigger = true
+                                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                        onToggle()
+                                    }
+                                }
+                                .onEnded { _ in
+                                    didTrigger = false
+                                    hasLockedHorizontalSwipe = false
+                                    withAnimation(.spring(response: 0.26, dampingFraction: 0.84)) {
+                                        dragOffset = 0
+                                    }
+                                }
+                        )
+                }
+            }
     }
 
     private var actionBackground: some View {

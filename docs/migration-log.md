@@ -747,3 +747,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - En busqueda, los resultados ya no aparecen dentro de una card grande extra, para que la capa se sienta mas limpia y menos "encajada".
 - El gesto rapido de `En curso` se limito a estados pendientes y ahora exige un arrastre mas largo y mucho mas pronunciado hacia la derecha.
 - La accion rapida ya no muestra texto ni iconos visibles en el hueco del swipe.
+
+## Actualizacion 2026-03-23 - Ajuste fino del gesto rapido frente a tags y estados activos
+
+- El gesto rapido de `En curso` ahora ignora una franja inferior de la fila en materias, para no activarse mientras se arrastran los tags horizontales.
+- Tambien permite quitar `En curso` con el mismo gesto cuando la materia sigue activa sin nota final.
+- La `Malla` principal ya no se desplaza arriba al tocar periodos o filtros; solo se recentran sus banners horizontales.

@@ -647,3 +647,22 @@ Como se soluciono:
 Regla:
 
 - En una fila densa con scroll vertical alrededor, un gesto rapido debe ser intencional, largo y visualmente sobrio.
+
+### 33. Mezclar el gesto rapido de la fila con la zona de tags horizontales
+
+Que paso:
+
+- Aunque el swipe ya era menos sensible, todavia podia interferir cuando el usuario arrastraba los tags de una materia.
+
+Por que paso:
+
+- La accion rapida seguia escuchando sobre toda la card, incluida la banda inferior donde viven los tags.
+
+Como se soluciono:
+
+- El gesto ahora ignora una franja inferior de la fila de materias.
+- Asi la parte alta sigue sirviendo para el swipe rapido y la parte baja queda libre para el scroll horizontal de tags.
+
+Regla:
+
+- Si una fila mezcla accion horizontal propia y subcomponentes con scroll horizontal, separar explicitamente sus zonas interactivas.
