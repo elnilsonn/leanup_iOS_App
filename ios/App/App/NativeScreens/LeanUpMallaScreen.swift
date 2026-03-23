@@ -8,6 +8,9 @@ struct LeanUpMallaView: View {
     @State private var selectedFilter: LeanUpMallaFilter = .all
     @State private var searchQuery = ""
     @State private var isReminderListPresented = false
+    @State private var currentScrollOffset: CGFloat = 0
+    @State private var pendingScrollRequest: LeanUpScrollPositionRequest?
+    @State private var storedScrollOffsetBeforeSearch: CGFloat?
 
     var body: some View {
         GeometryReader { proxy in
@@ -16,7 +19,7 @@ struct LeanUpMallaView: View {
                     VStack(alignment: .leading, spacing: 20) {
                         if !model.academics.courses.isEmpty && !isSearchMode {
                             LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
-                            LeanUpMallaMotivationCard(message: model.mallaMotivationMessage)
+                            LeanUpMallaMotivationCard(model: model)
                             LeanUpMallaReminderPreviewCard(
                                 reminders: model.upcomingReminders()
                             ) {
@@ -29,7 +32,13 @@ struct LeanUpMallaView: View {
                                 periods: model.periods,
                                 selectedPeriod: effectiveSelectedPeriod,
                                 selectedFilter: $selectedFilter,
-                                onSelectPeriod: { selectedPeriod = $0 }
+                                onSelectPeriod: { tappedPeriod in
+                                    if tappedPeriod == effectiveSelectedPeriod {
+                                        selectedPeriod = nil
+                                    } else {
+                                        selectedPeriod = tappedPeriod
+                                    }
+                                }
                             )
                         }
 
@@ -66,6 +75,12 @@ struct LeanUpMallaView: View {
                 .frame(width: max(proxy.size.width - 40, 0), alignment: .leading)
                 .padding(.horizontal, 20)
                 .padding(.vertical, 18)
+                .background(
+                    LeanUpScrollViewBridge(
+                        offset: $currentScrollOffset,
+                        request: $pendingScrollRequest
+                    )
+                )
                 .transaction { transaction in
                     transaction.animation = nil
                 }
@@ -90,6 +105,19 @@ struct LeanUpMallaView: View {
         .onAppear {
             if selectedPeriod == nil {
                 selectedPeriod = model.focusPeriod ?? model.periods.first
+            }
+        }
+        .onChange(of: searchQuery) { newValue in
+            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+
+            if !trimmed.isEmpty {
+                if storedScrollOffsetBeforeSearch == nil {
+                    storedScrollOffsetBeforeSearch = currentScrollOffset
+                    pendingScrollRequest = LeanUpScrollPositionRequest(offset: 0, animated: true)
+                }
+            } else if let storedScrollOffsetBeforeSearch {
+                pendingScrollRequest = LeanUpScrollPositionRequest(offset: storedScrollOffsetBeforeSearch, animated: true)
+                self.storedScrollOffsetBeforeSearch = nil
             }
         }
     }
@@ -353,25 +381,45 @@ struct LeanUpReminderPreviewRow: View {
 }
 
 struct LeanUpMallaMotivationCard: View {
-    let message: LeanUpMotivationMessage
+    @ObservedObject var model: LeanUpAppModel
+    @State private var message: LeanUpMotivationMessage
+    private let timer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
+
+    init(model: LeanUpAppModel) {
+        self.model = model
+        _message = State(initialValue: model.mallaMotivationMessage)
+    }
 
     var body: some View {
         LeanUpMallaBannerCard(compact: true) {
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Mensaje para hoy")
-                    .font(.caption.weight(.bold))
-                    .tracking(0.8)
-                    .foregroundStyle(Color.unadBlue)
+            ZStack(alignment: .topLeading) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Mensaje para hoy")
+                        .font(.caption.weight(.bold))
+                        .tracking(0.8)
+                        .foregroundStyle(Color.unadBlue)
 
-                Text(message.title)
-                    .font(.headline.weight(.semibold))
-                    .foregroundStyle(.primary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    Text(message.title)
+                        .font(.headline.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                Text(message.detail)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
+                    Text(message.detail)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .id("\(message.title)|\(message.detail)")
+                .transition(.asymmetric(insertion: .opacity.combined(with: .scale(scale: 0.985)), removal: .opacity))
+            }
+            .animation(.easeInOut(duration: 0.32), value: message)
+        }
+        .onReceive(timer) { _ in
+            let nextMessage = model.mallaMotivationMessage
+            guard nextMessage != message else { return }
+
+            withAnimation(.easeInOut(duration: 0.32)) {
+                message = nextMessage
             }
         }
     }
@@ -781,7 +829,7 @@ struct LeanUpMallaStickyHeader: View {
                 HStack(spacing: 8) {
                     ForEach(LeanUpMallaFilter.allCases) { filter in
                         Button {
-                            selectedFilter = filter
+                            selectedFilter = selectedFilter == filter ? .all : filter
                         } label: {
                             Text(filter.title)
                                 .font(.caption.weight(.bold))
@@ -980,22 +1028,31 @@ private struct LeanUpQuickInProgressGesture: ViewModifier {
 
     @State private var dragOffset: CGFloat = 0
     @State private var didTrigger = false
+    @State private var hasLockedHorizontalSwipe = false
 
     func body(content: Content) -> some View {
         content
             .background(alignment: .leading) {
-                if isEnabled {
+                if isEnabled && dragOffset > 0 {
                     actionBackground
                 }
             }
-            .offset(x: max(0, dragOffset))
+            .offset(x: max(0, dragOffset * 0.22))
             .simultaneousGesture(
                 DragGesture(minimumDistance: 12)
                     .onChanged { value in
                         guard isEnabled else { return }
-                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                        let horizontal = value.translation.width
+                        let vertical = abs(value.translation.height)
 
-                        let translation = max(0, value.translation.width)
+                        if !hasLockedHorizontalSwipe {
+                            guard horizontal > 18, horizontal > vertical * 1.35 else { return }
+                            hasLockedHorizontalSwipe = true
+                        }
+
+                        guard hasLockedHorizontalSwipe else { return }
+
+                        let translation = max(0, horizontal)
                         dragOffset = min(translation, 84)
 
                         if translation > 72 && !didTrigger {
@@ -1006,6 +1063,7 @@ private struct LeanUpQuickInProgressGesture: ViewModifier {
                     }
                     .onEnded { _ in
                         didTrigger = false
+                        hasLockedHorizontalSwipe = false
                         withAnimation(.spring(response: 0.26, dampingFraction: 0.84)) {
                             dragOffset = 0
                         }
@@ -1029,6 +1087,87 @@ private struct LeanUpQuickInProgressGesture: ViewModifier {
                 .padding(.leading, 14)
                 .opacity(progress)
             }
+    }
+}
+
+private struct LeanUpScrollPositionRequest: Equatable {
+    let id = UUID()
+    let offset: CGFloat
+    let animated: Bool
+}
+
+private struct LeanUpScrollViewBridge: UIViewRepresentable {
+    @Binding var offset: CGFloat
+    @Binding var request: LeanUpScrollPositionRequest?
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(offset: $offset, request: $request)
+    }
+
+    func makeUIView(context: Context) -> UIView {
+        let view = UIView(frame: .zero)
+        view.isUserInteractionEnabled = false
+        DispatchQueue.main.async {
+            context.coordinator.attachIfNeeded(from: view)
+        }
+        return view
+    }
+
+    func updateUIView(_ uiView: UIView, context: Context) {
+        DispatchQueue.main.async {
+            context.coordinator.attachIfNeeded(from: uiView)
+            context.coordinator.applyIfNeeded()
+        }
+    }
+
+    final class Coordinator: NSObject {
+        @Binding var offset: CGFloat
+        @Binding var request: LeanUpScrollPositionRequest?
+        weak var scrollView: UIScrollView?
+        var observation: NSKeyValueObservation?
+        var lastAppliedRequestID: UUID?
+
+        init(offset: Binding<CGFloat>, request: Binding<LeanUpScrollPositionRequest?>) {
+            _offset = offset
+            _request = request
+        }
+
+        func attachIfNeeded(from view: UIView) {
+            guard scrollView == nil else { return }
+
+            var currentSuperview = view.superview
+            while let currentSuperview {
+                if let scrollView = currentSuperview as? UIScrollView {
+                    self.scrollView = scrollView
+                    observation = scrollView.observe(\.contentOffset, options: [.initial, .new]) { [weak self] scrollView, _ in
+                        self?.offset = scrollView.contentOffset.y
+                    }
+                    break
+                }
+                currentSuperview = currentSuperview.superview
+            }
+        }
+
+        func applyIfNeeded() {
+            guard let request else { return }
+            guard lastAppliedRequestID != request.id else { return }
+            guard let scrollView else { return }
+
+            lastAppliedRequestID = request.id
+
+            let minOffset = -scrollView.adjustedContentInset.top
+            let maxOffset = max(
+                minOffset,
+                scrollView.contentSize.height - scrollView.bounds.height + scrollView.adjustedContentInset.bottom
+            )
+            let targetOffset = min(max(request.offset, minOffset), maxOffset)
+
+            scrollView.setContentOffset(CGPoint(x: 0, y: targetOffset), animated: request.animated)
+
+            DispatchQueue.main.async { [weak self] in
+                self?.request = nil
+            }
+        }
     }
 }
 

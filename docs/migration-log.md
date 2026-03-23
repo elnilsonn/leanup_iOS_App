@@ -730,3 +730,13 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Con eso el cierre de la busqueda deja de verse como si la pantalla se estuviera "rearmando".
 - El prompt de la barra se simplifico a un texto corto: `Busca una materia`.
 - El acceso rapido de `En curso` dejo de depender de `swipeActions` sobre cards en `ScrollView` y paso a un gesto horizontal propio, para preservar el diseno actual sin perder la accion rapida.
+
+## Actualizacion 2026-03-23 - Scroll recordado en busqueda y filtros con segundo toque
+
+- Al empezar a escribir en la busqueda principal de `Malla`, la pantalla ahora sube al inicio para mostrar resultados desde arriba.
+- Al borrar el texto o cerrar la busqueda, `Malla` vuelve a la posicion de scroll donde estaba antes de buscar.
+- Los mensajes motivacionales ahora se actualizan con una transicion suave de aparicion cuando cambia el bloque de 5 minutos.
+- En la cabecera de `Malla`:
+  - tocar de nuevo el periodo ya seleccionado devuelve al periodo actual
+  - tocar de nuevo un filtro activo devuelve a `Todas`
+- El gesto rapido de `En curso` se endurecio para que capture solo arrastres realmente horizontales y no estorbe al scroll vertical.

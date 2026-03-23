@@ -547,3 +547,44 @@ Como se soluciono:
 Regla:
 
 - Si la vista no esta montada como `List`, no asumir que `swipeActions` va a resolver un gesto rapido de fila de forma fiable.
+
+### 28. Resolver la busqueda solo con ocultar y mostrar resultados sin recordar posicion
+
+Que paso:
+
+- Al empezar a buscar, el usuario queria ver resultados desde arriba.
+- Al cerrar la busqueda, tambien queria volver exactamente al punto donde venia leyendo.
+
+Por que paso:
+
+- Ocultar banners y mostrar resultados no basta cuando la pantalla ya venia con scroll intermedio.
+- Sin recordar posicion, la experiencia se siente brusca o "teletransportada".
+
+Como se soluciono:
+
+- `Malla` ahora observa el `UIScrollView` real para recordar su offset antes de la busqueda.
+- Cuando aparece texto, sube al inicio.
+- Cuando la busqueda se limpia, restaura la posicion previa.
+
+Regla:
+
+- Si una pantalla larga mezcla `searchable` con contenido denso, tratar la posicion de scroll como parte del estado UX y no como detalle incidental.
+
+### 29. Gesto horizontal demasiado sensible sobre filas largas
+
+Que paso:
+
+- El gesto rapido de `En curso` empezaba a pelear con el scroll vertical.
+
+Por que paso:
+
+- Cualquier arrastre ligeramente diagonal podia activar visualmente el gesto horizontal demasiado pronto.
+
+Como se soluciono:
+
+- El gesto ahora espera una dominancia horizontal clara antes de bloquearse como swipe.
+- Tambien se reduce el desplazamiento visual de la card para no dar sensacion de que la lista se queda pegada.
+
+Regla:
+
+- En cards densas dentro de `ScrollView`, un gesto horizontal debe exigir umbral y dominancia clara antes de mover visualmente la fila.
