@@ -172,66 +172,66 @@ struct LeanUpMallaInlineSearchSection: View {
     let onOpen: (LeanUpMallaDetailRoute) -> Void
 
     var body: some View {
-        LeanUpSurfaceCard {
-            VStack(alignment: .leading, spacing: 14) {
-                HStack(alignment: .firstTextBaseline, spacing: 12) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Resultados en Malla")
-                            .font(.headline.weight(.semibold))
-                        Text("Buscando \"\(query)\" dentro de toda tu malla.")
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    Text("\(results.count)")
-                        .font(.caption.weight(.bold))
-                        .padding(.horizontal, 10)
-                        .padding(.vertical, 6)
-                        .background(Capsule().fill(Color.unadBlue.opacity(0.12)))
-                        .foregroundStyle(Color.unadBlue)
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Resultados")
+                        .font(.headline.weight(.semibold))
+                    Text("Buscando \"\(query)\" en tu malla.")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
                 }
 
-                if results.isEmpty {
+                Spacer()
+
+                Text("\(results.count)")
+                    .font(.caption.weight(.bold))
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(Color.unadBlue.opacity(0.12)))
+                    .foregroundStyle(Color.unadBlue)
+            }
+
+            if results.isEmpty {
+                LeanUpSurfaceCard {
                     Text("No encontramos coincidencias con ese texto.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
-                } else {
-                    VStack(spacing: 12) {
-                        ForEach(results) { result in
-                            Button {
-                                onOpen(result.route)
-                            } label: {
-                                LeanUpSurfaceInsetCard {
-                                    VStack(alignment: .leading, spacing: 6) {
-                                        HStack(alignment: .top, spacing: 10) {
-                                            VStack(alignment: .leading, spacing: 4) {
-                                                Text(result.title)
-                                                    .font(.subheadline.weight(.semibold))
-                                                    .foregroundStyle(.primary)
-                                                Text("Periodo \(result.period)")
-                                                    .font(.caption)
-                                                    .foregroundStyle(.secondary)
-                                            }
-
-                                            Spacer()
-
-                                            LeanUpCurriculumTag(
-                                                text: result.isElective ? "Electiva" : "Materia",
-                                                style: result.isElective ? .elective : .courseType("Teorica")
-                                            )
+                }
+            } else {
+                VStack(spacing: 12) {
+                    ForEach(results) { result in
+                        Button {
+                            onOpen(result.route)
+                        } label: {
+                            LeanUpSurfaceCard {
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack(alignment: .top, spacing: 10) {
+                                        VStack(alignment: .leading, spacing: 4) {
+                                            Text(result.title)
+                                                .font(.subheadline.weight(.semibold))
+                                                .foregroundStyle(.primary)
+                                            Text("Periodo \(result.period)")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
                                         }
 
-                                        Text(result.subtitle)
-                                            .font(.footnote)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(2)
+                                        Spacer()
+
+                                        LeanUpCurriculumTag(
+                                            text: result.isElective ? "Electiva" : "Materia",
+                                            style: result.isElective ? .elective : .courseType("Teorica")
+                                        )
                                     }
+
+                                    Text(result.subtitle)
+                                        .font(.footnote)
+                                        .foregroundStyle(.secondary)
+                                        .lineLimit(2)
                                 }
                             }
-                            .buttonStyle(.plain)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -803,48 +803,66 @@ struct LeanUpMallaStickyHeader: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 10) {
-                    ForEach(periods, id: \.self) { period in
-                        Button {
-                            onSelectPeriod(period)
-                        } label: {
-                            Text("Periodo \(period)")
-                                .font(.subheadline.weight(.semibold))
-                                .padding(.horizontal, 14)
-                                .padding(.vertical, 10)
-                                .background(
-                                    Capsule()
-                                        .fill(period == selectedPeriod ? Color.unadBlue : Color.primary.opacity(0.06))
-                                )
-                                .foregroundStyle(period == selectedPeriod ? Color.white : Color.primary)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(periods, id: \.self) { period in
+                            Button {
+                                onSelectPeriod(period)
+                            } label: {
+                                Text("Periodo \(period)")
+                                    .font(.subheadline.weight(.semibold))
+                                    .padding(.horizontal, 14)
+                                    .padding(.vertical, 10)
+                                    .background(
+                                        Capsule()
+                                            .fill(period == selectedPeriod ? Color.unadBlue : Color.primary.opacity(0.06))
+                                    )
+                                    .foregroundStyle(period == selectedPeriod ? Color.white : Color.primary)
+                            }
+                            .buttonStyle(.plain)
+                            .id("period-\(period)")
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.horizontal, 2)
                 }
-                .padding(.horizontal, 2)
+                .onAppear {
+                    scrollPeriodBanner(using: proxy, animated: false)
+                }
+                .onChange(of: selectedPeriod) { _ in
+                    scrollPeriodBanner(using: proxy, animated: true)
+                }
             }
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    ForEach(LeanUpMallaFilter.allCases) { filter in
-                        Button {
-                            onSelectFilter(filter)
-                        } label: {
-                            Text(filter.title)
-                                .font(.caption.weight(.bold))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(
-                                    Capsule()
-                                        .fill(filter == selectedFilter ? Color.unadNavy.opacity(0.92) : Color.primary.opacity(0.06))
-                                )
-                                .foregroundStyle(filter == selectedFilter ? Color.white : Color.secondary)
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(LeanUpMallaFilter.allCases) { filter in
+                            Button {
+                                onSelectFilter(filter)
+                            } label: {
+                                Text(filter.title)
+                                    .font(.caption.weight(.bold))
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 8)
+                                    .background(
+                                        Capsule()
+                                            .fill(filter == selectedFilter ? Color.unadNavy.opacity(0.92) : Color.primary.opacity(0.06))
+                                    )
+                                    .foregroundStyle(filter == selectedFilter ? Color.white : Color.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            .id("filter-\(filter.rawValue)")
                         }
-                        .buttonStyle(.plain)
                     }
+                    .padding(.horizontal, 2)
                 }
-                .padding(.horizontal, 2)
+                .onAppear {
+                    scrollFilterBanner(using: proxy, animated: false)
+                }
+                .onChange(of: selectedFilter) { _ in
+                    scrollFilterBanner(using: proxy, animated: true)
+                }
             }
         }
         .padding(14)
@@ -856,6 +874,34 @@ struct LeanUpMallaStickyHeader: View {
             RoundedRectangle(cornerRadius: 24, style: .continuous)
                 .stroke(Color.unadBlue.opacity(0.08), lineWidth: 1)
         )
+    }
+
+    private func scrollPeriodBanner(using proxy: ScrollViewProxy, animated: Bool) {
+        let action = {
+            proxy.scrollTo("period-\(selectedPeriod)", anchor: .center)
+        }
+
+        if animated {
+            withAnimation(.easeInOut(duration: 0.24)) {
+                action()
+            }
+        } else {
+            action()
+        }
+    }
+
+    private func scrollFilterBanner(using proxy: ScrollViewProxy, animated: Bool) {
+        let action = {
+            proxy.scrollTo("filter-\(selectedFilter.rawValue)", anchor: .center)
+        }
+
+        if animated {
+            withAnimation(.easeInOut(duration: 0.24)) {
+                action()
+            }
+        } else {
+            action()
+        }
     }
 }
 
@@ -929,7 +975,7 @@ struct LeanUpSelectedPeriodSection: View {
                                 }
                                 .modifier(
                                     LeanUpQuickInProgressGesture(
-                                        isEnabled: model.note(for: course) == nil,
+                                        isEnabled: isPendingCourse(course),
                                         isActive: model.isCourseInProgress(course),
                                         onToggle: {
                                             model.setCourseInProgress(!model.isCourseInProgress(course), for: course.id)
@@ -994,8 +1040,16 @@ struct LeanUpSelectedPeriodSection: View {
         model.electiveGroups(in: period).filter { filter.matches(group: $0, model: model) }
     }
 
+    private func isPendingCourse(_ course: LeanUpCourse) -> Bool {
+        if case .pending = model.courseStatus(for: course) {
+            return true
+        }
+        return false
+    }
+
     private func canQuickToggle(group: LeanUpElectiveGroup) -> Bool {
         guard let selected = model.selectedOption(in: group) else { return false }
+        guard case .pending = model.electiveStatus(for: group) else { return false }
         return model.electiveNote(groupName: group.name, optionCode: selected.code) == nil
     }
 
@@ -1037,25 +1091,25 @@ private struct LeanUpQuickInProgressGesture: ViewModifier {
                     actionBackground
                 }
             }
-            .offset(x: max(0, dragOffset * 0.22))
+            .offset(x: max(0, dragOffset * 0.14))
             .simultaneousGesture(
-                DragGesture(minimumDistance: 12)
+                DragGesture(minimumDistance: 28)
                     .onChanged { value in
                         guard isEnabled else { return }
                         let horizontal = value.translation.width
                         let vertical = abs(value.translation.height)
 
                         if !hasLockedHorizontalSwipe {
-                            guard horizontal > 18, horizontal > vertical * 1.35 else { return }
+                            guard horizontal > 52, horizontal > vertical * 2.4 else { return }
                             hasLockedHorizontalSwipe = true
                         }
 
                         guard hasLockedHorizontalSwipe else { return }
 
                         let translation = max(0, horizontal)
-                        dragOffset = min(translation, 84)
+                        dragOffset = min(translation, 124)
 
-                        if translation > 72 && !didTrigger {
+                        if translation > 112 && !didTrigger {
                             didTrigger = true
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             onToggle()
@@ -1072,22 +1126,11 @@ private struct LeanUpQuickInProgressGesture: ViewModifier {
     }
 
     private var actionBackground: some View {
-        let progress = min(max(dragOffset / 84, 0), 1)
+        let progress = min(max(dragOffset / 124, 0), 1)
 
         return RoundedRectangle(cornerRadius: 22, style: .continuous)
             .fill((isActive ? Color.gray : Color.unadCyan).opacity(0.14))
-            .overlay(alignment: .leading) {
-                Image(systemName: isActive ? "bookmark.slash.fill" : "bookmark.fill")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(isActive ? Color.gray : Color.unadCyan)
-                    .frame(width: 34, height: 34)
-                    .background(
-                        Circle()
-                            .fill(Color.white.opacity(0.86))
-                    )
-                    .padding(.leading, 14)
-                .opacity(progress)
-            }
+            .opacity(progress)
     }
 }
 

@@ -740,3 +740,10 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - tocar de nuevo el periodo ya seleccionado devuelve al periodo actual
   - tocar de nuevo un filtro activo devuelve a `Todas`
 - El gesto rapido de `En curso` se endurecio para que capture solo arrastres realmente horizontales y no estorbe al scroll vertical.
+
+## Actualizacion 2026-03-23 - Refinamiento de banners horizontales y gesto rapido
+
+- La cabecera horizontal de periodos y filtros ahora recentra el chip activo cuando cambia la seleccion.
+- En busqueda, los resultados ya no aparecen dentro de una card grande extra, para que la capa se sienta mas limpia y menos "encajada".
+- El gesto rapido de `En curso` se limito a estados pendientes y ahora exige un arrastre mas largo y mucho mas pronunciado hacia la derecha.
+- La accion rapida ya no muestra texto ni iconos visibles en el hueco del swipe.

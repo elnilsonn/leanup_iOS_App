@@ -609,3 +609,41 @@ Como se soluciono:
 Regla:
 
 - Si el compilador no esta mostrando la linea exacta, reducir primero el uso de azucar de lenguaje y wrappers complejos en la zona tocada antes de seguir agregando cambios.
+
+### 31. Confundir el scroll principal con el scroll horizontal interno de la cabecera
+
+Que paso:
+
+- El doble toque en periodos y filtros ya devolvia el estado correcto, pero el usuario no veia el chip seleccionado porque el banner horizontal quedaba corrido.
+
+Por que paso:
+
+- Se corrigio el estado de seleccion, pero no se acompano con scroll horizontal del propio banner.
+
+Como se soluciono:
+
+- Cada banda horizontal (`periodos` y `filtros`) ahora usa `ScrollViewReader` y recentra el elemento activo cuando cambia.
+
+Regla:
+
+- Si un control horizontal cambia seleccion programaticamente, mover solo el scroll de ese control para mantener el foco visual.
+
+### 32. Hacer el gesto rapido demasiado permisivo y con demasiada senal visual
+
+Que paso:
+
+- El swipe de `En curso` seguia peleandose con el scroll vertical y su affordance visual resultaba demasiado invasiva.
+
+Por que paso:
+
+- El umbral seguia siendo corto para una fila larga.
+- Ademas, mostrar texto o iconos en el hueco del arrastre metia ruido innecesario.
+
+Como se soluciono:
+
+- El gesto ahora pide un desplazamiento bastante mas largo y una dominancia horizontal mucho mas clara.
+- Tambien se limito a elementos realmente pendientes y el hueco del arrastre quedo limpio, sin texto ni iconos.
+
+Regla:
+
+- En una fila densa con scroll vertical alrededor, un gesto rapido debe ser intencional, largo y visualmente sobrio.
