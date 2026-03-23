@@ -807,3 +807,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Se elimino el badge superior duplicado con el progreso `5/8` en la cabecera del periodo.
 - El valor de progreso se conserva solo en la linea de `Cierre del periodo`.
 - Las filas de materias y electivas ahora dan prioridad al tap de apertura del detalle sobre la capa del gesto rapido de `En curso`.
+
+## Actualizacion 2026-03-23 - Capa de busqueda alineada con la Malla base
+
+- La capa de resultados de busqueda de `Malla` ahora usa la misma respiracion estructural de la pantalla base.
+- Se le dio el mismo tratamiento de fondo y scroll friendly que la vista principal.
+- Tambien se anadio espacio inferior de seguridad dentro del contenido de resultados para respetar mejor la tab bar flotante.

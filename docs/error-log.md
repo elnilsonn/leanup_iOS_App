@@ -890,3 +890,25 @@ Como se soluciono:
 Regla:
 
 - En una fila con gesto secundario y navegacion primaria, el tap de apertura debe tener prioridad clara sobre la capa auxiliar del gesto.
+
+### 46. Hacer que la capa de busqueda se comporte como una pantalla distinta a la Malla base
+
+Que paso:
+
+- La `Malla` normal se integraba bien con el comportamiento visual tipo iOS 26, pero la capa de busqueda no.
+
+Por que paso:
+
+- La capa de resultados tenia una estructura mas pelada que la pantalla base:
+  - otro `ScrollView`
+  - sin la misma respiracion de contenido
+  - sin colchón inferior suficiente frente a la tab bar flotante
+
+Como se soluciono:
+
+- La capa de busqueda se alineo con la estructura de la `Malla` base.
+- Se le dio el mismo tratamiento de fondo y de scroll friendly, y se añadió espacio inferior de seguridad dentro del contenido.
+
+Regla:
+
+- Si una vista de busqueda vive dentro de una pantalla base que ya se comporta bien, su capa de resultados debe heredar la misma estructura visual antes de inventar soluciones nuevas.

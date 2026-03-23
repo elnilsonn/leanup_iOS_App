@@ -89,16 +89,23 @@ struct LeanUpMallaView: View {
 
                 if showsSearchResults {
                     ScrollView {
-                        LeanUpMallaInlineSearchSection(
-                            query: trimmedSearchQuery,
-                            results: searchResults
-                        ) { item in
-                            route = item
+                        VStack(alignment: .leading, spacing: 20) {
+                            LeanUpMallaInlineSearchSection(
+                                query: trimmedSearchQuery,
+                                results: searchResults
+                            ) { item in
+                                route = item
+                            }
+
+                            Color.clear
+                                .frame(height: 120)
                         }
+                        .frame(width: max(proxy.size.width - 40, 0), alignment: .leading)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 18)
                     }
-                    .frame(width: max(proxy.size.width - 40, 0), alignment: .leading)
-                    .padding(.horizontal, 20)
-                    .padding(.vertical, 18)
+                    .leanUpKeyboardFriendlyScroll()
+                    .background(LeanUpPageBackground())
                     .zIndex(1)
                 }
             }
