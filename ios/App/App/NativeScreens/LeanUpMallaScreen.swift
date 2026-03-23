@@ -115,8 +115,8 @@ struct LeanUpMallaView: View {
                     storedScrollOffsetBeforeSearch = currentScrollOffset
                     pendingScrollRequest = LeanUpScrollPositionRequest(offset: 0, animated: true)
                 }
-            } else if let storedScrollOffsetBeforeSearch {
-                pendingScrollRequest = LeanUpScrollPositionRequest(offset: storedScrollOffsetBeforeSearch, animated: true)
+            } else if let previousScrollOffset = storedScrollOffsetBeforeSearch {
+                pendingScrollRequest = LeanUpScrollPositionRequest(offset: previousScrollOffset, animated: true)
                 self.storedScrollOffsetBeforeSearch = nil
             }
         }
@@ -381,7 +381,7 @@ struct LeanUpReminderPreviewRow: View {
 }
 
 struct LeanUpMallaMotivationCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let model: LeanUpAppModel
     @State private var message: LeanUpMotivationMessage
     private let timer = Timer.publish(every: 300, on: .main, in: .common).autoconnect()
 
@@ -1136,15 +1136,15 @@ private struct LeanUpScrollViewBridge: UIViewRepresentable {
             guard scrollView == nil else { return }
 
             var currentSuperview = view.superview
-            while let currentSuperview {
-                if let scrollView = currentSuperview as? UIScrollView {
+            while let superview = currentSuperview {
+                if let scrollView = superview as? UIScrollView {
                     self.scrollView = scrollView
                     observation = scrollView.observe(\.contentOffset, options: [.initial, .new]) { [weak self] scrollView, _ in
                         self?.offset = scrollView.contentOffset.y
                     }
                     break
                 }
-                currentSuperview = currentSuperview.superview
+                currentSuperview = superview.superview
             }
         }
 

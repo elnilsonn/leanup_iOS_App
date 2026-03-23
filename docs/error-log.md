@@ -588,3 +588,24 @@ Como se soluciono:
 Regla:
 
 - En cards densas dentro de `ScrollView`, un gesto horizontal debe exigir umbral y dominancia clara antes de mover visualmente la fila.
+
+### 30. Afinar `Malla` con construcciones Swift mas delicadas sin el error visible del compilador
+
+Que paso:
+
+- Tras el ultimo ajuste de `Malla`, el build volvio a caer pero el bloque pegado no mostraba la linea `error:` concreta.
+
+Por que paso:
+
+- En ese tipo de situacion, pequenas construcciones mas delicadas como wrappers observados con `init` manual o atajos de optional binding pueden volverse sospechosas aunque el log no ayude.
+
+Como se soluciono:
+
+- Se simplificaron esas piezas a formas mas conservadoras:
+  - `LeanUpMallaMotivationCard` dejo de usar `@ObservedObject` con `init` manual
+  - se reemplazaron atajos de binding opcional por sintaxis explicita
+  - se hizo el recorrido de superviews con binding explicito
+
+Regla:
+
+- Si el compilador no esta mostrando la linea exacta, reducir primero el uso de azucar de lenguaje y wrappers complejos en la zona tocada antes de seguir agregando cambios.
