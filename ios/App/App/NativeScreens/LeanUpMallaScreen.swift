@@ -7,53 +7,60 @@ struct LeanUpMallaView: View {
     @State private var selectedPeriod: Int?
     @State private var selectedFilter: LeanUpMallaFilter = .all
     @State private var searchQuery = ""
-    @State private var isShowingSearchResults = false
     @State private var isReminderListPresented = false
 
     var body: some View {
         GeometryReader { proxy in
             ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    if !model.academics.courses.isEmpty && !isSearchMode {
-                        LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
-                        LeanUpMallaMotivationCard(message: model.mallaMotivationMessage)
-                        LeanUpMallaReminderPreviewCard(
-                            reminders: model.upcomingReminders()
-                        ) {
-                            isReminderListPresented = true
+                ZStack(alignment: .topLeading) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        if !model.academics.courses.isEmpty && !isSearchMode {
+                            LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
+                            LeanUpMallaMotivationCard(message: model.mallaMotivationMessage)
+                            LeanUpMallaReminderPreviewCard(
+                                reminders: model.upcomingReminders()
+                            ) {
+                                isReminderListPresented = true
+                            }
+                        }
+
+                        if !model.academics.courses.isEmpty && !isSearchMode {
+                            LeanUpMallaStickyHeader(
+                                periods: model.periods,
+                                selectedPeriod: effectiveSelectedPeriod,
+                                selectedFilter: $selectedFilter,
+                                onSelectPeriod: { selectedPeriod = $0 }
+                            )
+                        }
+
+                        if model.academics.courses.isEmpty {
+                            LeanUpSurfaceCard {
+                                Text("No pudimos cargar la base academica en este momento. Tu progreso guardado sigue intacto.")
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } else {
+                            LeanUpSelectedPeriodSection(
+                                period: effectiveSelectedPeriod,
+                                model: model,
+                                filter: selectedFilter
+                            ) { item in
+                                route = item
+                            }
                         }
                     }
+                    .opacity(showsSearchResults ? 0 : 1)
+                    .allowsHitTesting(!showsSearchResults)
+                    .accessibilityHidden(showsSearchResults)
 
-                    if !model.academics.courses.isEmpty && !isSearchMode {
-                        LeanUpMallaStickyHeader(
-                            periods: model.periods,
-                            selectedPeriod: effectiveSelectedPeriod,
-                            selectedFilter: $selectedFilter,
-                            onSelectPeriod: { selectedPeriod = $0 }
-                        )
-                    }
-
-                    if model.academics.courses.isEmpty {
-                        LeanUpSurfaceCard {
-                            Text("No pudimos cargar la base academica en este momento. Tu progreso guardado sigue intacto.")
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                        }
-                    } else if showsSearchResults {
+                    if showsSearchResults {
                         LeanUpMallaInlineSearchSection(
                             query: trimmedSearchQuery,
                             results: searchResults
                         ) { item in
                             route = item
                         }
-                    } else {
-                        LeanUpSelectedPeriodSection(
-                            period: effectiveSelectedPeriod,
-                            model: model,
-                            filter: selectedFilter
-                        ) { item in
-                            route = item
-                        }
+                        .zIndex(1)
                     }
                 }
                 .frame(width: max(proxy.size.width - 40, 0), alignment: .leading)
@@ -71,7 +78,7 @@ struct LeanUpMallaView: View {
         .modifier(
             LeanUpNativeMallaSearchModifier(
                 query: $searchQuery,
-                prompt: "Busca materia, codigo, electiva o habilidad"
+                prompt: "Busca una materia"
             )
         )
         .sheet(isPresented: $isReminderListPresented) {
@@ -83,18 +90,6 @@ struct LeanUpMallaView: View {
         .onAppear {
             if selectedPeriod == nil {
                 selectedPeriod = model.focusPeriod ?? model.periods.first
-            }
-        }
-        .onChange(of: searchQuery) { newValue in
-            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-            if !trimmed.isEmpty {
-                isShowingSearchResults = true
-            } else {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
-                    if searchQuery.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                        isShowingSearchResults = false
-                    }
-                }
             }
         }
     }
@@ -111,9 +106,9 @@ private extension LeanUpMallaView {
 
     var hasActiveSearch: Bool { !trimmedSearchQuery.isEmpty }
 
-    var isSearchMode: Bool { isShowingSearchResults }
+    var isSearchMode: Bool { hasActiveSearch }
 
-    var showsSearchResults: Bool { isShowingSearchResults && !trimmedSearchQuery.isEmpty }
+    var showsSearchResults: Bool { hasActiveSearch }
 
     var searchResults: [LeanUpMallaSearchResult] {
         leanUpMallaSearchResults(model: model, query: trimmedSearchQuery)
@@ -884,17 +879,15 @@ struct LeanUpSelectedPeriodSection: View {
                                 .onTapGesture {
                                     onOpen(.course(course))
                                 }
-                                .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                    Button {
-                                        model.setCourseInProgress(!model.isCourseInProgress(course), for: course.id)
-                                    } label: {
-                                        Label(
-                                            model.isCourseInProgress(course) ? "Quitar en curso" : "Marcar en curso",
-                                            systemImage: model.isCourseInProgress(course) ? "xmark.circle" : "calendar.badge.clock"
-                                        )
-                                    }
-                                    .tint(model.isCourseInProgress(course) ? .gray : .unadCyan)
-                                }
+                                .modifier(
+                                    LeanUpQuickInProgressGesture(
+                                        isEnabled: model.note(for: course) == nil,
+                                        isActive: model.isCourseInProgress(course),
+                                        onToggle: {
+                                            model.setCourseInProgress(!model.isCourseInProgress(course), for: course.id)
+                                        }
+                                    )
+                                )
                             }
                         }
                     }
@@ -928,19 +921,15 @@ struct LeanUpSelectedPeriodSection: View {
                                 .onTapGesture {
                                     onOpen(.electiveGroup(group))
                                 }
-                                .swipeActions(edge: .leading, allowsFullSwipe: true) {
-                                    if model.selectedOption(in: group) != nil {
-                                        Button {
+                                .modifier(
+                                    LeanUpQuickInProgressGesture(
+                                        isEnabled: canQuickToggle(group: group),
+                                        isActive: model.isElectiveInProgress(group),
+                                        onToggle: {
                                             model.setElectiveInProgress(!model.isElectiveInProgress(group), groupName: group.name)
-                                        } label: {
-                                            Label(
-                                                model.isElectiveInProgress(group) ? "Quitar en curso" : "Marcar en curso",
-                                                systemImage: model.isElectiveInProgress(group) ? "xmark.circle" : "calendar.badge.clock"
-                                            )
                                         }
-                                        .tint(model.isElectiveInProgress(group) ? .gray : .unadCyan)
-                                    }
-                                }
+                                    )
+                                )
                             }
                         }
                     }
@@ -955,6 +944,11 @@ struct LeanUpSelectedPeriodSection: View {
 
     private var filteredElectiveGroups: [LeanUpElectiveGroup] {
         model.electiveGroups(in: period).filter { filter.matches(group: $0, model: model) }
+    }
+
+    private func canQuickToggle(group: LeanUpElectiveGroup) -> Bool {
+        guard let selected = model.selectedOption(in: group) else { return false }
+        return model.electiveNote(groupName: group.name, optionCode: selected.code) == nil
     }
 
     private func periodSummary(progress: LeanUpPeriodProgress, visibleCount: Int) -> String {
@@ -976,6 +970,65 @@ struct LeanUpSelectedPeriodSection: View {
         case .electives:
             return "Este periodo no tiene grupos de electivas para revisar."
         }
+    }
+}
+
+private struct LeanUpQuickInProgressGesture: ViewModifier {
+    let isEnabled: Bool
+    let isActive: Bool
+    let onToggle: () -> Void
+
+    @State private var dragOffset: CGFloat = 0
+    @State private var didTrigger = false
+
+    func body(content: Content) -> some View {
+        content
+            .background(alignment: .leading) {
+                if isEnabled {
+                    actionBackground
+                }
+            }
+            .offset(x: max(0, dragOffset))
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 12)
+                    .onChanged { value in
+                        guard isEnabled else { return }
+                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+
+                        let translation = max(0, value.translation.width)
+                        dragOffset = min(translation, 84)
+
+                        if translation > 72 && !didTrigger {
+                            didTrigger = true
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            onToggle()
+                        }
+                    }
+                    .onEnded { _ in
+                        didTrigger = false
+                        withAnimation(.spring(response: 0.26, dampingFraction: 0.84)) {
+                            dragOffset = 0
+                        }
+                    }
+            )
+    }
+
+    private var actionBackground: some View {
+        let progress = min(max(dragOffset / 84, 0), 1)
+
+        return RoundedRectangle(cornerRadius: 22, style: .continuous)
+            .fill((isActive ? Color.gray : Color.unadCyan).opacity(0.14))
+            .overlay(alignment: .leading) {
+                HStack(spacing: 8) {
+                    Image(systemName: isActive ? "xmark.circle" : "calendar.badge.clock")
+                        .font(.subheadline.weight(.semibold))
+                    Text(isActive ? "Quitar en curso" : "Marcar en curso")
+                        .font(.caption.weight(.bold))
+                }
+                .foregroundStyle(isActive ? Color.gray : Color.unadCyan)
+                .padding(.leading, 14)
+                .opacity(progress)
+            }
     }
 }
 

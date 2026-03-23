@@ -508,3 +508,42 @@ Como se soluciono:
 Regla:
 
 - Si un resultado de busqueda apunta a un elemento hijo dentro de un contenedor, la navegacion debe preservar tambien el objetivo interno y no quedarse solo en el contenedor padre.
+
+### 26. Reaparecer la Malla reconstruyendo toda la jerarquia al limpiar la busqueda
+
+Que paso:
+
+- Al borrar el texto o cerrar la busqueda, `Malla` se veia como si recompusiera la pantalla en vivo.
+
+Por que paso:
+
+- Los resultados y la vista principal se estaban alternando con ramas distintas del layout.
+- Aunque el sistema cerraba la busqueda bien, la pantalla principal se desmontaba y volvia a montarse justo en esa transicion.
+
+Como se soluciono:
+
+- La vista principal queda siempre montada.
+- Los resultados de busqueda se renderizan por encima solo cuando el query tiene texto.
+
+Regla:
+
+- Si una pantalla densa usa `searchable`, preferir mantener el contenido base montado y superponer resultados antes que intercambiar arboles grandes durante el cierre.
+
+### 27. Esperar que `swipeActions` funcione igual sobre cards dentro de `ScrollView`
+
+Que paso:
+
+- El gesto rapido de `En curso` no respondia en `Malla`.
+
+Por que paso:
+
+- La interaccion se implemento con `swipeActions`, pero Apple la muestra y documenta como patron de filas de `List`.
+- `Malla` esta construida sobre `ScrollView` y cards personalizadas, no sobre una `List` tradicional.
+
+Como se soluciono:
+
+- Para conservar el diseno actual, se reemplazo por un gesto horizontal propio con feedback y umbral corto.
+
+Regla:
+
+- Si la vista no esta montada como `List`, no asumir que `swipeActions` va a resolver un gesto rapido de fila de forma fiable.

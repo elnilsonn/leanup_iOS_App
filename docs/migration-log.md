@@ -722,3 +722,11 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - la vista hace scroll automatico hasta la opcion buscada
   - la opcion recibe un resaltado corto para ubicarla rapido
 - Si la opcion pertenece a otra ruta interna del disciplinar, el filtro se ajusta solo antes del scroll para que la coincidencia no quede oculta.
+
+## Actualizacion 2026-03-23 - Busqueda de Malla con contenido precargado y gesto rapido estable
+
+- La pantalla principal de `Malla` ya no intercambia toda su estructura al limpiar la busqueda.
+- Ahora el contenido principal queda montado por debajo y los resultados se superponen solo mientras hay texto real.
+- Con eso el cierre de la busqueda deja de verse como si la pantalla se estuviera "rearmando".
+- El prompt de la barra se simplifico a un texto corto: `Busca una materia`.
+- El acceso rapido de `En curso` dejo de depender de `swipeActions` sobre cards en `ScrollView` y paso a un gesto horizontal propio, para preservar el diseno actual sin perder la accion rapida.
