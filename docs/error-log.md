@@ -999,3 +999,24 @@ Como se soluciono:
 Regla:
 
 - Si una transicion nace desde `large title`, no introducir `inline` ni siquiera durante la fase presentada salvo que sea estrictamente necesario; de lo contrario el titulo reducido termina filtrandose en el cierre.
+
+### 51. Sobreajustar el cierre de busqueda separando top y no-top cuando el arreglo global ya era mejor
+
+Que paso:
+
+- Se intento separar el cierre de busqueda de `Malla` entre el caso que nace desde el top y el caso que nace mas abajo.
+- Aunque la hipotesis era razonable, en la practica se daño otra vez la animacion general y el usuario prefirio volver al estado anterior.
+
+Por que paso:
+
+- El refinamiento atacaba un frame concreto del `large title`, pero introducia demasiada logica condicional sobre la navegacion.
+- El costo visual total del experimento fue peor que el beneficio puntual.
+
+Como se soluciono:
+
+- Se revirtio todo el refinamiento top/no-top.
+- Se recupero el comportamiento anterior, que mantenia mejor la transicion global del cierre.
+
+Regla:
+
+- Si un refinamiento muy especifico corrige un detalle pero empeora la animacion general percibida, revertirlo y volver al ultimo estado estable en vez de insistir sobre una rama que ya se demostro peor.

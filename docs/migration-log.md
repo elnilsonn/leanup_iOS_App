@@ -842,3 +842,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - El titulo inline de `Malla` ya no se fuerza automaticamente solo por tener la busqueda presentada.
 - Ahora solo se usa si la busqueda comenzo cuando la pantalla ya estaba fuera del top.
 - Si la busqueda nacio arriba del todo, el flujo completo conserva el contexto de `large title`.
+
+## Actualizacion 2026-03-23 - Reversion del refinamiento top/no-top en el cierre de busqueda
+
+- Se deshicieron los experimentos que diferenciaban el cierre de busqueda segun si `Malla` estaba arriba del todo o no.
+- Ese refinamiento intentaba eliminar el `Malla` pequeno fantasma en `large title`, pero terminaba rompiendo la animacion general que ya estaba bien.
+- La pantalla vuelve al comportamiento anterior, que conserva mejor la transicion global del cierre.

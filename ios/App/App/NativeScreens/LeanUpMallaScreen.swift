@@ -11,8 +11,6 @@ struct LeanUpMallaView: View {
     @State private var isSearchClosing = false
     @State private var closingSearchQuery = ""
     @State private var lastNonEmptySearchQuery = ""
-    @State private var mainScrollTopOffset: CGFloat = 0
-    @State private var wasAtTopWhenSearchPresented = true
     @State private var isReminderListPresented = false
     @State private var periodResetScrollToken = 0
     @State private var filterResetScrollToken = 0
@@ -24,17 +22,6 @@ struct LeanUpMallaView: View {
             ZStack(alignment: .topLeading) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        Color.clear
-                            .frame(height: 0)
-                            .background(
-                                GeometryReader { geometry in
-                                    Color.clear.preference(
-                                        key: LeanUpMallaScrollTopPreferenceKey.self,
-                                        value: geometry.frame(in: .named("LeanUpMallaMainScroll")).minY
-                                    )
-                                }
-                            )
-
                         if !model.academics.courses.isEmpty && !isSearchMode {
                             LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
                             LeanUpMallaMotivationCard(model: model)
@@ -103,10 +90,6 @@ struct LeanUpMallaView: View {
                 .transaction { transaction in
                     transaction.animation = nil
                 }
-                .coordinateSpace(name: "LeanUpMallaMainScroll")
-                .onPreferenceChange(LeanUpMallaScrollTopPreferenceKey.self) { value in
-                    mainScrollTopOffset = value
-                }
 
                 if showsSearchResults {
                     ScrollView {
@@ -134,7 +117,7 @@ struct LeanUpMallaView: View {
         .leanUpKeyboardFriendlyScroll()
         .background(LeanUpPageBackground())
         .navigationTitle("Malla")
-        .navigationBarTitleDisplayMode(shouldUseInlineSearchTitle ? .inline : .large)
+        .navigationBarTitleDisplayMode(isSearchChromeActive ? .inline : .large)
         .modifier(
             LeanUpNativeMallaSearchModifier(
                 query: $searchQuery,
@@ -164,7 +147,6 @@ struct LeanUpMallaView: View {
         }
         .onChange(of: isSearchPresented) { newValue in
             if newValue {
-                wasAtTopWhenSearchPresented = isMainScrollNearTop
                 isSearchClosing = false
                 closingSearchQuery = ""
                 return
@@ -216,22 +198,10 @@ private extension LeanUpMallaView {
 
     var showsSearchResults: Bool { !activeSearchQuery.isEmpty }
 
-    var isMainScrollNearTop: Bool { mainScrollTopOffset >= 0 }
-
-    var shouldUseInlineSearchTitle: Bool {
-        (isSearchPresented || isSearchClosing) && !wasAtTopWhenSearchPresented
-    }
+    var isSearchChromeActive: Bool { isSearchPresented || isSearchClosing }
 
     var searchResults: [LeanUpMallaSearchResult] {
         leanUpMallaSearchResults(model: model, query: activeSearchQuery)
-    }
-}
-
-private struct LeanUpMallaScrollTopPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat = 0
-
-    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
-        value = nextValue()
     }
 }
 
