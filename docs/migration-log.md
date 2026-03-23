@@ -866,3 +866,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - El cierre de la busqueda en `Malla` dejo de reutilizar el ultimo texto escrito como apoyo visual.
 - Ahora, si en esa sesion hubo texto, el cierre usa solo una capa transitoria limpia mientras la barra del sistema termina de cerrarse.
 - Los resultados visibles solo existen cuando el query actual sigue teniendo texto real.
+
+## Actualizacion 2026-03-23 - Cerrar con resultados vivos ya no mantiene la lista durante el cierre
+
+- Cuando el usuario cierra la busqueda con resultados todavia visibles, `Malla` deja de pintar esa lista en cuanto empieza el cierre.
+- La transicion conserva solo la capa transitoria limpia mientras la barra del sistema termina de minimizarse.
+- Con eso el cierre directo desde resultados se alinea mejor con los otros dos casos ya corregidos.

@@ -1056,3 +1056,23 @@ Como se soluciono:
 Regla:
 
 - Si el usuario ya vacio una busqueda, no revivir el ultimo query como parche visual de cierre; mantener una transicion limpia es mejor que reinyectar resultados viejos.
+
+### 54. Mantener la lista de resultados visible durante el cierre aunque la barra ya se estuviera cerrando
+
+Que paso:
+
+- Despues del ajuste anterior, seguia fallando el caso de abrir, escribir y cerrar directamente con los resultados aun visibles.
+
+Por que paso:
+
+- Aunque el latch ya no revivia el ultimo query, la vista seguia pintando la lista de resultados mientras `hasActiveSearch` fuera verdadero.
+- Eso permitia que el cierre siguiera conviviendo con resultados vivos en pantalla justo durante la minimizacion del sistema.
+
+Como se soluciono:
+
+- En cuanto empieza `isSearchClosing`, la lista de resultados deja de renderizarse.
+- La capa transitoria del cierre se mantiene, pero ya limpia.
+
+Regla:
+
+- Si el cierre de una busqueda sigue fallando cuando hay resultados visibles, separar la capa de transicion de la capa de resultados; no mantener ambas al mismo tiempo.

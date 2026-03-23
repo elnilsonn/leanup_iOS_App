@@ -93,7 +93,7 @@ struct LeanUpMallaView: View {
                 if showsSearchOverlay {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
-                            if hasActiveSearch {
+                            if shouldShowLiveSearchResults {
                                 LeanUpMallaInlineSearchSection(
                                     query: trimmedSearchQuery,
                                     results: searchResults
@@ -182,6 +182,8 @@ private extension LeanUpMallaView {
     var isSearchMode: Bool { hasActiveSearch }
 
     var showsSearchOverlay: Bool { hasActiveSearch || isSearchClosing }
+
+    var shouldShowLiveSearchResults: Bool { hasActiveSearch && !isSearchClosing }
 
     var isSearchChromeActive: Bool { isSearchPresented || isSearchClosing }
 
