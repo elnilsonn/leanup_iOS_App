@@ -979,3 +979,23 @@ Como se soluciono:
 Regla:
 
 - Si una animacion de navegacion falla solo en una posicion concreta del scroll, no asumir un unico estado global; primero distinguir desde que contexto visual real entro el usuario a la transicion.
+
+### 50. Seguir forzando inline mientras la busqueda esta presentada aunque se hubiera abierto desde large title
+
+Que paso:
+
+- Incluso despues de distinguir entre top y no-top para el cierre, seguia apareciendo el `Malla` pequeno en medio de la animacion si la busqueda habia nacido arriba del todo.
+
+Por que paso:
+
+- La condicion anterior aun forzaba el estado inline durante la presentacion de la busqueda, aunque el flujo hubiera empezado desde `large title`.
+- Eso dejaba preparado el titulo pequeno que luego se colaba en el cierre.
+
+Como se soluciono:
+
+- El estado inline ahora solo se usa si la busqueda se abrio estando fuera del top.
+- Si la busqueda nacio arriba del todo, todo ese flujo conserva el contexto de `large title`.
+
+Regla:
+
+- Si una transicion nace desde `large title`, no introducir `inline` ni siquiera durante la fase presentada salvo que sea estrictamente necesario; de lo contrario el titulo reducido termina filtrandose en el cierre.

@@ -219,11 +219,7 @@ private extension LeanUpMallaView {
     var isMainScrollNearTop: Bool { mainScrollTopOffset >= 0 }
 
     var shouldUseInlineSearchTitle: Bool {
-        if isSearchClosing {
-            return !wasAtTopWhenSearchPresented
-        }
-
-        return isSearchPresented
+        (isSearchPresented || isSearchClosing) && !wasAtTopWhenSearchPresented
     }
 
     var searchResults: [LeanUpMallaSearchResult] {

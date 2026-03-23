@@ -836,3 +836,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - si la pantalla venia desde `large title`, conserva ese contexto
   - si venia desde estado reducido, mantiene el comportamiento inline que ya se sentia bien
 - Con esto se busca conservar la animacion buena general sin reintroducir el `Malla` pequeno fantasma en el top.
+
+## Actualizacion 2026-03-23 - El estado inline solo se usa si la busqueda nacio fuera del top
+
+- El titulo inline de `Malla` ya no se fuerza automaticamente solo por tener la busqueda presentada.
+- Ahora solo se usa si la busqueda comenzo cuando la pantalla ya estaba fuera del top.
+- Si la busqueda nacio arriba del todo, el flujo completo conserva el contexto de `large title`.
