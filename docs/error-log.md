@@ -1020,3 +1020,39 @@ Como se soluciono:
 Regla:
 
 - Si un refinamiento muy especifico corrige un detalle pero empeora la animacion general percibida, revertirlo y volver al ultimo estado estable en vez de insistir sobre una rama que ya se demostro peor.
+
+### 52. Tomar decisiones de busqueda futuras sin partir del patron ya validado en Malla
+
+Que paso:
+
+- El flujo de busqueda de `Malla` ya paso por varias iteraciones hasta encontrar una base que se siente bien para el usuario.
+
+Como se corrige de ahora en adelante:
+
+- El comportamiento actual de `Malla` queda como patron por defecto para futuras busquedas similares en la app.
+
+Regla:
+
+- Antes de inventar otra interaccion de lupa o barra, reutilizar como referencia el patron ya validado en `Malla` y desviarse solo si la nueva pantalla realmente lo exige.
+
+### 53. Reutilizar `lastNonEmptySearchQuery` para cerrar la busqueda aunque el usuario ya no quisiera ver resultados
+
+Que paso:
+
+- Despues de escribir en la busqueda de `Malla`, cerrar la barra seguia dando problemas.
+- Tambien fallaba el caso de escribir, borrar el texto y luego cerrar.
+
+Por que paso:
+
+- El cierre estaba resucitando el ultimo query no vacio mediante `lastNonEmptySearchQuery`.
+- Eso hacia que toda sesion de busqueda que hubiera tenido texto se siguiera tratando como si todavia hubiera una busqueda activa, incluso cuando el usuario ya habia borrado todo.
+
+Como se soluciono:
+
+- Se retiro la dependencia del ultimo query escrito para el cierre.
+- Si hubo texto en la sesion, el sistema usa solo una capa transitoria vacia mientras termina la animacion.
+- Los resultados solo se muestran cuando el query actual sigue siendo no vacio.
+
+Regla:
+
+- Si el usuario ya vacio una busqueda, no revivir el ultimo query como parche visual de cierre; mantener una transicion limpia es mejor que reinyectar resultados viejos.

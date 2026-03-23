@@ -9,8 +9,7 @@ struct LeanUpMallaView: View {
     @State private var searchQuery = ""
     @State private var isSearchPresented = false
     @State private var isSearchClosing = false
-    @State private var closingSearchQuery = ""
-    @State private var lastNonEmptySearchQuery = ""
+    @State private var searchSessionHadContent = false
     @State private var isReminderListPresented = false
     @State private var periodResetScrollToken = 0
     @State private var filterResetScrollToken = 0
@@ -84,21 +83,23 @@ struct LeanUpMallaView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 18)
                 }
-                .opacity(showsSearchResults ? 0 : 1)
-                .allowsHitTesting(!showsSearchResults)
-                .accessibilityHidden(showsSearchResults)
+                .opacity(showsSearchOverlay ? 0 : 1)
+                .allowsHitTesting(!showsSearchOverlay)
+                .accessibilityHidden(showsSearchOverlay)
                 .transaction { transaction in
                     transaction.animation = nil
                 }
 
-                if showsSearchResults {
+                if showsSearchOverlay {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 20) {
-                            LeanUpMallaInlineSearchSection(
-                                query: activeSearchQuery,
-                                results: searchResults
-                            ) { item in
-                                route = item
+                            if hasActiveSearch {
+                                LeanUpMallaInlineSearchSection(
+                                    query: trimmedSearchQuery,
+                                    results: searchResults
+                                ) { item in
+                                    route = item
+                                }
                             }
 
                             Color.clear
@@ -140,32 +141,28 @@ struct LeanUpMallaView: View {
             let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
 
             if !trimmed.isEmpty {
-                lastNonEmptySearchQuery = trimmed
+                searchSessionHadContent = true
                 isSearchClosing = false
-                closingSearchQuery = ""
             }
         }
         .onChange(of: isSearchPresented) { newValue in
             if newValue {
                 isSearchClosing = false
-                closingSearchQuery = ""
+                searchSessionHadContent = !trimmedSearchQuery.isEmpty
                 return
             }
 
-            let fallbackQuery = trimmedSearchQuery.isEmpty ? lastNonEmptySearchQuery : trimmedSearchQuery
-            guard !fallbackQuery.isEmpty else {
+            guard searchSessionHadContent else {
                 isSearchClosing = false
-                closingSearchQuery = ""
                 return
             }
 
-            closingSearchQuery = fallbackQuery
             isSearchClosing = true
 
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.26) {
-                guard !isSearchPresented, trimmedSearchQuery.isEmpty else { return }
+                guard !isSearchPresented else { return }
                 isSearchClosing = false
-                closingSearchQuery = ""
+                searchSessionHadContent = false
             }
         }
     }
@@ -184,24 +181,12 @@ private extension LeanUpMallaView {
 
     var isSearchMode: Bool { hasActiveSearch }
 
-    var activeSearchQuery: String {
-        if hasActiveSearch {
-            return trimmedSearchQuery
-        }
-
-        if isSearchClosing {
-            return closingSearchQuery
-        }
-
-        return ""
-    }
-
-    var showsSearchResults: Bool { !activeSearchQuery.isEmpty }
+    var showsSearchOverlay: Bool { hasActiveSearch || isSearchClosing }
 
     var isSearchChromeActive: Bool { isSearchPresented || isSearchClosing }
 
     var searchResults: [LeanUpMallaSearchResult] {
-        leanUpMallaSearchResults(model: model, query: activeSearchQuery)
+        leanUpMallaSearchResults(model: model, query: trimmedSearchQuery)
     }
 }
 

@@ -848,3 +848,21 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Se deshicieron los experimentos que diferenciaban el cierre de busqueda segun si `Malla` estaba arriba del todo o no.
 - Ese refinamiento intentaba eliminar el `Malla` pequeno fantasma en `large title`, pero terminaba rompiendo la animacion general que ya estaba bien.
 - La pantalla vuelve al comportamiento anterior, que conserva mejor la transicion global del cierre.
+
+## Actualizacion 2026-03-23 - Patron por defecto para futuras busquedas nativas
+
+- Se fija como referencia base el comportamiento actual del boton/barra de busqueda de `Malla`.
+- Este patron por defecto queda asi:
+  - `searchable` nativo del sistema
+  - `searchToolbarBehavior(.minimize)` en iOS 26
+  - resultados inline sobre la misma pantalla
+  - contenido principal montado por debajo
+  - latch corto de cierre para acompanar la animacion del sistema
+  - sin separar artificialmente el flujo entre top y no-top si eso rompe la animacion general
+- Si en otra pantalla hace falta una busqueda similar, este es el punto de partida recomendado.
+
+## Actualizacion 2026-03-23 - El cierre de busqueda ya no revive el ultimo query
+
+- El cierre de la busqueda en `Malla` dejo de reutilizar el ultimo texto escrito como apoyo visual.
+- Ahora, si en esa sesion hubo texto, el cierre usa solo una capa transitoria limpia mientras la barra del sistema termina de cerrarse.
+- Los resultados visibles solo existen cuando el query actual sigue teniendo texto real.
