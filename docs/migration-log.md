@@ -890,3 +890,28 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Se retiro el reseteo anticipado de `searchSessionHadContent` desde el cambio de `query`.
 - Ahora el fin de la sesion lo gobierna el cierre real de la barra y no una carrera entre `query` vacio e `isPresented`.
 - Esto endurece la fluidez del search chrome en cierres donde el sistema vacia el texto y minimiza casi al mismo tiempo.
+
+## Actualizacion 2026-03-23 - Refactor estructural de la busqueda de Malla
+
+- La busqueda de `Malla` dejo de usar una jerarquia duplicada con overlay propio para resultados.
+- Ahora todo vive en un solo `ScrollView` estable:
+  - si el query esta vacio, se muestra el contenido normal
+  - si el query tiene texto, se muestra la seccion de resultados en la misma jerarquia
+- Se retiro la maquina de estados manual del cierre:
+  - sin `isSearchPresented`
+  - sin `isSearchClosing`
+  - sin delays de cierre
+  - sin forzar el title mode durante la busqueda
+- La barra vuelve a depender del comportamiento nativo de `searchable` y `searchToolbarBehavior(.minimize)`.
+
+## Actualizacion 2026-03-23 - Investigacion externa sobre `searchable` y `searchToolbarBehavior(.minimize)`
+
+- Se revisaron Apple docs, Apple Developer Forums y referencias tecnicas externas sobre `searchable` en SwiftUI.
+- La evidencia apunta a que en iOS 26 hay glitches del framework cuando `searchable` convive con:
+  - `NavigationStack`
+  - `TabView`
+  - titulos grandes (`.navigationBarTitleDisplayMode(.large)`)
+  - y `searchToolbarBehavior(.minimize)`
+- Para LeanUp, esto cambia la estrategia:
+  - primero reducir interaccion entre estados propios y el search chrome del sistema
+  - y si la animacion sigue fallando, considerar un search chrome propio en SwiftUI antes de seguir parchando el `searchable` del sistema.

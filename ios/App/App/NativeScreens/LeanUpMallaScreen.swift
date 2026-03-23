@@ -2,16 +2,11 @@
 import UIKit
 
 struct LeanUpMallaView: View {
-    @Environment(\.scenePhase) private var scenePhase
     @ObservedObject var model: LeanUpAppModel
     @State private var route: LeanUpMallaDetailRoute?
     @State private var selectedPeriod: Int?
     @State private var selectedFilter: LeanUpMallaFilter = .all
     @State private var searchQuery = ""
-    @State private var isSearchPresented = false
-    @State private var isSearchClosing = false
-    @State private var searchSessionHadContent = false
-    @State private var searchClosingGeneration = 0
     @State private var isReminderListPresented = false
     @State private var periodResetScrollToken = 0
     @State private var filterResetScrollToken = 0
@@ -20,64 +15,82 @@ struct LeanUpMallaView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            ZStack(alignment: .topLeading) {
+            ScrollViewReader { scrollProxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 20) {
-                        if !model.academics.courses.isEmpty && !isSearchMode {
-                            LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
-                            LeanUpMallaMotivationCard(model: model)
-                            LeanUpMallaReminderPreviewCard(
-                                reminders: model.upcomingReminders()
-                            ) {
-                                isReminderListPresented = true
-                            }
-                        }
+                        Color.clear
+                            .frame(height: 0)
+                            .id(LeanUpMallaScrollAnchor.top)
 
-                        if !model.academics.courses.isEmpty && !isSearchMode {
-                            LeanUpMallaStickyHeader(
-                                periods: model.periods,
-                                selectedPeriod: effectiveSelectedPeriod,
-                                selectedFilter: selectedFilter,
-                                periodResetScrollToken: periodResetScrollToken,
-                                filterResetScrollToken: filterResetScrollToken,
-                                periodResetScrollTarget: periodResetScrollTarget ?? effectiveSelectedPeriod,
-                                filterResetScrollTarget: filterResetScrollTarget,
-                                onSelectPeriod: { tappedPeriod in
-                                    if tappedPeriod == effectiveSelectedPeriod {
-                                        periodResetScrollTarget = model.focusPeriod ?? model.periods.first ?? 1
-                                        selectedPeriod = nil
-                                        DispatchQueue.main.async {
-                                            periodResetScrollToken += 1
-                                        }
-                                    } else {
-                                        selectedPeriod = tappedPeriod
-                                    }
-                                },
-                                onSelectFilter: { tappedFilter in
-                                    if selectedFilter == tappedFilter {
-                                        filterResetScrollTarget = .all
-                                        selectedFilter = .all
-                                        filterResetScrollToken += 1
-                                    } else {
-                                        selectedFilter = tappedFilter
-                                    }
-                                }
-                            )
-                        }
-
-                        if model.academics.courses.isEmpty {
-                            LeanUpSurfaceCard {
-                                Text("No pudimos cargar la base academica en este momento. Tu progreso guardado sigue intacto.")
-                                    .font(.subheadline)
-                                    .foregroundStyle(.secondary)
-                            }
-                        } else {
-                            LeanUpSelectedPeriodSection(
-                                period: effectiveSelectedPeriod,
-                                model: model,
-                                filter: selectedFilter
+                        if hasActiveSearch {
+                            LeanUpMallaInlineSearchSection(
+                                query: trimmedSearchQuery,
+                                results: searchResults
                             ) { item in
                                 route = item
+                            }
+                        }
+
+                        if hasActiveSearch {
+                            Color.clear
+                                .frame(height: 120)
+                        } else {
+                            if !model.academics.courses.isEmpty {
+                                LeanUpMallaCompactOverviewCard(model: model, selectedPeriod: effectiveSelectedPeriod)
+                                LeanUpMallaMotivationCard(model: model)
+                                LeanUpMallaReminderPreviewCard(
+                                    reminders: model.upcomingReminders()
+                                ) {
+                                    isReminderListPresented = true
+                                }
+                            }
+
+                            if !model.academics.courses.isEmpty {
+                                LeanUpMallaStickyHeader(
+                                    periods: model.periods,
+                                    selectedPeriod: effectiveSelectedPeriod,
+                                    selectedFilter: selectedFilter,
+                                    periodResetScrollToken: periodResetScrollToken,
+                                    filterResetScrollToken: filterResetScrollToken,
+                                    periodResetScrollTarget: periodResetScrollTarget ?? effectiveSelectedPeriod,
+                                    filterResetScrollTarget: filterResetScrollTarget,
+                                    onSelectPeriod: { tappedPeriod in
+                                        if tappedPeriod == effectiveSelectedPeriod {
+                                            periodResetScrollTarget = model.focusPeriod ?? model.periods.first ?? 1
+                                            selectedPeriod = nil
+                                            DispatchQueue.main.async {
+                                                periodResetScrollToken += 1
+                                            }
+                                        } else {
+                                            selectedPeriod = tappedPeriod
+                                        }
+                                    },
+                                    onSelectFilter: { tappedFilter in
+                                        if selectedFilter == tappedFilter {
+                                            filterResetScrollTarget = .all
+                                            selectedFilter = .all
+                                            filterResetScrollToken += 1
+                                        } else {
+                                            selectedFilter = tappedFilter
+                                        }
+                                    }
+                                )
+                            }
+
+                            if model.academics.courses.isEmpty {
+                                LeanUpSurfaceCard {
+                                    Text("No pudimos cargar la base academica en este momento. Tu progreso guardado sigue intacto.")
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                }
+                            } else {
+                                LeanUpSelectedPeriodSection(
+                                    period: effectiveSelectedPeriod,
+                                    model: model,
+                                    filter: selectedFilter
+                                ) { item in
+                                    route = item
+                                }
                             }
                         }
                     }
@@ -85,46 +98,23 @@ struct LeanUpMallaView: View {
                     .padding(.horizontal, 20)
                     .padding(.vertical, 18)
                 }
-                .opacity(showsSearchOverlay ? 0 : 1)
-                .allowsHitTesting(!showsSearchOverlay)
-                .accessibilityHidden(showsSearchOverlay)
-                .transaction { transaction in
-                    transaction.animation = nil
-                }
-
-                if showsSearchOverlay {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 20) {
-                            if shouldShowLiveSearchResults {
-                                LeanUpMallaInlineSearchSection(
-                                    query: trimmedSearchQuery,
-                                    results: searchResults
-                                ) { item in
-                                    route = item
-                                }
-                            }
-
-                            Color.clear
-                                .frame(height: 120)
+                .onChange(of: trimmedSearchQuery) { newValue in
+                    guard !newValue.isEmpty else { return }
+                    DispatchQueue.main.async {
+                        withAnimation(.easeInOut(duration: 0.18)) {
+                            scrollProxy.scrollTo(LeanUpMallaScrollAnchor.top, anchor: .top)
                         }
-                        .frame(width: max(proxy.size.width - 40, 0), alignment: .leading)
-                        .padding(.horizontal, 20)
-                        .padding(.vertical, 18)
                     }
-                    .leanUpKeyboardFriendlyScroll()
-                    .background(LeanUpPageBackground())
-                    .zIndex(1)
                 }
             }
         }
         .leanUpKeyboardFriendlyScroll()
         .background(LeanUpPageBackground())
         .navigationTitle("Malla")
-        .navigationBarTitleDisplayMode(isSearchChromeActive ? .inline : .large)
+        .navigationBarTitleDisplayMode(.large)
         .modifier(
             LeanUpNativeMallaSearchModifier(
                 query: $searchQuery,
-                isPresented: $isSearchPresented,
                 prompt: "Busca una materia"
             )
         )
@@ -137,55 +127,6 @@ struct LeanUpMallaView: View {
         .onAppear {
             if selectedPeriod == nil {
                 selectedPeriod = model.focusPeriod ?? model.periods.first
-            }
-        }
-        .onChange(of: searchQuery) { newValue in
-            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
-
-            if !trimmed.isEmpty {
-                searchSessionHadContent = true
-                searchClosingGeneration += 1
-                isSearchClosing = false
-            }
-        }
-        .onChange(of: isSearchPresented) { newValue in
-            if newValue {
-                searchClosingGeneration += 1
-                isSearchClosing = false
-                searchSessionHadContent = !trimmedSearchQuery.isEmpty
-                return
-            }
-
-            guard searchSessionHadContent else {
-                searchClosingGeneration += 1
-                isSearchClosing = false
-                return
-            }
-
-            searchClosingGeneration += 1
-            let generation = searchClosingGeneration
-            isSearchClosing = true
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.26) {
-                guard searchClosingGeneration == generation, !isSearchPresented else { return }
-                isSearchClosing = false
-                searchSessionHadContent = false
-            }
-        }
-        .onChange(of: scenePhase) { newValue in
-            guard newValue != .active else {
-                if !isSearchPresented && trimmedSearchQuery.isEmpty {
-                    searchSessionHadContent = false
-                    isSearchClosing = false
-                }
-                return
-            }
-
-            searchClosingGeneration += 1
-            isSearchClosing = false
-
-            if !isSearchPresented || trimmedSearchQuery.isEmpty {
-                searchSessionHadContent = false
             }
         }
     }
@@ -202,23 +143,13 @@ private extension LeanUpMallaView {
 
     var hasActiveSearch: Bool { !trimmedSearchQuery.isEmpty }
 
-    var isSearchMode: Bool { hasActiveSearch }
-
-    var shouldHoldSearchOverlayWhilePresented: Bool {
-        isSearchPresented && searchSessionHadContent && !hasActiveSearch
-    }
-
-    var showsSearchOverlay: Bool {
-        hasActiveSearch || isSearchClosing || shouldHoldSearchOverlayWhilePresented
-    }
-
-    var shouldShowLiveSearchResults: Bool { hasActiveSearch && !isSearchClosing }
-
-    var isSearchChromeActive: Bool { isSearchPresented || isSearchClosing }
-
     var searchResults: [LeanUpMallaSearchResult] {
         leanUpMallaSearchResults(model: model, query: trimmedSearchQuery)
     }
+}
+
+private enum LeanUpMallaScrollAnchor: String {
+    case top
 }
 
 struct LeanUpMallaBannerCard<Content: View>: View {
@@ -2296,7 +2227,6 @@ private struct LeanUpNativeDetailSearchModifier: ViewModifier {
 
 private struct LeanUpNativeMallaSearchModifier: ViewModifier {
     @Binding var query: String
-    @Binding var isPresented: Bool
     let prompt: String
 
     @ViewBuilder
@@ -2320,7 +2250,6 @@ private struct LeanUpNativeMallaSearchModifier: ViewModifier {
         content
             .searchable(
                 text: $query,
-                isPresented: $isPresented,
                 placement: .automatic,
                 prompt: prompt
             )
@@ -2332,7 +2261,6 @@ private struct LeanUpNativeMallaSearchModifier: ViewModifier {
         content
             .searchable(
                 text: $query,
-                isPresented: $isPresented,
                 placement: .navigationBarDrawer(displayMode: .always),
                 prompt: prompt
             )

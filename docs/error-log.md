@@ -1138,3 +1138,61 @@ Como se soluciono:
 Regla:
 
 - Si una animacion depende de `query` e `isPresented`, no dejar que ambos cierren por separado el mismo estado transitorio; elegir una sola autoridad para terminar la sesion.
+
+### 58. Intentar estabilizar el search chrome nativo con una maquina de estados paralela
+
+Que paso:
+
+- La busqueda de `Malla` acumulo varios parches de cierre:
+  - overlay duplicado
+  - title mode manual
+  - latches
+  - delays
+  - estados transitorios propios
+- Aun asi seguian apareciendo variantes rotas al escribir, borrar, cerrar o volver del background.
+
+Por que paso:
+
+- El sistema ya estaba animando su propio `searchable`.
+- Nuestra vista intentaba acompañarlo con otra coreografia paralela, cambiando a la vez:
+  - la jerarquia del scroll
+  - el contenido visible
+  - el title mode
+  - el tiempo del cierre
+
+Como se soluciono:
+
+- Se elimino la maquina de estados manual del cierre.
+- Se dejo una sola jerarquia de contenido viva.
+- Los resultados ahora cambian dentro del mismo `ScrollView`.
+- El search chrome vuelve a depender principalmente del sistema.
+
+Regla:
+
+- Si una animacion nativa sigue rompiendose pese a muchos ajustes de timing, dejar de pelear con el sistema y mover la variacion al contenido dentro de una sola jerarquia estable.
+
+### 58. Seguir asumiendo que todo el glitch de `searchable` viene de la app sin validar primero limitaciones del framework
+
+Que paso:
+
+- La busqueda de `Malla` en iOS 26 siguio mostrando glitches al cerrar despues de escribir, incluso despues de varios ajustes razonables en el estado local.
+
+Por que paso:
+
+- La combinacion usada es especialmente sensible:
+  - `searchable`
+  - `searchToolbarBehavior(.minimize)`
+  - `NavigationStack`
+  - `TabView`
+  - y titulo grande
+- Apple Developer Forums ya muestra reportes recientes de comportamiento incorrecto de `searchable` y de transiciones/navigation chrome en SwiftUI sobre iOS 26.
+
+Como se corrige de ahora en adelante:
+
+- Tratar este tipo de bug primero como posible problema mixto: framework + implementacion local.
+- Antes de seguir sumando latches y delays, validar documentacion, foros y repros de terceros.
+- Si el search chrome del sistema sigue siendo inestable en este contexto, preferir un search chrome propio en SwiftUI antes que seguir acumulando parches sobre `.searchable`.
+
+Regla:
+
+- Si una animacion de barra nativa en SwiftUI sigue fallando tras varios ajustes coherentes, detener la iteracion reactiva y verificar si el framework tiene regresiones conocidas en esa combinacion de APIs.
