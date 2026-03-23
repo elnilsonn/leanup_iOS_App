@@ -786,3 +786,7 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 
 - La banda horizontal de `Periodos` ahora se reconstruye solo en el flujo de reset por segundo toque.
 - Con eso, el recentrado del primer reset deja de depender de la instancia anterior del `ScrollViewReader` y aterriza desde una banda nueva ya alineada con el target correcto.
+
+## Actualizacion 2026-03-23 - Animacion restaurada en el reset de Periodos
+
+- Tras reconstruir la banda de `Periodos`, el recentrado se reprogramo al siguiente ciclo principal para que la animacion horizontal vuelva a sentirse como en `Filtros`.

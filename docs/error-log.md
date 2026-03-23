@@ -799,3 +799,21 @@ Como se soluciono:
 Regla:
 
 - Si un `ScrollViewReader` sigue fallando solo en un primer flujo especifico, considerar recrear esa banda puntual antes de seguir agregando retardos.
+
+### 41. Recentrar una banda recien reconstruida demasiado pronto para que se vea la animacion
+
+Que paso:
+
+- La banda de `Periodos` ya recentraba bien tras el rebuild, pero el movimiento podia sentirse seco, sin la animacion horizontal visible.
+
+Por que paso:
+
+- El `scrollTo` se estaba disparando demasiado pegado al `onAppear` de la banda nueva.
+
+Como se soluciono:
+
+- El recentrado del reset se difirio al siguiente ciclo principal, manteniendo la animacion.
+
+Regla:
+
+- Si una banda reconstruida ya centra bien pero pierde la sensacion de animacion, retrasar el disparo del `scrollTo` un ciclo principal antes de volver a tocar su logica.
