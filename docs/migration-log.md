@@ -766,3 +766,8 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Cambios normales entre chips distintos vuelven a comportarse como antes, sin recentrado extra.
 - En `Periodos`, ese segundo toque vuelve al `focusPeriod` real.
 - En `Filtros`, ese segundo toque vuelve a `Todas`.
+
+## Actualizacion 2026-03-23 - Recentrado con segunda pasada tras reset
+
+- El banner horizontal de `Periodos` y `Filtros` ahora hace el recentrado con una pequena segunda pasada diferida.
+- Esto refuerza el caso del segundo toque sobre el mismo chip activo, donde el estado ya resetea bien pero el `scrollTo` podia llegar antes de que el layout terminara de asentarse.

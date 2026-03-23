@@ -876,33 +876,37 @@ struct LeanUpMallaStickyHeader: View {
     }
 
     private func scrollPeriodBanner(using proxy: ScrollViewProxy, animated: Bool) {
-        DispatchQueue.main.async {
-            let action = {
-                proxy.scrollTo("period-\(selectedPeriod)", anchor: .center)
-            }
-
-            if animated {
-                withAnimation(.easeInOut(duration: 0.24)) {
-                    action()
-                }
-            } else {
-                action()
-            }
-        }
+        scheduleCenteredScroll(
+            using: proxy,
+            targetID: "period-\(selectedPeriod)",
+            animated: animated
+        )
     }
 
     private func scrollFilterBanner(using proxy: ScrollViewProxy, animated: Bool) {
-        DispatchQueue.main.async {
-            let action = {
-                proxy.scrollTo("filter-\(selectedFilter.rawValue)", anchor: .center)
-            }
+        scheduleCenteredScroll(
+            using: proxy,
+            targetID: "filter-\(selectedFilter.rawValue)",
+            animated: animated
+        )
+    }
 
-            if animated {
-                withAnimation(.easeInOut(duration: 0.24)) {
+    private func scheduleCenteredScroll(using proxy: ScrollViewProxy, targetID: String, animated: Bool) {
+        let delays: [TimeInterval] = animated ? [0.0, 0.08] : [0.0]
+
+        for delay in delays {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                let action = {
+                    proxy.scrollTo(targetID, anchor: .center)
+                }
+
+                if animated {
+                    withAnimation(.easeInOut(duration: 0.26)) {
+                        action()
+                    }
+                } else {
                     action()
                 }
-            } else {
-                action()
             }
         }
     }

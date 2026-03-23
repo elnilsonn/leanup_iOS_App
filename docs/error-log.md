@@ -723,3 +723,22 @@ Como se soluciono:
 Regla:
 
 - Si el requerimiento viene expresado de forma vaga pero la intencion es detectable, ayudar a convertirlo en una regla de interaccion clara antes de implementar.
+
+### 37. Tener la logica de reset correcta pero el recentrado en el momento equivocado
+
+Que paso:
+
+- El segundo toque ya reseteaba bien `Periodos` y `Filtros`, pero el banner horizontal seguia visualmente corrido.
+
+Por que paso:
+
+- El problema ya no estaba en la seleccion.
+- El `scrollTo` podia dispararse antes de que el layout final del chip activo nuevo quedara estable.
+
+Como se soluciono:
+
+- El recentrado ahora hace una primera pasada inmediata y una segunda pasada corta diferida para asegurar el centrado final.
+
+Regla:
+
+- Si un reset de estado ya es correcto pero el banner no termina centrado, revisar el timing del `scrollTo` antes de volver a tocar la logica de seleccion.
