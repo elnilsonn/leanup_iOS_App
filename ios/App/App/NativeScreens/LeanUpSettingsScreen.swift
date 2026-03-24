@@ -1,5 +1,27 @@
 import SwiftUI
 
+private struct LeanUpSettingsViewData {
+    let currentDisplayName: String
+    let themeDescription: String
+    let currentThemeMode: LeanUpThemeMode
+    let registeredCountText: String
+    let approvedCountText: String
+    let selectedElectivesCountText: String
+    let earnedCreditsText: String
+    let localStorageStatusText: String
+
+    init(model: LeanUpAppModel) {
+        currentDisplayName = model.currentDisplayName
+        themeDescription = model.themeDescription
+        currentThemeMode = model.snapshot.themeMode
+        registeredCountText = "\(model.registeredCount)"
+        approvedCountText = "\(model.approvedCount)"
+        selectedElectivesCountText = "\(model.selectedElectivesCount)"
+        earnedCreditsText = "\(model.earnedCredits)"
+        localStorageStatusText = model.localStorageStatusText
+    }
+}
+
 struct LeanUpSettingsView: View {
     @ObservedObject var model: LeanUpAppModel
     @State private var draftName = ""
@@ -8,9 +30,14 @@ struct LeanUpSettingsView: View {
     @State private var nameSaveFeedback = false
 
     var body: some View {
+        let data = LeanUpSettingsViewData(model: model)
+
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                LeanUpSettingsQuickControlCard(model: model)
+                LeanUpSettingsQuickControlCard(
+                    currentDisplayName: data.currentDisplayName,
+                    themeDescription: data.themeDescription
+                )
 
                 LeanUpSettingsIdentityCard(
                     draftName: $draftName,
@@ -19,10 +46,19 @@ struct LeanUpSettingsView: View {
                     onReset: { showResetNameAlert = true }
                 )
 
-                LeanUpSettingsAppearanceCard(model: model)
+                LeanUpSettingsAppearanceCard(
+                    currentThemeMode: data.currentThemeMode,
+                    onSelectTheme: { model.setTheme($0) }
+                )
 
                 LeanUpSettingsStorageCard(
-                    model: model,
+                    registeredCountText: data.registeredCountText,
+                    approvedCountText: data.approvedCountText,
+                    selectedElectivesCountText: data.selectedElectivesCountText,
+                    earnedCreditsText: data.earnedCreditsText,
+                    currentDisplayName: data.currentDisplayName,
+                    themeDescription: data.themeDescription,
+                    localStorageStatusText: data.localStorageStatusText,
                     onClearProgress: { showClearProgressAlert = true }
                 )
 
@@ -75,7 +111,8 @@ struct LeanUpSettingsView: View {
 }
 
 private struct LeanUpSettingsQuickControlCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let currentDisplayName: String
+    let themeDescription: String
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -103,8 +140,8 @@ private struct LeanUpSettingsQuickControlCard: View {
                 }
 
                 HStack(spacing: 10) {
-                    LeanUpSettingsMetricBadge(title: "Nombre", value: model.currentDisplayName)
-                    LeanUpSettingsMetricBadge(title: "Tema", value: model.themeDescription)
+                    LeanUpSettingsMetricBadge(title: "Nombre", value: currentDisplayName)
+                    LeanUpSettingsMetricBadge(title: "Tema", value: themeDescription)
                     LeanUpSettingsMetricBadge(title: "Estado", value: "Local")
                 }
             }
@@ -173,7 +210,8 @@ private struct LeanUpSettingsIdentityCard: View {
 }
 
 private struct LeanUpSettingsAppearanceCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let currentThemeMode: LeanUpThemeMode
+    let onSelectTheme: (LeanUpThemeMode) -> Void
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -187,13 +225,13 @@ private struct LeanUpSettingsAppearanceCard: View {
                 VStack(alignment: .leading, spacing: 10) {
                     ForEach(LeanUpThemeMode.allCases, id: \.self) { mode in
                         Button {
-                            model.setTheme(mode)
+                            onSelectTheme(mode)
                         } label: {
                             HStack(spacing: 12) {
                                 Image(systemName: icon(for: mode))
                                     .font(.system(size: 18, weight: .semibold))
                                     .frame(width: 24, height: 24)
-                                    .foregroundStyle(model.snapshot.themeMode == mode ? Color.unadBlue : .secondary)
+                                    .foregroundStyle(currentThemeMode == mode ? Color.unadBlue : .secondary)
 
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text(title(for: mode))
@@ -206,13 +244,13 @@ private struct LeanUpSettingsAppearanceCard: View {
 
                                 Spacer()
 
-                                Image(systemName: model.snapshot.themeMode == mode ? "checkmark.circle.fill" : "circle")
-                                    .foregroundStyle(model.snapshot.themeMode == mode ? Color.unadBlue : .secondary)
+                                Image(systemName: currentThemeMode == mode ? "checkmark.circle.fill" : "circle")
+                                    .foregroundStyle(currentThemeMode == mode ? Color.unadBlue : .secondary)
                             }
                             .padding(14)
                             .background(
                                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                    .fill(model.snapshot.themeMode == mode ? Color.unadBlue.opacity(0.10) : Color.primary.opacity(0.05))
+                                    .fill(currentThemeMode == mode ? Color.unadBlue.opacity(0.10) : Color.primary.opacity(0.05))
                             )
                         }
                         .buttonStyle(.plain)
@@ -248,7 +286,13 @@ private struct LeanUpSettingsAppearanceCard: View {
 }
 
 private struct LeanUpSettingsStorageCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let registeredCountText: String
+    let approvedCountText: String
+    let selectedElectivesCountText: String
+    let earnedCreditsText: String
+    let currentDisplayName: String
+    let themeDescription: String
+    let localStorageStatusText: String
     let onClearProgress: () -> Void
 
     var body: some View {
@@ -261,19 +305,19 @@ private struct LeanUpSettingsStorageCard: View {
                 )
 
                 HStack(spacing: 10) {
-                    LeanUpSettingsMetricBadge(title: "Notas", value: "\(model.registeredCount)")
-                    LeanUpSettingsMetricBadge(title: "Aprobadas", value: "\(model.approvedCount)")
+                    LeanUpSettingsMetricBadge(title: "Notas", value: registeredCountText)
+                    LeanUpSettingsMetricBadge(title: "Aprobadas", value: approvedCountText)
                 }
 
                 HStack(spacing: 10) {
-                    LeanUpSettingsMetricBadge(title: "Electivas", value: "\(model.selectedElectivesCount)")
-                    LeanUpSettingsMetricBadge(title: "Creditos", value: "\(model.earnedCredits)")
+                    LeanUpSettingsMetricBadge(title: "Electivas", value: selectedElectivesCountText)
+                    LeanUpSettingsMetricBadge(title: "Creditos", value: earnedCreditsText)
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
-                    LeanUpSettingsInfoRow(title: "Nombre actual", value: model.currentDisplayName)
-                    LeanUpSettingsInfoRow(title: "Tema activo", value: model.themeDescription)
-                    LeanUpSettingsInfoRow(title: "Estado local", value: model.localStorageStatusText)
+                    LeanUpSettingsInfoRow(title: "Nombre actual", value: currentDisplayName)
+                    LeanUpSettingsInfoRow(title: "Tema activo", value: themeDescription)
+                    LeanUpSettingsInfoRow(title: "Estado local", value: localStorageStatusText)
                 }
 
                 VStack(alignment: .leading, spacing: 10) {

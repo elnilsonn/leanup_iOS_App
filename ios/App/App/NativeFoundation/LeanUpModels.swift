@@ -1,4 +1,5 @@
 import Foundation
+import Dispatch
 import SwiftUI
 enum LeanUpThemeMode: String, Codable, CaseIterable {
     case light
@@ -182,8 +183,8 @@ struct LeanUpSnapshotStore {
     }
 
     @discardableResult
-    func saveSnapshot(_ snapshot: LeanUpSnapshot) throws -> String {
-        let normalized = snapshot.normalized()
+    func saveSnapshot(_ snapshot: LeanUpSnapshot, assumesNormalized: Bool = false) throws -> String {
+        let normalized = assumesNormalized ? snapshot : snapshot.normalized()
         let json = try normalized.encodedString()
         let base64 = Data(json.utf8).base64EncodedString()
         userDefaults.set(base64, forKey: Self.nativeBackupKey)
@@ -408,10 +409,12 @@ final class LeanUpAppModel: ObservableObject {
 
     let totalCourses = 38
     let totalCredits = 144
+    let totalTrackableItems: Int
     let academics: LeanUpAcademicsPayload
 
     private let store = LeanUpSnapshotStore()
     private let academicsStore = LeanUpAcademicsStore()
+    private var pendingSaveWorkItem: DispatchWorkItem?
     private var cachedAllGrades: [Double] = []
     private var cachedApprovedCourses: [LeanUpCourse] = []
     private var cachedSelectedElectiveOptions: [LeanUpElectiveOption] = []
@@ -428,6 +431,14 @@ final class LeanUpAppModel: ObservableObject {
     private var cachedApprovedSignalCorpus: [String] = []
     private var cachedAlignmentAreaScoresSnapshot: [String: Int] = [:]
     private var cachedProgressByPeriod: [Int: LeanUpPeriodProgress] = [:]
+    private var cachedCompletedPeriodsCount = 0
+    private var cachedPeriodAverageSeries: [LeanUpPeriodAveragePoint] = []
+    private var cachedStrongestCourses: [LeanUpGradedCourse] = []
+    private var cachedMostDemandingCourses: [LeanUpGradedCourse] = []
+    private var cachedAchievements: [LeanUpAchievement] = []
+    private var cachedUnlockedAchievements: [LeanUpAchievement] = []
+    private var cachedNextLockedAchievement: LeanUpAchievement?
+    private var cachedPresentationState = LeanUpPresentationState.empty
     private static let monthYearFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "es_CO")
@@ -444,6 +455,7 @@ final class LeanUpAppModel: ObservableObject {
 
     init() {
         academics = academicsStore.load()
+        totalTrackableItems = academics.courses.count + academics.electiveGroups.count
         load()
     }
 
@@ -452,20 +464,19 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var registeredCount: Int {
-        allGrades.count
+        cachedPresentationState.registeredCount
     }
 
     var averageValue: Double? {
-        guard !allGrades.isEmpty else { return nil }
-        return allGrades.reduce(0, +) / Double(allGrades.count)
+        cachedPresentationState.averageValue
     }
 
     var approvedCount: Int {
-        allGrades.filter { $0 >= 3.0 }.count
+        cachedPresentationState.approvedCount
     }
 
     var failedCount: Int {
-        allGrades.filter { $0 < 3.0 }.count
+        cachedPresentationState.failedCount
     }
 
     var inProgressCount: Int {
@@ -476,17 +487,12 @@ final class LeanUpAppModel: ObservableObject {
         snapshot.electivosSeleccionados.count
     }
 
-    var totalTrackableItems: Int {
-        academics.courses.count + academics.electiveGroups.count
-    }
-
     var pendingCount: Int {
-        max(totalTrackableItems - approvedCount - failedCount - inProgressCount, 0)
+        cachedPresentationState.pendingCount
     }
 
     var earnedCredits: Int {
-        approvedCourses.reduce(0) { $0 + $1.credits } +
-        approvedElectiveOptions.reduce(0) { $0 + $1.credits }
+        cachedPresentationState.earnedCredits
     }
 
     var electiveGroupsWithoutSelection: Int {
@@ -494,19 +500,15 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var focusPeriod: Int? {
-        periods.first { progress(for: $0).approved < progress(for: $0).total } ?? periods.last
+        cachedPresentationState.focusPeriod
     }
 
     var completionPercentText: String {
-        guard totalTrackableItems > 0 else { return "0%" }
-        let ratio = Double(approvedCount) / Double(totalTrackableItems)
-        return "\(Int((ratio * 100).rounded()))%"
+        cachedPresentationState.completionPercentText
     }
 
     var careerReadinessPercent: Int {
-        guard totalTrackableItems > 0 else { return 0 }
-        let ratio = Double(approvedCount) / Double(totalTrackableItems)
-        return Int((ratio * 100).rounded())
+        cachedPresentationState.careerReadinessPercent
     }
 
     var approvedCourses: [LeanUpCourse] {
@@ -522,24 +524,11 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var recommendedRoles: [String] {
-        var seen = Set<String>()
-        let sources = approvedCourses.map(\.outcomes) + approvedElectiveOptions.map(\.outcomes)
-
-        return sources
-            .flatMap { $0.components(separatedBy: ",") }
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .filter { role in
-                if seen.contains(role) { return false }
-                seen.insert(role)
-                return true
-            }
+        cachedPresentationState.recommendedRoles
     }
 
     var activeFocusNames: [String] {
-        academics.electiveGroups.compactMap { group in
-            selectedOption(in: group)?.name
-        }
+        cachedPresentationState.activeFocusNames
     }
 
     var careerItems: [LeanUpCareerItem] {
@@ -547,25 +536,15 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var linkedinHighlights: [LeanUpCareerItem] {
-        careerItems.filter { !$0.linkedinText.isEmpty }
+        cachedPresentationState.linkedinHighlights
     }
 
     var portfolioHighlights: [LeanUpCareerItem] {
-        careerItems.filter { !$0.portfolioProject.isEmpty }
+        cachedPresentationState.portfolioHighlights
     }
 
     var standoutSkills: [String] {
-        var seen = Set<String>()
-
-        return careerItems
-            .flatMap(\.skills)
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .filter { skill in
-                if seen.contains(skill) { return false }
-                seen.insert(skill)
-                return true
-            }
+        cachedPresentationState.standoutSkills
     }
 
     var periods: [Int] {
@@ -573,294 +552,83 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var studiedPeriodsCount: Int {
-        Set(gradedItems.map(\.period)).count
+        cachedPresentationState.studiedPeriodsCount
     }
 
     var completedPeriodsCount: Int {
-        periods.filter {
-            let progress = progress(for: $0)
-            return progress.total > 0 && progress.approved == progress.total
-        }.count
+        cachedPresentationState.completedPeriodsCount
     }
 
     var averageText: String {
-        guard let averageValue else { return "-" }
-        return String(format: "%.2f", averageValue)
+        cachedPresentationState.averageText
     }
 
     var progressText: String {
-        "\(approvedCount) aprobadas"
+        cachedPresentationState.progressText
     }
 
     var themeDescription: String {
-        switch snapshot.themeMode {
-        case .light: return "Claro"
-        case .dark: return "Oscuro"
-        case .system: return "Sistema"
-        }
+        cachedPresentationState.themeDescription
     }
 
     var currentDisplayName: String {
-        preferredDisplayName ?? snapshot.username
+        cachedPresentationState.currentDisplayName
     }
 
     var localStorageStatusText: String {
-        if registeredCount == 0 && selectedElectivesCount == 0 {
-            return "Listo para empezar a guardar progreso local"
-        }
-
-        return "Guardado local activo en este iPhone"
+        cachedPresentationState.localStorageStatusText
     }
 
     var failedCourses: [LeanUpCourse] {
-        academics.courses
-            .filter { courseStatus(for: $0) == .failed }
-            .sorted {
-                if $0.period == $1.period {
-                    return $0.name < $1.name
-                }
-                return $0.period < $1.period
-            }
+        cachedPresentationState.failedCourses
     }
 
     var pendingCourses: [LeanUpCourse] {
-        academics.courses
-            .filter { courseStatus(for: $0) == .pending }
-            .sorted {
-                if $0.period == $1.period {
-                    return $0.name < $1.name
-                }
-                return $0.period < $1.period
-            }
+        cachedPresentationState.pendingCourses
     }
 
     var inProgressCourses: [LeanUpCourse] {
-        academics.courses
-            .filter { courseStatus(for: $0) == .inProgress }
-            .sorted {
-                if $0.period == $1.period {
-                    return $0.name < $1.name
-                }
-                return $0.period < $1.period
-            }
+        cachedPresentationState.inProgressCourses
     }
 
     var highlightedCareerItems: [LeanUpCareerItem] {
-        Array(careerItems.prefix(4))
+        cachedPresentationState.highlightedCareerItems
     }
 
     var profileHeadline: String {
-        if let primaryRole = recommendedRoles.first {
-            return "Ya te estas perfilando hacia \(primaryRole)"
-        }
-
-        if let focus = activeFocusNames.first {
-            return "Tu perfil ya empieza a tomar forma alrededor de \(focus)"
-        }
-
-        return "Tu perfil profesional ya tiene una base academica clara"
+        cachedPresentationState.profileHeadline
     }
 
     var professionalHeadline: String {
-        profileHeadline
+        cachedPresentationState.professionalHeadline
     }
 
     var profileSummary: String {
-        if careerItems.isEmpty {
-            return "Tu avance academico ya esta ordenado, pero aun necesitas registrar mas materias o electivas aprobadas para construir una narrativa profesional mas fuerte."
-        }
-
-        if let primaryRole = recommendedRoles.first {
-            return "Tu avance combina \(approvedCount) materias o electivas aprobadas, \(earnedCredits) creditos ganados y senales concretas que ya apuntan hacia \(primaryRole)."
-        }
-
-        return "Tu avance ya combina \(approvedCount) materias o electivas aprobadas, \(earnedCredits) creditos ganados y evidencias suficientes para empezar a construir una presentacion profesional mas clara."
+        cachedPresentationState.profileSummary
     }
 
     var professionalSummary: String {
-        profileSummary
+        cachedPresentationState.professionalSummary
     }
 
     var nextProfessionalMove: String {
-        if failedCount > 0 {
-            return "Recupera primero las materias o electivas reprobadas. Eso mejora tu promedio y fortalece cualquier perfil profesional que quieras mostrar."
-        }
-
-        if electiveGroupsWithoutSelection > 0 {
-            return "Define las electivas pendientes. Es la forma mas directa de darle una direccion mas clara a tu perfil."
-        }
-
-        if let period = focusPeriod {
-            return "Empuja el periodo \(period). Ese bloque es el siguiente salto natural para ganar mas evidencia academica y profesional."
-        }
-
-        return "Tu base academica ya esta bastante clara. El siguiente paso es convertirla en historias y proyectos que puedas mostrar afuera."
+        cachedPresentationState.nextProfessionalMove
     }
 
     var profileNextMilestone: LeanUpMilestoneInsight {
-        let thresholds = [25, 50, 75, 100]
-        let earned = min(earnedCredits, totalCredits)
-        let currentPercent = totalCredits == 0 ? 0 : Int((Double(earned) / Double(totalCredits) * 100).rounded())
-
-        if earned >= totalCredits {
-            return LeanUpMilestoneInsight(
-                title: "Ya cerraste el 100% de la carrera",
-                detail: "Tu siguiente hito ya no es academico: toca convertir esa base en una oferta, un portafolio y una narrativa profesional propia.",
-                badgeText: "100%",
-                targetPercent: 100,
-                creditsRemaining: 0,
-                progress: 1
-            )
-        }
-
-        let nextPercent = thresholds.first { percent in
-            let targetCredits = Int((Double(totalCredits) * Double(percent) / 100.0).rounded())
-            return earned < targetCredits
-        } ?? 100
-        let targetCredits = Int((Double(totalCredits) * Double(nextPercent) / 100.0).rounded())
-        let remaining = max(targetCredits - earned, 0)
-        let detail: String
-
-        switch nextPercent {
-        case 25:
-            detail = "Te faltan \(remaining) creditos para llegar al 25% y dejar de estar en fase de arranque. Ese punto ya te da una base mas estable para hablar de criterio y disciplina."
-        case 50:
-            detail = "Te faltan \(remaining) creditos para llegar al 50% de la carrera. Ahí ya se empieza a sentir media carrera real detrás de tu perfil."
-        case 75:
-            detail = "Te faltan \(remaining) creditos para llegar al 75%. Ese umbral ya te acerca a propuestas mucho mas serias y con mejor sustento."
-        default:
-            detail = "Te faltan \(remaining) creditos para cerrar la carrera. Ya no es una base inicial: estas afinando el tramo final."
-        }
-
-        return LeanUpMilestoneInsight(
-            title: "Te faltan \(remaining) creditos para llegar al \(nextPercent)%",
-            detail: detail,
-            badgeText: "\(currentPercent)%",
-            targetPercent: nextPercent,
-            creditsRemaining: remaining,
-            progress: totalCredits == 0 ? 0 : Double(earned) / Double(totalCredits)
-        )
+        cachedPresentationState.profileNextMilestone
     }
 
     var electiveAlignmentInsight: LeanUpProfileAlignmentInsight {
-        let selections = selectedElectiveOptions
-        guard !selections.isEmpty else {
-            return LeanUpProfileAlignmentInsight(
-                statusTitle: "Aun sin lectura fuerte",
-                title: "Todavia no hay suficientes electivos definidos",
-                detail: "Tu direccion todavia no se puede leer con claridad porque aun faltan electivos por escoger. Aqui vale mas definir que acumular señales sueltas.",
-                detectedAreas: [],
-                recommendation: "Empieza por escoger los electivos que mas se acerquen al tipo de trabajo que te gustaria probar primero.",
-                confidenceText: "Confianza baja",
-                tone: .orange
-            )
-        }
-
-        let areaScores = alignmentAreaScores(for: selections)
-        let sortedAreas = areaScores
-            .sorted {
-                if $0.value == $1.value {
-                    return $0.key < $1.key
-                }
-                return $0.value > $1.value
-            }
-
-        let topAreas = sortedAreas.prefix(3).map(\.key)
-        let topScore = sortedAreas.first?.value ?? 0
-        let secondScore = sortedAreas.dropFirst().first?.value ?? 0
-        let totalScore = max(areaScores.values.reduce(0, +), 1)
-        let dominantShare = Double(topScore) / Double(totalScore)
-
-        if selections.count < 2 {
-            return LeanUpProfileAlignmentInsight(
-                statusTitle: "Aun temprano",
-                title: "Ya asoma una direccion, pero aun es muy pronto",
-                detail: "Por ahora tu eleccion empieza a apuntar a \(topAreas.first ?? "una linea posible"), pero una sola senal todavia no alcanza para hablar de especializacion.",
-                detectedAreas: topAreas,
-                recommendation: electiveGroupsWithoutSelection > 0
-                    ? "Define el siguiente electivo en la misma linea si quieres que tu perfil se lea mas coherente."
-                    : "Si quieres reforzar esa linea, procura que tus siguientes proyectos y materias aprobadas vayan en la misma direccion.",
-                confidenceText: "Confianza baja",
-                tone: .orange
-            )
-        }
-
-        if dominantShare >= 0.58 && (topScore - secondScore) >= 2 {
-            return LeanUpProfileAlignmentInsight(
-                statusTitle: "Alineado",
-                title: "Tus electivos ya apuntan a una linea bastante clara",
-                detail: "Lo mas fuerte hoy es \(topAreas.first ?? "tu linea principal"). No se siente disperso: empieza a leerse como una direccion concreta.",
-                detectedAreas: topAreas,
-                recommendation: electiveGroupsWithoutSelection > 0
-                    ? "Si mantienes esa misma linea en los proximos electivos, tu perfil se va a leer cada vez mas especializado."
-                    : "Ahora conviene que tu portafolio y tu primer servicio giren alrededor de esa misma linea.",
-                confidenceText: selections.count >= 3 ? "Confianza media-alta" : "Confianza media",
-                tone: .green
-            )
-        }
-
-        if dominantShare >= 0.40 {
-            return LeanUpProfileAlignmentInsight(
-                statusTitle: "Mixto",
-                title: "Tu perfil mezcla dos lineas con bastante peso",
-                detail: "Hay una combinacion visible entre \(topAreas.prefix(2).joined(separator: " y ")). No es ruido, pero tampoco una sola especializacion cerrada.",
-                detectedAreas: topAreas,
-                recommendation: "Si quieres venderte mas claro afuera, define cual de esas lineas quieres que mande y usa las otras como apoyo.",
-                confidenceText: "Confianza media",
-                tone: .blue
-            )
-        }
-
-        return LeanUpProfileAlignmentInsight(
-            statusTitle: "Diversificado",
-            title: "Tus electivos hoy se sienten mas diversos que especializados",
-            detail: "Hay varias senales abiertas al mismo tiempo y ninguna domina del todo. Eso no es malo, pero hoy tu perfil se lee mas exploratorio que enfocado.",
-            detectedAreas: topAreas,
-            recommendation: "El siguiente electivo y tu proximo proyecto deberian empujar una sola linea si quieres que el perfil gane nitidez.",
-            confidenceText: "Confianza media",
-            tone: .gold
-        )
+        cachedPresentationState.electiveAlignmentInsight
     }
 
     var subjectTypeMap: LeanUpSubjectTypeMap {
-        let typedEntries = LeanUpProfileStrategyLibrary.trackedSubjectTypes.map { type in
-            LeanUpSubjectTypeCount(
-                type: type,
-                approved: approvedTypedItems.filter { normalizedTypes(for: $0).contains(type) }.count,
-                remaining: remainingTypedItems.filter { normalizedTypes(for: $0).contains(type) }.count
-            )
-        }
-
-        let dominant = typedEntries.max { lhs, rhs in
-            if lhs.approved == rhs.approved {
-                return lhs.type > rhs.type
-            }
-            return lhs.approved < rhs.approved
-        }?.type
-
-        let lagging = typedEntries.max { lhs, rhs in
-            if lhs.remaining == rhs.remaining {
-                return lhs.type > rhs.type
-            }
-            return lhs.remaining < rhs.remaining
-        }?.type
-
-        let summary: String
-        if let dominant, let lagging {
-            summary = "Lo mas avanzado hoy va por \(dominant), mientras que \(lagging) es donde mas recorrido visible te sigue faltando en las materias que si traen tipologia explicita."
-        } else {
-            summary = "A medida que apruebes mas materias y definas mas electivos, este mapa se volvera mas legible."
-        }
-
-        return LeanUpSubjectTypeMap(
-            entries: typedEntries,
-            dominantType: dominant,
-            laggingType: lagging,
-            summary: summary
-        )
+        cachedPresentationState.subjectTypeMap
     }
 
     var recommendedStarterService: LeanUpServiceRecommendation {
+        return cachedPresentationState.recommendedStarterService
         let matchedRules = LeanUpProfileStrategyLibrary.serviceRules.map { rule -> (LeanUpServiceRule, Int) in
             let areaScore = rule.requiredAreas.reduce(0) { partial, area in
                 partial + (alignmentAreaScoresSnapshot[area] ?? 0)
@@ -911,6 +679,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var minimumViablePortfolio: [LeanUpPortfolioRoadmapItem] {
+        return cachedPresentationState.minimumViablePortfolio
         let rankedRules = LeanUpProfileStrategyLibrary.portfolioRules
             .map { rule -> (LeanUpPortfolioRule, Int) in
                 (rule, matchCount(for: rule.keywords, in: approvedSignalCorpus))
@@ -945,6 +714,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var freelancerChecklist: LeanUpFreelancerChecklist {
+        return cachedPresentationState.freelancerChecklist
         let profileStatus: LeanUpFreelancerChecklistStatus
         if preferredDisplayName != nil && earnedCredits >= 24 {
             profileStatus = .ready
@@ -1042,25 +812,30 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var profileStrategicSummary: String {
+        return cachedPresentationState.profileStrategicSummary
         let name = preferredDisplayName ?? "Tu perfil"
         return "\(name) hoy se lee mejor cuando unes \(electiveAlignmentInsight.statusTitle.lowercased()), el siguiente hito en \(profileNextMilestone.targetPercent)% y una oferta inicial como \(recommendedStarterService.title.lowercased())."
     }
 
     var completionRatio: Double {
+        return cachedPresentationState.completionRatio
         guard totalTrackableItems > 0 else { return 0 }
         return Double(approvedCount) / Double(totalTrackableItems)
     }
 
     var completedEquivalentPeriods: Double {
+        return cachedPresentationState.completedEquivalentPeriods
         completionRatio * Double(max(periods.count, 1))
     }
 
     var paceEquivalentPeriodsPerStudiedPeriod: Double {
+        return cachedPresentationState.paceEquivalentPeriodsPerStudiedPeriod
         guard studiedPeriodsCount > 0 else { return 0 }
         return completedEquivalentPeriods / Double(studiedPeriodsCount)
     }
 
     var estimatedRemainingPeriods: Double? {
+        return cachedPresentationState.estimatedRemainingPeriods
         let pace = paceEquivalentPeriodsPerStudiedPeriod
         guard pace > 0 else { return nil }
         let remainingEquivalent = max(Double(max(periods.count, 1)) - completedEquivalentPeriods - inProgressEquivalentPeriods, 0)
@@ -1068,6 +843,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var estimatedGraduationDate: Date? {
+        return cachedPresentationState.estimatedGraduationDate
         guard approvedCount < totalTrackableItems else { return Date() }
         guard let remainingPeriods = estimatedRemainingPeriods else { return nil }
         let months = Int((remainingPeriods * 4.0).rounded())
@@ -1075,16 +851,19 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var estimatedGraduationText: String? {
+        return cachedPresentationState.estimatedGraduationText
         guard let estimatedGraduationDate else { return nil }
         return Self.monthYearFormatter.string(from: estimatedGraduationDate)
     }
 
     var estimatedGraduationShortText: String? {
+        return cachedPresentationState.estimatedGraduationShortText
         guard let estimatedGraduationDate else { return nil }
         return Self.shortMonthYearFormatter.string(from: estimatedGraduationDate).capitalized
     }
 
     var paceTitle: String {
+        return cachedPresentationState.paceTitle
         if approvedCount >= totalTrackableItems, totalTrackableItems > 0 {
             return "Ya cerraste la malla completa."
         }
@@ -1097,6 +876,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var paceDetail: String {
+        return cachedPresentationState.paceDetail
         if approvedCount >= totalTrackableItems, totalTrackableItems > 0 {
             return "Tu progreso academico ya no necesita proyeccion: la carrera esta cerrada en la app."
         }
@@ -1113,20 +893,24 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var paceValueText: String {
+        return cachedPresentationState.paceValueText
         guard paceEquivalentPeriodsPerStudiedPeriod > 0 else { return "--" }
         return String(format: "%.1f", paceEquivalentPeriodsPerStudiedPeriod)
     }
 
     var remainingPeriodsText: String {
+        return cachedPresentationState.remainingPeriodsText
         guard let estimatedRemainingPeriods else { return "--" }
         return String(format: "%.1f", estimatedRemainingPeriods)
     }
 
     var studiedPeriodsText: String {
+        return cachedPresentationState.studiedPeriodsText
         studiedPeriodsCount == 0 ? "--" : "\(studiedPeriodsCount)"
     }
 
     var inProgressCountText: String {
+        return cachedPresentationState.inProgressCountText
         inProgressCount == 0 ? "--" : "\(inProgressCount)"
     }
 
@@ -1153,92 +937,27 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var periodAverageSeries: [LeanUpPeriodAveragePoint] {
-        periods.compactMap { period in
-            let grades = gradeEntries(in: period).map(\.grade)
-            guard !grades.isEmpty else { return nil }
-            let average = grades.reduce(0, +) / Double(grades.count)
-            return LeanUpPeriodAveragePoint(period: period, average: average, count: grades.count)
-        }
+        cachedPeriodAverageSeries
     }
 
     var strongestCourses: [LeanUpGradedCourse] {
-        Array(
-            gradedCourses
-                .sorted {
-                    if $0.grade == $1.grade {
-                        return $0.period < $1.period
-                    }
-                    return $0.grade > $1.grade
-                }
-                .prefix(3)
-        )
+        cachedStrongestCourses
     }
 
     var mostDemandingCourses: [LeanUpGradedCourse] {
-        Array(
-            gradedCourses
-                .sorted {
-                    if $0.grade == $1.grade {
-                        return $0.period < $1.period
-                    }
-                    return $0.grade < $1.grade
-                }
-                .prefix(3)
-        )
+        cachedMostDemandingCourses
     }
 
     var achievements: [LeanUpAchievement] {
-        let halfThreshold = Int(ceil(Double(totalTrackableItems) / 2.0))
-        return [
-            LeanUpAchievement(
-                id: "first-period-complete",
-                title: "Primer periodo completo",
-                detail: "Cierra un periodo entero sin pendientes ni reprobadas.",
-                icon: "flag.checkered.2.crossed",
-                tone: .blue,
-                isUnlocked: completedPeriodsCount >= 1
-            ),
-            LeanUpAchievement(
-                id: "gpa-over-4",
-                title: "Promedio sobre 4.0",
-                detail: "Sostienes un promedio acumulado por encima de 4.0.",
-                icon: "star.circle.fill",
-                tone: .gold,
-                isUnlocked: (averageValue ?? 0) >= 4.0
-            ),
-            LeanUpAchievement(
-                id: "ten-approved",
-                title: "Diez aprobadas",
-                detail: "Ya construiste una base academica de doble digito.",
-                icon: "10.circle.fill",
-                tone: .green,
-                isUnlocked: approvedCount >= 10
-            ),
-            LeanUpAchievement(
-                id: "half-career",
-                title: "Mitad de la carrera",
-                detail: "Ya pasaste la mitad de la malla en terminos reales.",
-                icon: "seal.fill",
-                tone: .navy,
-                isUnlocked: approvedCount >= halfThreshold
-            ),
-            LeanUpAchievement(
-                id: "clean-record",
-                title: "Sin rojos activos",
-                detail: "No tienes notas reprobadas dentro de lo ya registrado.",
-                icon: "checkmark.shield.fill",
-                tone: .cyan,
-                isUnlocked: registeredCount >= 6 && failedCount == 0
-            )
-        ]
+        cachedAchievements
     }
 
     var unlockedAchievements: [LeanUpAchievement] {
-        achievements.filter(\.isUnlocked)
+        cachedUnlockedAchievements
     }
 
     var nextLockedAchievement: LeanUpAchievement? {
-        achievements.first(where: { !$0.isUnlocked })
+        cachedNextLockedAchievement
     }
 
     var preferredColorScheme: ColorScheme? {
@@ -1321,17 +1040,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     func reminders(for period: Int? = nil) -> [LeanUpPeriodReminder] {
-        snapshot.periodReminders
-            .filter { period == nil || $0.period == period }
-            .sorted {
-                if $0.isDone != $1.isDone {
-                    return !$0.isDone && $1.isDone
-                }
-                if $0.dueDate == $1.dueDate {
-                    return $0.title.localizedCaseInsensitiveCompare($1.title) == .orderedAscending
-                }
-                return $0.dueDate < $1.dueDate
-            }
+        snapshot.periodReminders.filter { period == nil || $0.period == period }
     }
 
     func upcomingReminders(for period: Int? = nil, limit: Int = 3) -> [LeanUpPeriodReminder] {
@@ -1433,7 +1142,7 @@ final class LeanUpAppModel: ObservableObject {
         var updated = snapshot
         mutate(&updated)
         applySnapshot(updated)
-        _ = try? store.saveSnapshot(snapshot)
+        scheduleSnapshotPersistence()
     }
 
     private var gradedCourses: [LeanUpGradedCourse] {
@@ -1503,6 +1212,13 @@ final class LeanUpAppModel: ObservableObject {
         cachedApprovedSignalCorpus = derived.approvedSignalCorpus
         cachedAlignmentAreaScoresSnapshot = derived.alignmentAreaScoresSnapshot
         cachedProgressByPeriod = derived.progressByPeriod
+        cachedCompletedPeriodsCount = derived.completedPeriodsCount
+        cachedPeriodAverageSeries = derived.periodAverageSeries
+        cachedStrongestCourses = derived.strongestCourses
+        cachedMostDemandingCourses = derived.mostDemandingCourses
+        cachedAchievements = derived.achievements
+        cachedUnlockedAchievements = derived.unlockedAchievements
+        cachedNextLockedAchievement = derived.nextLockedAchievement
         snapshot = normalized
     }
 
@@ -1633,6 +1349,91 @@ final class LeanUpAppModel: ObservableObject {
                 )
             )
         })
+        let completedPeriodsCount = sortedPeriods.reduce(into: 0) { total, period in
+            let progress = progressByPeriod[period] ?? LeanUpPeriodProgress(approved: 0, failed: 0, total: 0)
+            if progress.total > 0 && progress.approved == progress.total {
+                total += 1
+            }
+        }
+        let periodAverageSeries = sortedPeriods.compactMap { period in
+            let grades = gradedItems
+                .lazy
+                .filter { $0.period == period }
+                .map(\.grade)
+            let resolvedGrades = Array(grades)
+            guard !resolvedGrades.isEmpty else { return nil }
+            let average = resolvedGrades.reduce(0, +) / Double(resolvedGrades.count)
+            return LeanUpPeriodAveragePoint(period: period, average: average, count: resolvedGrades.count)
+        }
+        let strongestCourses = Array(
+            gradedCourses
+                .sorted {
+                    if $0.grade == $1.grade {
+                        return $0.period < $1.period
+                    }
+                    return $0.grade > $1.grade
+                }
+                .prefix(3)
+        )
+        let mostDemandingCourses = Array(
+            gradedCourses
+                .sorted {
+                    if $0.grade == $1.grade {
+                        return $0.period < $1.period
+                    }
+                    return $0.grade < $1.grade
+                }
+                .prefix(3)
+        )
+        let averageValue = allGrades.isEmpty ? nil : (allGrades.reduce(0, +) / Double(allGrades.count))
+        let registeredCount = allGrades.count
+        let approvedCount = approvedCourses.count + approvedElectiveOptions.count
+        let failedCount = allGrades.filter { $0 < 3.0 }.count
+        let halfThreshold = Int(ceil(Double(totalTrackableItems) / 2.0))
+        let achievements = [
+            LeanUpAchievement(
+                id: "first-period-complete",
+                title: "Primer periodo completo",
+                detail: "Cierra un periodo entero sin pendientes ni reprobadas.",
+                icon: "flag.checkered.2.crossed",
+                tone: .blue,
+                isUnlocked: completedPeriodsCount >= 1
+            ),
+            LeanUpAchievement(
+                id: "gpa-over-4",
+                title: "Promedio sobre 4.0",
+                detail: "Sostienes un promedio acumulado por encima de 4.0.",
+                icon: "star.circle.fill",
+                tone: .gold,
+                isUnlocked: (averageValue ?? 0) >= 4.0
+            ),
+            LeanUpAchievement(
+                id: "ten-approved",
+                title: "Diez aprobadas",
+                detail: "Ya construiste una base academica de doble digito.",
+                icon: "10.circle.fill",
+                tone: .green,
+                isUnlocked: approvedCount >= 10
+            ),
+            LeanUpAchievement(
+                id: "half-career",
+                title: "Mitad de la carrera",
+                detail: "Ya pasaste la mitad de la malla en terminos reales.",
+                icon: "seal.fill",
+                tone: .navy,
+                isUnlocked: approvedCount >= halfThreshold
+            ),
+            LeanUpAchievement(
+                id: "clean-record",
+                title: "Sin rojos activos",
+                detail: "No tienes notas reprobadas dentro de lo ya registrado.",
+                icon: "checkmark.shield.fill",
+                tone: .cyan,
+                isUnlocked: registeredCount >= 6 && failedCount == 0
+            )
+        ]
+        let unlockedAchievements = achievements.filter(\.isUnlocked)
+        let nextLockedAchievement = achievements.first(where: { !$0.isUnlocked })
 
         return LeanUpDerivedState(
             allGrades: allGrades,
@@ -1650,7 +1451,599 @@ final class LeanUpAppModel: ObservableObject {
             inProgressElectiveCount: inProgressElectiveCount,
             approvedSignalCorpus: approvedSignalCorpus,
             alignmentAreaScoresSnapshot: alignmentAreaScoresSnapshot,
-            progressByPeriod: progressByPeriod
+            progressByPeriod: progressByPeriod,
+            completedPeriodsCount: completedPeriodsCount,
+            periodAverageSeries: periodAverageSeries,
+            strongestCourses: strongestCourses,
+            mostDemandingCourses: mostDemandingCourses,
+            achievements: achievements,
+            unlockedAchievements: unlockedAchievements,
+            nextLockedAchievement: nextLockedAchievement
+        )
+    }
+
+    private func buildPresentationState(for snapshot: LeanUpSnapshot, derived: LeanUpDerivedState) -> LeanUpPresentationState {
+        var failedCourses: [LeanUpCourse] = []
+        var pendingCourses: [LeanUpCourse] = []
+        var inProgressCourses: [LeanUpCourse] = []
+
+        for course in academics.courses {
+            let key = String(course.id)
+            if let grade = snapshot.notas[key] {
+                if grade < 3.0 {
+                    failedCourses.append(course)
+                }
+            } else if snapshot.cursosEnCurso[key] == true {
+                inProgressCourses.append(course)
+            } else {
+                pendingCourses.append(course)
+            }
+        }
+
+        let sortedCourseComparator: (LeanUpCourse, LeanUpCourse) -> Bool = { lhs, rhs in
+            if lhs.period == rhs.period {
+                return lhs.name < rhs.name
+            }
+            return lhs.period < rhs.period
+        }
+
+        failedCourses.sort(by: sortedCourseComparator)
+        pendingCourses.sort(by: sortedCourseComparator)
+        inProgressCourses.sort(by: sortedCourseComparator)
+
+        let registeredCount = derived.allGrades.count
+        let averageValue = derived.allGrades.isEmpty ? nil : derived.allGrades.reduce(0, +) / Double(derived.allGrades.count)
+        let approvedCount = derived.approvedCourses.count + derived.approvedElectiveOptions.count
+        let failedCount = max(registeredCount - approvedCount, 0)
+        let inProgressCount = derived.inProgressCourseCount + derived.inProgressElectiveCount
+        let pendingCount = max(totalTrackableItems - approvedCount - failedCount - inProgressCount, 0)
+
+        let earnedCredits = derived.approvedCourses.reduce(0) { $0 + $1.credits } +
+            derived.approvedElectiveOptions.reduce(0) { $0 + $1.credits }
+
+        let focusPeriod = derived.periods.first { period in
+            let progress = derived.progressByPeriod[period] ?? LeanUpPeriodProgress(approved: 0, failed: 0, total: 0)
+            return progress.approved < progress.total
+        } ?? derived.periods.last
+
+        let completionRatio = totalTrackableItems > 0 ? Double(approvedCount) / Double(totalTrackableItems) : 0
+        let careerReadinessPercent = totalTrackableItems > 0 ? Int((completionRatio * 100).rounded()) : 0
+        let completionPercentText = totalTrackableItems > 0 ? "\(careerReadinessPercent)%" : "0%"
+        let averageText = averageValue.map { String(format: "%.2f", $0) } ?? "-"
+        let progressText = "\(approvedCount) aprobadas"
+        let preferredDisplayName = snapshot.username.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedDisplayName = preferredDisplayName.isEmpty || preferredDisplayName.caseInsensitiveCompare("Usuario") == .orderedSame
+            ? nil
+            : preferredDisplayName
+        let currentDisplayName = normalizedDisplayName ?? snapshot.username
+        let localStorageStatusText = registeredCount == 0 && snapshot.electivosSeleccionados.isEmpty
+            ? "Listo para empezar a guardar progreso local"
+            : "Guardado local activo en este iPhone"
+        let themeDescription: String
+        switch snapshot.themeMode {
+        case .light:
+            themeDescription = "Claro"
+        case .dark:
+            themeDescription = "Oscuro"
+        case .system:
+            themeDescription = "Sistema"
+        }
+
+        let activeFocusNames = derived.selectedElectiveOptions.map(\.name)
+        let recommendedRoles = {
+            var seen = Set<String>()
+            let sources = derived.approvedCourses.map(\.outcomes) + derived.approvedElectiveOptions.map(\.outcomes)
+            return sources
+                .flatMap { $0.components(separatedBy: ",") }
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+                .filter { role in
+                    if seen.contains(role) { return false }
+                    seen.insert(role)
+                    return true
+                }
+        }()
+
+        let standoutSkills = {
+            var seen = Set<String>()
+            return derived.careerItems
+                .flatMap(\.skills)
+                .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+                .filter { !$0.isEmpty }
+                .filter { skill in
+                    if seen.contains(skill) { return false }
+                    seen.insert(skill)
+                    return true
+                }
+        }()
+
+        let linkedinHighlights = derived.careerItems.filter { !$0.linkedinText.isEmpty }
+        let portfolioHighlights = derived.careerItems.filter { !$0.portfolioProject.isEmpty }
+        let highlightedCareerItems = Array(derived.careerItems.prefix(4))
+
+        let profileHeadline: String
+        if let primaryRole = recommendedRoles.first {
+            profileHeadline = "Ya te estas perfilando hacia \(primaryRole)"
+        } else if let focus = activeFocusNames.first {
+            profileHeadline = "Tu perfil ya empieza a tomar forma alrededor de \(focus)"
+        } else {
+            profileHeadline = "Tu perfil profesional ya tiene una base academica clara"
+        }
+
+        let profileSummary: String
+        if derived.careerItems.isEmpty {
+            profileSummary = "Tu avance academico ya esta ordenado, pero aun necesitas registrar mas materias o electivas aprobadas para construir una narrativa profesional mas fuerte."
+        } else if let primaryRole = recommendedRoles.first {
+            profileSummary = "Tu avance combina \(approvedCount) materias o electivas aprobadas, \(earnedCredits) creditos ganados y senales concretas que ya apuntan hacia \(primaryRole)."
+        } else {
+            profileSummary = "Tu avance ya combina \(approvedCount) materias o electivas aprobadas, \(earnedCredits) creditos ganados y evidencias suficientes para empezar a construir una presentacion profesional mas clara."
+        }
+
+        let nextProfessionalMove: String
+        if failedCount > 0 {
+            nextProfessionalMove = "Recupera primero las materias o electivas reprobadas. Eso mejora tu promedio y fortalece cualquier perfil profesional que quieras mostrar."
+        } else if derived.electiveGroupsWithoutSelection > 0 {
+            nextProfessionalMove = "Define las electivas pendientes. Es la forma mas directa de darle una direccion mas clara a tu perfil."
+        } else if let period = focusPeriod {
+            nextProfessionalMove = "Empuja el periodo \(period). Ese bloque es el siguiente salto natural para ganar mas evidencia academica y profesional."
+        } else {
+            nextProfessionalMove = "Tu base academica ya esta bastante clara. El siguiente paso es convertirla en historias y proyectos que puedas mostrar afuera."
+        }
+
+        let profileNextMilestone: LeanUpMilestoneInsight = {
+            let thresholds = [25, 50, 75, 100]
+            let earned = min(earnedCredits, totalCredits)
+            let currentPercent = totalCredits == 0 ? 0 : Int((Double(earned) / Double(totalCredits) * 100).rounded())
+
+            if earned >= totalCredits {
+                return LeanUpMilestoneInsight(
+                    title: "Ya cerraste el 100% de la carrera",
+                    detail: "Tu siguiente hito ya no es academico: toca convertir esa base en una oferta, un portafolio y una narrativa profesional propia.",
+                    badgeText: "100%",
+                    targetPercent: 100,
+                    creditsRemaining: 0,
+                    progress: 1
+                )
+            }
+
+            let nextPercent = thresholds.first { percent in
+                let targetCredits = Int((Double(totalCredits) * Double(percent) / 100.0).rounded())
+                return earned < targetCredits
+            } ?? 100
+            let targetCredits = Int((Double(totalCredits) * Double(nextPercent) / 100.0).rounded())
+            let remaining = max(targetCredits - earned, 0)
+            let detail: String
+
+            switch nextPercent {
+            case 25:
+                detail = "Te faltan \(remaining) creditos para llegar al 25% y dejar de estar en fase de arranque. Ese punto ya te da una base mas estable para hablar de criterio y disciplina."
+            case 50:
+                detail = "Te faltan \(remaining) creditos para llegar al 50% de la carrera. Ahí ya se empieza a sentir media carrera real detrás de tu perfil."
+            case 75:
+                detail = "Te faltan \(remaining) creditos para llegar al 75%. Ese umbral ya te acerca a propuestas mucho mas serias y con mejor sustento."
+            default:
+                detail = "Te faltan \(remaining) creditos para cerrar la carrera. Ya no es una base inicial: estas afinando el tramo final."
+            }
+
+            return LeanUpMilestoneInsight(
+                title: "Te faltan \(remaining) creditos para llegar al \(nextPercent)%",
+                detail: detail,
+                badgeText: "\(currentPercent)%",
+                targetPercent: nextPercent,
+                creditsRemaining: remaining,
+                progress: totalCredits == 0 ? 0 : Double(earned) / Double(totalCredits)
+            )
+        }()
+
+        let electiveAlignmentInsight: LeanUpProfileAlignmentInsight = {
+            let selections = derived.selectedElectiveOptions
+            guard !selections.isEmpty else {
+                return LeanUpProfileAlignmentInsight(
+                    statusTitle: "Aun sin lectura fuerte",
+                    title: "Todavia no hay suficientes electivos definidos",
+                    detail: "Tu direccion todavia no se puede leer con claridad porque aun faltan electivos por escoger. Aqui vale mas definir que acumular señales sueltas.",
+                    detectedAreas: [],
+                    recommendation: "Empieza por escoger los electivos que mas se acerquen al tipo de trabajo que te gustaria probar primero.",
+                    confidenceText: "Confianza baja",
+                    tone: .orange
+                )
+            }
+
+            let areaScores = alignmentAreaScores(for: selections)
+            let sortedAreas = areaScores.sorted {
+                if $0.value == $1.value {
+                    return $0.key < $1.key
+                }
+                return $0.value > $1.value
+            }
+
+            let topAreas = sortedAreas.prefix(3).map(\.key)
+            let topScore = sortedAreas.first?.value ?? 0
+            let secondScore = sortedAreas.dropFirst().first?.value ?? 0
+            let totalScore = max(areaScores.values.reduce(0, +), 1)
+            let dominantShare = Double(topScore) / Double(totalScore)
+
+            if selections.count < 2 {
+                return LeanUpProfileAlignmentInsight(
+                    statusTitle: "Aun temprano",
+                    title: "Ya asoma una direccion, pero aun es muy pronto",
+                    detail: "Por ahora tu eleccion empieza a apuntar a \(topAreas.first ?? "una linea posible"), pero una sola senal todavia no alcanza para hablar de especializacion.",
+                    detectedAreas: topAreas,
+                    recommendation: derived.electiveGroupsWithoutSelection > 0
+                        ? "Define el siguiente electivo en la misma linea si quieres que tu perfil se lea mas coherente."
+                        : "Si quieres reforzar esa linea, procura que tus siguientes proyectos y materias aprobadas vayan en la misma direccion.",
+                    confidenceText: "Confianza baja",
+                    tone: .orange
+                )
+            }
+
+            if dominantShare >= 0.58 && (topScore - secondScore) >= 2 {
+                return LeanUpProfileAlignmentInsight(
+                    statusTitle: "Alineado",
+                    title: "Tus electivos ya apuntan a una linea bastante clara",
+                    detail: "Lo mas fuerte hoy es \(topAreas.first ?? "tu linea principal"). No se siente disperso: empieza a leerse como una direccion concreta.",
+                    detectedAreas: topAreas,
+                    recommendation: derived.electiveGroupsWithoutSelection > 0
+                        ? "Si mantienes esa misma linea en los proximos electivos, tu perfil se va a leer cada vez mas especializado."
+                        : "Ahora conviene que tu portafolio y tu primer servicio giren alrededor de esa misma linea.",
+                    confidenceText: selections.count >= 3 ? "Confianza media-alta" : "Confianza media",
+                    tone: .green
+                )
+            }
+
+            if dominantShare >= 0.40 {
+                return LeanUpProfileAlignmentInsight(
+                    statusTitle: "Mixto",
+                    title: "Tu perfil mezcla dos lineas con bastante peso",
+                    detail: "Hay una combinacion visible entre \(topAreas.prefix(2).joined(separator: " y ")). No es ruido, pero tampoco una sola especializacion cerrada.",
+                    detectedAreas: topAreas,
+                    recommendation: "Si quieres venderte mas claro afuera, define cual de esas lineas quieres que mande y usa las otras como apoyo.",
+                    confidenceText: "Confianza media",
+                    tone: .blue
+                )
+            }
+
+            return LeanUpProfileAlignmentInsight(
+                statusTitle: "Diversificado",
+                title: "Tus electivos hoy se sienten mas diversos que especializados",
+                detail: "Hay varias senales abiertas al mismo tiempo y ninguna domina del todo. Eso no es malo, pero hoy tu perfil se lee mas exploratorio que enfocado.",
+                detectedAreas: topAreas,
+                recommendation: "El siguiente electivo y tu proximo proyecto deberian empujar una sola linea si quieres que el perfil gane nitidez.",
+                confidenceText: "Confianza media",
+                tone: .gold
+            )
+        }()
+
+        let approvedTypedItems = derived.approvedCourses.map { LeanUpTypeTrackable(types: $0.types) }
+        let remainingTypedItems = failedCourses.map { LeanUpTypeTrackable(types: $0.types) } +
+            pendingCourses.map { LeanUpTypeTrackable(types: $0.types) } +
+            inProgressCourses.map { LeanUpTypeTrackable(types: $0.types) }
+
+        let typedEntries = LeanUpProfileStrategyLibrary.trackedSubjectTypes.map { type in
+            LeanUpSubjectTypeCount(
+                type: type,
+                approved: approvedTypedItems.filter { normalizedTypes(for: $0).contains(type) }.count,
+                remaining: remainingTypedItems.filter { normalizedTypes(for: $0).contains(type) }.count
+            )
+        }
+
+        let dominantType = typedEntries.max { lhs, rhs in
+            if lhs.approved == rhs.approved { return lhs.type > rhs.type }
+            return lhs.approved < rhs.approved
+        }?.type
+
+        let laggingType = typedEntries.max { lhs, rhs in
+            if lhs.remaining == rhs.remaining { return lhs.type > rhs.type }
+            return lhs.remaining < rhs.remaining
+        }?.type
+
+        let subjectTypeSummary: String
+        if let dominantType, let laggingType {
+            subjectTypeSummary = "Lo mas avanzado hoy va por \(dominantType), mientras que \(laggingType) es donde mas recorrido visible te sigue faltando en las materias que si traen tipologia explicita."
+        } else {
+            subjectTypeSummary = "A medida que apruebes mas materias y definas mas electivos, este mapa se volvera mas legible."
+        }
+
+        let subjectTypeMap = LeanUpSubjectTypeMap(
+            entries: typedEntries,
+            dominantType: dominantType,
+            laggingType: laggingType,
+            summary: subjectTypeSummary
+        )
+
+        let supportSignals: ([String]) -> [String] = { keywords in
+            let signals = derived.careerItems.flatMap { item in
+                [item.name] + item.skills
+            }
+
+            var seen = Set<String>()
+            return signals.filter { signal in
+                let normalized = signal.leanUpProfileKey
+                let matches = keywords.contains { keyword in
+                    let normalizedKeyword = keyword.leanUpProfileKey
+                    return normalized.contains(normalizedKeyword) || normalizedKeyword.contains(normalized)
+                }
+                guard matches else { return false }
+                let key = signal.leanUpProfileKey
+                guard !seen.contains(key) else { return false }
+                seen.insert(key)
+                return true
+            }
+        }
+
+        let recommendedStarterService: LeanUpServiceRecommendation = {
+            let matchedRules = LeanUpProfileStrategyLibrary.serviceRules.map { rule -> (LeanUpServiceRule, Int) in
+                let areaScore = rule.requiredAreas.reduce(0) { partial, area in
+                    partial + (derived.alignmentAreaScoresSnapshot[area] ?? 0)
+                }
+                let keywordScore = matchCount(for: rule.keywords, in: derived.approvedSignalCorpus) * 2
+                let creditScore = earnedCredits >= rule.minCredits ? 3 : max(earnedCredits / 12, 0)
+                return (rule, areaScore + keywordScore + creditScore)
+            }
+            let bestRule = matchedRules.sorted {
+                if $0.1 == $1.1 { return $0.0.minCredits < $1.0.minCredits }
+                return $0.1 > $1.1
+            }.first?.0 ?? LeanUpProfileStrategyLibrary.serviceRules[0]
+
+            let confidence: String
+            switch earnedCredits {
+            case 0..<18:
+                confidence = "Confianza baja"
+            case 18..<36:
+                confidence = "Confianza media-baja"
+            case 36..<72:
+                confidence = "Confianza media"
+            default:
+                confidence = "Confianza media-alta"
+            }
+
+            let signals = Array(supportSignals(bestRule.keywords).prefix(4))
+            let reason: String
+            if signals.isEmpty {
+                reason = "Tu base actual ya deja ver una combinacion inicial de criterio academico y habilidades transferibles para empezar pequeno y con prudencia."
+            } else {
+                reason = "Hoy ya puedes justificarlo desde senales reales como \(signals.joined(separator: ", "))."
+            }
+
+            return LeanUpServiceRecommendation(
+                title: bestRule.title,
+                summary: bestRule.summary,
+                whyYouCanOfferIt: reason,
+                priceText: LeanUpProfileStrategyLibrary.priceText(for: bestRule.priceRangeUSD),
+                nextEvidence: bestRule.nextEvidence,
+                confidenceText: confidence,
+                supportingSignals: signals,
+                tone: earnedCredits >= bestRule.minCredits ? .green : .blue
+            )
+        }()
+
+        let minimumViablePortfolio: [LeanUpPortfolioRoadmapItem] = {
+            let rankedRules = LeanUpProfileStrategyLibrary.portfolioRules
+                .map { rule -> (LeanUpPortfolioRule, Int) in
+                    (rule, matchCount(for: rule.keywords, in: derived.approvedSignalCorpus))
+                }
+                .sorted {
+                    if $0.1 == $1.1 { return $0.0.title < $1.0.title }
+                    return $0.1 > $1.1
+                }
+
+            return Array(rankedRules.prefix(3)).map { rule, score in
+                let readiness: LeanUpPortfolioReadinessState
+                switch score {
+                case 4...:
+                    readiness = .ready
+                case 2...3:
+                    readiness = .almostReady
+                default:
+                    readiness = .missingBase
+                }
+
+                return LeanUpPortfolioRoadmapItem(
+                    id: rule.id,
+                    title: rule.title,
+                    objective: rule.objective,
+                    whyItMatters: rule.whyItMatters,
+                    readiness: readiness,
+                    supportingSignals: Array(supportSignals(rule.keywords).prefix(3))
+                )
+            }
+        }()
+
+        let freelancerChecklist: LeanUpFreelancerChecklist = {
+            let profileStatus: LeanUpFreelancerChecklistStatus
+            if normalizedDisplayName != nil && earnedCredits >= 24 {
+                profileStatus = .ready
+            } else if normalizedDisplayName != nil || earnedCredits >= 12 {
+                profileStatus = .inProgress
+            } else {
+                profileStatus = .pending
+            }
+
+            let skillStatus: LeanUpFreelancerChecklistStatus
+            if standoutSkills.count >= 10 && derived.careerItems.count >= 6 {
+                skillStatus = .ready
+            } else if standoutSkills.count >= 5 {
+                skillStatus = .inProgress
+            } else {
+                skillStatus = .pending
+            }
+
+            let readyPortfolioItems = minimumViablePortfolio.filter { $0.readiness == .ready }.count
+            let portfolioStatus: LeanUpFreelancerChecklistStatus
+            if readyPortfolioItems >= 2 {
+                portfolioStatus = .ready
+            } else if minimumViablePortfolio.contains(where: { $0.readiness != .missingBase }) {
+                portfolioStatus = .inProgress
+            } else {
+                portfolioStatus = .pending
+            }
+
+            let toolsScore = matchCount(for: LeanUpProfileStrategyLibrary.toolKeywords, in: derived.approvedSignalCorpus)
+            let toolsStatus: LeanUpFreelancerChecklistStatus
+            if toolsScore >= 5 {
+                toolsStatus = .ready
+            } else if toolsScore >= 2 {
+                toolsStatus = .inProgress
+            } else {
+                toolsStatus = .pending
+            }
+
+            let items = [
+                LeanUpFreelancerChecklistItem(
+                    id: "profile",
+                    title: "Perfil profesional",
+                    detail: profileStatus == .ready
+                        ? "Ya hay suficiente base para presentarte con una narrativa inicial bastante clara."
+                        : "Tu narrativa ya arranco, pero aun conviene darle mas forma antes de salir a vender fuerte.",
+                    status: profileStatus
+                ),
+                LeanUpFreelancerChecklistItem(
+                    id: "skills",
+                    title: "Habilidades demostrables",
+                    detail: skillStatus == .ready
+                        ? "Tus materias aprobadas ya dejan ver habilidades repetidas y con bastante evidencia."
+                        : "Todavia conviene consolidar mejor que sabes hacer y en que se repite tu fortaleza.",
+                    status: skillStatus
+                ),
+                LeanUpFreelancerChecklistItem(
+                    id: "portfolio",
+                    title: "Portafolio minimo",
+                    detail: portfolioStatus == .ready
+                        ? "Ya hay al menos dos piezas que podrian empezar a sostener conversaciones reales con clientes."
+                        : "Aun te conviene convertir mejor tu recorrido academico en proyectos visibles.",
+                    status: portfolioStatus
+                ),
+                LeanUpFreelancerChecklistItem(
+                    id: "tools",
+                    title: "Herramientas base",
+                    detail: toolsStatus == .ready
+                        ? "Tu recorrido ya muestra herramientas y flujos suficientemente utiles para un trabajo independiente inicial."
+                        : "Todavia sirve reforzar herramientas operativas antes de ofrecerte con mas seguridad.",
+                    status: toolsStatus
+                )
+            ]
+
+            let readyCount = items.filter { $0.status == .ready }.count
+            let progressCount = items.filter { $0.status == .inProgress }.count
+            let overallTitle: String
+            let overallDetail: String
+
+            if readyCount >= 3 {
+                overallTitle = "Listo para probar ofertas pequenas"
+                overallDetail = "Todavia conviene moverte con prudencia, pero ya tienes base suficiente para empezar a cobrar proyectos acotados."
+            } else if readyCount + progressCount >= 3 {
+                overallTitle = "Cerca de cobrar tu primer servicio"
+                overallDetail = "Tu base ya no esta verde del todo. Falta ordenar mejor evidencia y propuesta, no empezar desde cero."
+            } else {
+                overallTitle = "Aun verde"
+                overallDetail = "La base va creciendo, pero todavia conviene seguir acumulando evidencia antes de salir a vender fuerte."
+            }
+
+            return LeanUpFreelancerChecklist(items: items, overallTitle: overallTitle, overallDetail: overallDetail)
+        }()
+
+        let profileStrategicSummary = {
+            let name = normalizedDisplayName ?? "Tu perfil"
+            return "\(name) hoy se lee mejor cuando unes \(electiveAlignmentInsight.statusTitle.lowercased()), el siguiente hito en \(profileNextMilestone.targetPercent)% y una oferta inicial como \(recommendedStarterService.title.lowercased())."
+        }()
+
+        let selectedPeriodsCount = Set(derived.gradedItems.map(\.period)).count
+        let averageItemsPerPeriod = derived.periods.isEmpty ? Double(totalTrackableItems) : Double(totalTrackableItems) / Double(derived.periods.count)
+        let inProgressEquivalentPeriods = averageItemsPerPeriod > 0 ? Double(inProgressCount) / averageItemsPerPeriod : 0
+        let completedEquivalentPeriods = completionRatio * Double(max(derived.periods.count, 1))
+        let paceEquivalentPeriodsPerStudiedPeriod = selectedPeriodsCount > 0 ? completedEquivalentPeriods / Double(selectedPeriodsCount) : 0
+        let estimatedRemainingPeriods = {
+            guard paceEquivalentPeriodsPerStudiedPeriod > 0 else { return nil }
+            let remainingEquivalent = max(Double(max(derived.periods.count, 1)) - completedEquivalentPeriods - inProgressEquivalentPeriods, 0)
+            return remainingEquivalent / paceEquivalentPeriodsPerStudiedPeriod
+        }()
+
+        let estimatedGraduationDate: Date? = {
+            guard approvedCount < totalTrackableItems else { return Date() }
+            guard let remainingPeriods = estimatedRemainingPeriods else { return nil }
+            let months = Int((remainingPeriods * 4.0).rounded())
+            return Calendar.current.date(byAdding: .month, value: max(months, 0), to: Date())
+        }()
+
+        let estimatedGraduationText = estimatedGraduationDate.map { Self.monthYearFormatter.string(from: $0) }
+        let estimatedGraduationShortText = estimatedGraduationDate.map { Self.shortMonthYearFormatter.string(from: $0).capitalized }
+        let paceTitle: String
+        if approvedCount >= totalTrackableItems, totalTrackableItems > 0 {
+            paceTitle = "Ya cerraste la malla completa."
+        } else if registeredCount >= 3, let estimatedGraduationText {
+            paceTitle = "Si mantienes este ritmo, podrias terminar hacia \(estimatedGraduationText)."
+        } else {
+            paceTitle = "Aun no hay suficiente historial para proyectar tu grado."
+        }
+
+        let paceDetail: String
+        if approvedCount >= totalTrackableItems, totalTrackableItems > 0 {
+            paceDetail = "Tu progreso academico ya no necesita proyeccion: la carrera esta cerrada en la app."
+        } else if registeredCount < 3 {
+            paceDetail = "Cuando registres mas notas en distintos periodos, LeanUp podra estimar mejor el cierre real de la carrera."
+        } else if inProgressCount > 0 {
+            paceDetail = "La lectura usa tu avance aprobado, tu carga actual marcada como en curso y la duracion real de ciclos de 4 meses."
+        } else {
+            paceDetail = "La lectura usa tu avance aprobado, los periodos donde ya tienes notas y una duracion estimada de 4 meses por ciclo."
+        }
+
+        let paceValueText = paceEquivalentPeriodsPerStudiedPeriod > 0 ? String(format: "%.1f", paceEquivalentPeriodsPerStudiedPeriod) : "--"
+        let remainingPeriodsText = estimatedRemainingPeriods.map { String(format: "%.1f", $0) } ?? "--"
+        let studiedPeriodsText = selectedPeriodsCount == 0 ? "--" : "\(selectedPeriodsCount)"
+        let inProgressCountText = inProgressCount == 0 ? "--" : "\(inProgressCount)"
+
+        return LeanUpPresentationState(
+            registeredCount: registeredCount,
+            averageValue: averageValue,
+            approvedCount: approvedCount,
+            failedCount: failedCount,
+            pendingCount: pendingCount,
+            earnedCredits: earnedCredits,
+            focusPeriod: focusPeriod,
+            completionPercentText: completionPercentText,
+            careerReadinessPercent: careerReadinessPercent,
+            recommendedRoles: recommendedRoles,
+            activeFocusNames: activeFocusNames,
+            linkedinHighlights: linkedinHighlights,
+            portfolioHighlights: portfolioHighlights,
+            standoutSkills: standoutSkills,
+            highlightedCareerItems: highlightedCareerItems,
+            failedCourses: failedCourses,
+            pendingCourses: pendingCourses,
+            inProgressCourses: inProgressCourses,
+            profileHeadline: profileHeadline,
+            professionalHeadline: profileHeadline,
+            profileSummary: profileSummary,
+            professionalSummary: profileSummary,
+            nextProfessionalMove: nextProfessionalMove,
+            profileNextMilestone: profileNextMilestone,
+            electiveAlignmentInsight: electiveAlignmentInsight,
+            subjectTypeMap: subjectTypeMap,
+            recommendedStarterService: recommendedStarterService,
+            minimumViablePortfolio: minimumViablePortfolio,
+            freelancerChecklist: freelancerChecklist,
+            profileStrategicSummary: profileStrategicSummary,
+            completionRatio: completionRatio,
+            completedEquivalentPeriods: completedEquivalentPeriods,
+            paceEquivalentPeriodsPerStudiedPeriod: paceEquivalentPeriodsPerStudiedPeriod,
+            estimatedRemainingPeriods: estimatedRemainingPeriods,
+            estimatedGraduationDate: estimatedGraduationDate,
+            estimatedGraduationText: estimatedGraduationText,
+            estimatedGraduationShortText: estimatedGraduationShortText,
+            paceTitle: paceTitle,
+            paceDetail: paceDetail,
+            paceValueText: paceValueText,
+            remainingPeriodsText: remainingPeriodsText,
+            studiedPeriodsText: studiedPeriodsText,
+            inProgressCountText: inProgressCountText,
+            preferredDisplayName: normalizedDisplayName,
+            currentDisplayName: currentDisplayName,
+            localStorageStatusText: localStorageStatusText,
+            averageText: averageText,
+            progressText: progressText,
+            themeDescription: themeDescription,
+            studiedPeriodsCount: selectedPeriodsCount,
+            completedPeriodsCount: derived.completedPeriodsCount
         )
     }
 
@@ -1703,6 +2096,18 @@ final class LeanUpAppModel: ObservableObject {
             seen.insert(key)
             return true
         }
+    }
+
+    private func scheduleSnapshotPersistence() {
+        pendingSaveWorkItem?.cancel()
+
+        let normalizedSnapshot = snapshot
+        let workItem = DispatchWorkItem { [store] in
+            _ = try? store.saveSnapshot(normalizedSnapshot, assumesNormalized: true)
+        }
+
+        pendingSaveWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.18, execute: workItem)
     }
 
     private var motivationContextPool: [String] {
@@ -1803,6 +2208,91 @@ private struct LeanUpDerivedState {
     let approvedSignalCorpus: [String]
     let alignmentAreaScoresSnapshot: [String: Int]
     let progressByPeriod: [Int: LeanUpPeriodProgress]
+    let completedPeriodsCount: Int
+    let periodAverageSeries: [LeanUpPeriodAveragePoint]
+    let strongestCourses: [LeanUpGradedCourse]
+    let mostDemandingCourses: [LeanUpGradedCourse]
+    let achievements: [LeanUpAchievement]
+    let unlockedAchievements: [LeanUpAchievement]
+    let nextLockedAchievement: LeanUpAchievement?
+}
+
+private struct LeanUpPresentationState {
+    var registeredCount = 0
+    var averageValue: Double?
+    var approvedCount = 0
+    var failedCount = 0
+    var pendingCount = 0
+    var earnedCredits = 0
+    var focusPeriod: Int?
+    var completionPercentText = "0%"
+    var careerReadinessPercent = 0
+    var recommendedRoles: [String] = []
+    var activeFocusNames: [String] = []
+    var linkedinHighlights: [LeanUpCareerItem] = []
+    var portfolioHighlights: [LeanUpCareerItem] = []
+    var standoutSkills: [String] = []
+    var highlightedCareerItems: [LeanUpCareerItem] = []
+    var failedCourses: [LeanUpCourse] = []
+    var pendingCourses: [LeanUpCourse] = []
+    var inProgressCourses: [LeanUpCourse] = []
+    var profileHeadline = ""
+    var professionalHeadline = ""
+    var profileSummary = ""
+    var professionalSummary = ""
+    var nextProfessionalMove = ""
+    var profileNextMilestone = LeanUpMilestoneInsight(
+        title: "",
+        detail: "",
+        badgeText: "",
+        targetPercent: 0,
+        creditsRemaining: 0,
+        progress: 0
+    )
+    var electiveAlignmentInsight = LeanUpProfileAlignmentInsight(
+        statusTitle: "",
+        title: "",
+        detail: "",
+        detectedAreas: [],
+        recommendation: "",
+        confidenceText: "",
+        tone: .blue
+    )
+    var subjectTypeMap = LeanUpSubjectTypeMap(entries: [], dominantType: nil, laggingType: nil, summary: "")
+    var recommendedStarterService = LeanUpServiceRecommendation(
+        title: "",
+        summary: "",
+        whyYouCanOfferIt: "",
+        priceText: "",
+        nextEvidence: "",
+        confidenceText: "",
+        supportingSignals: [],
+        tone: .blue
+    )
+    var minimumViablePortfolio: [LeanUpPortfolioRoadmapItem] = []
+    var freelancerChecklist = LeanUpFreelancerChecklist(items: [], overallTitle: "", overallDetail: "")
+    var profileStrategicSummary = ""
+    var completionRatio: Double = 0
+    var completedEquivalentPeriods: Double = 0
+    var paceEquivalentPeriodsPerStudiedPeriod: Double = 0
+    var estimatedRemainingPeriods: Double?
+    var estimatedGraduationDate: Date?
+    var estimatedGraduationText: String?
+    var estimatedGraduationShortText: String?
+    var paceTitle = ""
+    var paceDetail = ""
+    var paceValueText = "--"
+    var remainingPeriodsText = "--"
+    var studiedPeriodsText = "--"
+    var inProgressCountText = "--"
+    var preferredDisplayName: String?
+    var currentDisplayName = ""
+    var localStorageStatusText = ""
+    var averageText = "-"
+    var progressText = ""
+    var themeDescription = ""
+    var studiedPeriodsCount = 0
+    var completedPeriodsCount = 0
 }
 
 enum LeanUpProgressStatus: Equatable {

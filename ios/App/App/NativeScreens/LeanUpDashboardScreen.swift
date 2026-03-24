@@ -1,20 +1,125 @@
 import SwiftUI
 
+private struct LeanUpDashboardViewData {
+    let username: String
+    let heroMessage: String
+    let heroBadgeIcon: String
+    let heroBadgeValue: String
+    let heroBadgeLabel: String
+    let averageText: String
+    let focusPeriodText: String
+    let earnedCreditsText: String
+    let registeredCountText: String
+    let completedPeriodsCountText: String
+    let pendingCountText: String
+    let approvedCountText: String
+    let failedCount: Int
+    let paceTitle: String
+    let paceDetail: String
+    let paceValueText: String
+    let remainingPeriodsText: String
+    let inProgressCountText: String
+    let completionPercentText: String
+    let completionRatio: Double
+    let periodAverageSeries: [LeanUpPeriodAveragePoint]
+    let strongestCourses: [LeanUpGradedCourse]
+    let mostDemandingCourses: [LeanUpGradedCourse]
+    let unlockedAchievements: [LeanUpAchievement]
+    let nextLockedAchievement: LeanUpAchievement?
+
+    init(model: LeanUpAppModel) {
+        let focusPeriod = model.focusPeriod.map(String.init) ?? "Listo"
+        let completionText = model.completionPercentText
+        let estimatedGraduationShortText = model.estimatedGraduationShortText
+
+        username = model.snapshot.username
+        averageText = model.averageText
+        focusPeriodText = focusPeriod
+        earnedCreditsText = "\(model.earnedCredits)"
+        registeredCountText = "\(model.registeredCount)"
+        completedPeriodsCountText = "\(model.completedPeriodsCount)"
+        pendingCountText = "\(model.pendingCount)"
+        approvedCountText = "\(model.approvedCount)"
+        failedCount = model.failedCount
+        paceTitle = model.paceTitle
+        paceDetail = model.paceDetail
+        paceValueText = model.paceValueText
+        remainingPeriodsText = model.remainingPeriodsText
+        inProgressCountText = model.inProgressCountText
+        completionPercentText = completionText
+        completionRatio = model.completionRatio
+        periodAverageSeries = model.periodAverageSeries
+        strongestCourses = model.strongestCourses
+        mostDemandingCourses = model.mostDemandingCourses
+        unlockedAchievements = model.unlockedAchievements
+        nextLockedAchievement = model.nextLockedAchievement
+
+        if model.approvedCount >= model.totalTrackableItems, model.totalTrackableItems > 0 {
+            heroMessage = "Tu carrera ya se puede leer como una historia academica cerrada dentro de LeanUp."
+        } else if model.failedCount > 0 {
+            heroMessage = "Tu avance ya tiene suficiente informacion para tomar decisiones. Lo que mas puede acelerar tu ritmo ahora es recuperar los frentes en rojo."
+        } else if model.registeredCount >= 3, model.estimatedGraduationText != nil {
+            heroMessage = "Ya se puede proyectar el cierre de la carrera usando el ritmo real con el que vienes aprobando la malla."
+        } else {
+            heroMessage = "Registra mas notas y LeanUp podra leer con mas precision tu ritmo, la evolucion del promedio y la fecha estimada de grado."
+        }
+
+        heroBadgeIcon = estimatedGraduationShortText == nil ? "chart.xyaxis.line" : "calendar.badge.clock"
+        heroBadgeValue = estimatedGraduationShortText ?? completionPercentText
+        heroBadgeLabel = estimatedGraduationShortText == nil ? "Cierre actual" : "Grado estimado"
+    }
+}
+
 struct LeanUpDashboardView: View {
     @ObservedObject var model: LeanUpAppModel
 
     var body: some View {
+        let data = LeanUpDashboardViewData(model: model)
+
         GeometryReader { proxy in
             let contentWidth = max(proxy.size.width - 40, 0)
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
-                    LeanUpDashboardHero(model: model)
-                    LeanUpDashboardSnapshotBand(model: model)
-                    LeanUpDashboardPaceCard(model: model)
-                    LeanUpDashboardGpaTrackerCard(model: model)
-                    LeanUpDashboardPerformanceCard(model: model)
-                    LeanUpDashboardAchievementsCard(model: model)
+                    LeanUpDashboardHero(
+                        username: data.username,
+                        message: data.heroMessage,
+                        badgeIcon: data.heroBadgeIcon,
+                        badgeValue: data.heroBadgeValue,
+                        badgeLabel: data.heroBadgeLabel,
+                        averageText: data.averageText,
+                        focusPeriodText: data.focusPeriodText,
+                        earnedCreditsText: data.earnedCreditsText,
+                        registeredCountText: data.registeredCountText,
+                        completedPeriodsCountText: data.completedPeriodsCountText
+                    )
+                    LeanUpDashboardSnapshotBand(
+                        averageText: data.averageText,
+                        earnedCreditsText: data.earnedCreditsText,
+                        approvedCountText: data.approvedCountText,
+                        pendingCountText: data.pendingCountText,
+                        failedCount: data.failedCount
+                    )
+                    LeanUpDashboardPaceCard(
+                        title: data.paceTitle,
+                        detail: data.paceDetail,
+                        valueText: data.paceValueText,
+                        remainingPeriodsText: data.remainingPeriodsText,
+                        inProgressCountText: data.inProgressCountText,
+                        completionPercentText: data.completionPercentText,
+                        completionRatio: data.completionRatio
+                    )
+                    LeanUpDashboardGpaTrackerCard(
+                        points: data.periodAverageSeries
+                    )
+                    LeanUpDashboardPerformanceCard(
+                        strongestCourses: data.strongestCourses,
+                        mostDemandingCourses: data.mostDemandingCourses
+                    )
+                    LeanUpDashboardAchievementsCard(
+                        unlockedAchievements: data.unlockedAchievements,
+                        nextLockedAchievement: data.nextLockedAchievement
+                    )
                 }
                 .frame(width: contentWidth, alignment: .leading)
                 .padding(.horizontal, 20)
@@ -30,7 +135,16 @@ struct LeanUpDashboardView: View {
 }
 
 struct LeanUpDashboardHero: View {
-    @ObservedObject var model: LeanUpAppModel
+    let username: String
+    let message: String
+    let badgeIcon: String
+    let badgeValue: String
+    let badgeLabel: String
+    let averageText: String
+    let focusPeriodText: String
+    let earnedCreditsText: String
+    let registeredCountText: String
+    let completedPeriodsCountText: String
     @Environment(\.colorScheme) private var scheme
 
     var body: some View {
@@ -39,12 +153,12 @@ struct LeanUpDashboardHero: View {
                 .fill(heroGradient)
 
             Circle()
-                .stroke(Color.white.opacity(0.18), lineWidth: 1)
+                .stroke(Color.white.opacity(0.14), lineWidth: 1)
                 .frame(width: 216, height: 216)
                 .offset(x: 178, y: -84)
 
             Circle()
-                .fill(Color.unadGold.opacity(0.16))
+                .fill(Color.unadGold.opacity(0.12))
                 .frame(width: 96, height: 96)
                 .offset(x: 216, y: -10)
 
@@ -56,11 +170,11 @@ struct LeanUpDashboardHero: View {
                             .tracking(1.2)
                             .foregroundStyle(Color.white.opacity(0.74))
 
-                        Text("Hola, \(model.snapshot.username)")
+                        Text("Hola, \(username)")
                             .font(.system(size: 34, weight: .bold, design: .rounded))
                             .foregroundStyle(.white)
 
-                        Text(heroMessage)
+                        Text(message)
                             .font(.subheadline)
                             .foregroundStyle(Color.white.opacity(0.82))
                     }
@@ -68,35 +182,35 @@ struct LeanUpDashboardHero: View {
                     Spacer(minLength: 12)
 
                     VStack(alignment: .trailing, spacing: 8) {
-                        Image(systemName: heroBadgeIcon)
+                        Image(systemName: badgeIcon)
                             .font(.system(size: 28, weight: .semibold))
                             .foregroundStyle(Color.unadGold)
 
-                        Text(heroBadgeValue)
+                        Text(badgeValue)
                             .font(.title3.weight(.bold))
                             .foregroundStyle(.white)
                             .multilineTextAlignment(.trailing)
 
-                        Text(heroBadgeLabel)
+                        Text(badgeLabel)
                             .font(.caption.weight(.semibold))
                             .foregroundStyle(Color.white.opacity(0.68))
                     }
                 }
 
                 HStack(spacing: 12) {
-                    LeanUpInlineMetric(title: "Promedio", value: model.averageText)
-                    LeanUpInlineMetric(title: "Periodo foco", value: model.focusPeriod.map(String.init) ?? "Listo")
+                    LeanUpInlineMetric(title: "Promedio", value: averageText)
+                    LeanUpInlineMetric(title: "Periodo foco", value: focusPeriodText)
                 }
 
                 HStack(spacing: 10) {
-                    LeanUpPill(text: "\(model.earnedCredits) creditos", icon: "bolt.fill")
-                    LeanUpPill(text: "\(model.registeredCount) notas", icon: "chart.bar.fill")
-                    LeanUpPill(text: "\(model.completedPeriodsCount) periodos cerrados", icon: "flag.checkered")
+                    LeanUpPill(text: "\(earnedCreditsText) creditos", icon: "bolt.fill")
+                    LeanUpPill(text: "\(registeredCountText) notas", icon: "chart.bar.fill")
+                    LeanUpPill(text: "\(completedPeriodsCountText) periodos cerrados", icon: "flag.checkered")
                 }
             }
             .padding(24)
         }
-        .shadow(color: Color.unadNavy.opacity(scheme == .dark ? 0.06 : 0.10), radius: scheme == .dark ? 4 : 12, x: 0, y: scheme == .dark ? 2 : 8)
+        .shadow(color: Color.unadNavy.opacity(scheme == .dark ? 0.035 : 0.07), radius: scheme == .dark ? 2 : 6, x: 0, y: scheme == .dark ? 1 : 4)
     }
 
     private var heroGradient: LinearGradient {
@@ -111,37 +225,14 @@ struct LeanUpDashboardHero: View {
         )
     }
 
-    private var heroMessage: String {
-        if model.approvedCount >= model.totalTrackableItems, model.totalTrackableItems > 0 {
-            return "Tu carrera ya se puede leer como una historia academica cerrada dentro de LeanUp."
-        }
-
-        if model.failedCount > 0 {
-            return "Tu avance ya tiene suficiente informacion para tomar decisiones. Lo que mas puede acelerar tu ritmo ahora es recuperar los frentes en rojo."
-        }
-
-        if model.registeredCount >= 3, model.estimatedGraduationText != nil {
-            return "Ya se puede proyectar el cierre de la carrera usando el ritmo real con el que vienes aprobando la malla."
-        }
-
-        return "Registra mas notas y LeanUp podra leer con mas precision tu ritmo, la evolucion del promedio y la fecha estimada de grado."
-    }
-
-    private var heroBadgeIcon: String {
-        model.estimatedGraduationShortText == nil ? "chart.xyaxis.line" : "calendar.badge.clock"
-    }
-
-    private var heroBadgeValue: String {
-        model.estimatedGraduationShortText ?? model.completionPercentText
-    }
-
-    private var heroBadgeLabel: String {
-        model.estimatedGraduationShortText == nil ? "Cierre actual" : "Grado estimado"
-    }
 }
 
 struct LeanUpDashboardSnapshotBand: View {
-    @ObservedObject var model: LeanUpAppModel
+    let averageText: String
+    let earnedCreditsText: String
+    let approvedCountText: String
+    let pendingCountText: String
+    let failedCount: Int
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -152,30 +243,30 @@ struct LeanUpDashboardSnapshotBand: View {
         LazyVGrid(columns: columns, spacing: 12) {
             LeanUpDashboardStatTile(
                 eyebrow: "Promedio",
-                value: model.averageText,
+                value: averageText,
                 subtitle: "Rendimiento acumulado",
                 tint: .unadBlue,
                 icon: "waveform.path.ecg"
             )
             LeanUpDashboardStatTile(
                 eyebrow: "Creditos",
-                value: "\(model.earnedCredits)",
+                value: earnedCreditsText,
                 subtitle: "Ganados hasta hoy",
                 tint: .unadGold,
                 icon: "bolt.badge.checkmark.fill"
             )
             LeanUpDashboardStatTile(
                 eyebrow: "Aprobadas",
-                value: "\(model.approvedCount)",
+                value: approvedCountText,
                 subtitle: "Base consolidada",
                 tint: .green,
                 icon: "checkmark.seal.fill"
             )
             LeanUpDashboardStatTile(
                 eyebrow: "Pendientes",
-                value: "\(model.pendingCount)",
+                value: pendingCountText,
                 subtitle: "Aun por cerrar",
-                tint: model.failedCount > 0 ? .orange : .unadCyan,
+                tint: failedCount > 0 ? .orange : .unadCyan,
                 icon: "scope"
             )
         }
@@ -183,7 +274,13 @@ struct LeanUpDashboardSnapshotBand: View {
 }
 
 struct LeanUpDashboardPaceCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let title: String
+    let detail: String
+    let valueText: String
+    let remainingPeriodsText: String
+    let inProgressCountText: String
+    let completionPercentText: String
+    let completionRatio: Double
 
     private let columns = [
         GridItem(.flexible(minimum: 0), spacing: 12),
@@ -196,28 +293,28 @@ struct LeanUpDashboardPaceCard: View {
             VStack(alignment: .leading, spacing: 16) {
                 LeanUpSectionHeader(
                     eyebrow: "Ritmo de avance",
-                    title: model.paceTitle,
-                    detail: model.paceDetail
+                    title: title,
+                    detail: detail
                 )
 
                 LazyVGrid(columns: columns, spacing: 12) {
                     LeanUpDashboardAccentStat(
                         title: "Ritmo",
-                        value: model.paceValueText,
+                        value: valueText,
                         caption: "Periodos equivalentes por tramo cursado",
                         tint: .unadBlue
                     )
 
                     LeanUpDashboardAccentStat(
                         title: "Restan",
-                        value: model.remainingPeriodsText,
+                        value: remainingPeriodsText,
                         caption: "Periodos estimados",
                         tint: .unadGold
                     )
 
                     LeanUpDashboardAccentStat(
                         title: "En curso",
-                        value: model.inProgressCountText,
+                        value: inProgressCountText,
                         caption: "Carga activa",
                         tint: .unadCyan
                     )
@@ -225,8 +322,8 @@ struct LeanUpDashboardPaceCard: View {
 
                 LeanUpProgressTrack(
                     title: "Malla aprobada hasta ahora",
-                    valueText: model.completionPercentText,
-                    progress: model.completionRatio,
+                    valueText: completionPercentText,
+                    progress: completionRatio,
                     tint: .unadBlue
                 )
             }
@@ -235,7 +332,7 @@ struct LeanUpDashboardPaceCard: View {
 }
 
 struct LeanUpDashboardGpaTrackerCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let points: [LeanUpPeriodAveragePoint]
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -246,13 +343,13 @@ struct LeanUpDashboardGpaTrackerCard: View {
                     detail: trendDetail
                 )
 
-                if model.periodAverageSeries.isEmpty {
+                if points.isEmpty {
                     LeanUpDashboardEmptyState(
                         icon: "chart.line.uptrend.xyaxis",
                         text: "Todavia no hay suficientes notas distribuidas por periodo para dibujar la evolucion del promedio."
                     )
                 } else {
-                    LeanUpDashboardLineChart(points: model.periodAverageSeries)
+                    LeanUpDashboardLineChart(points: points)
 
                     HStack(spacing: 12) {
                         LeanUpDashboardAccentStat(
@@ -274,8 +371,8 @@ struct LeanUpDashboardGpaTrackerCard: View {
     }
 
     private var trendTitle: String {
-        guard let first = model.periodAverageSeries.first,
-              let last = model.periodAverageSeries.last else {
+        guard let first = points.first,
+              let last = points.last else {
             return "Tu evolucion del promedio aparecera aqui."
         }
 
@@ -292,7 +389,7 @@ struct LeanUpDashboardGpaTrackerCard: View {
     }
 
     private var trendDetail: String {
-        guard model.periodAverageSeries.count > 1 else {
+        guard points.count > 1 else {
             return "A medida que registres mas periodos, podras ver si tu rendimiento se esta estabilizando o no."
         }
 
@@ -300,28 +397,29 @@ struct LeanUpDashboardGpaTrackerCard: View {
     }
 
     private var latestAverageText: String {
-        guard let latest = model.periodAverageSeries.last else { return "--" }
+        guard let latest = points.last else { return "--" }
         return String(format: "%.2f", latest.average)
     }
 
     private var latestCaption: String {
-        guard let latest = model.periodAverageSeries.last else { return "Sin periodo" }
+        guard let latest = points.last else { return "Sin periodo" }
         return "Periodo \(latest.period)"
     }
 
     private var bestAverageText: String {
-        guard let best = model.periodAverageSeries.max(by: { $0.average < $1.average }) else { return "--" }
+        guard let best = points.max(by: { $0.average < $1.average }) else { return "--" }
         return String(format: "%.2f", best.average)
     }
 
     private var bestCaption: String {
-        guard let best = model.periodAverageSeries.max(by: { $0.average < $1.average }) else { return "Sin pico" }
+        guard let best = points.max(by: { $0.average < $1.average }) else { return "Sin pico" }
         return "Pico en P\(best.period)"
     }
 }
 
 struct LeanUpDashboardPerformanceCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let strongestCourses: [LeanUpGradedCourse]
+    let mostDemandingCourses: [LeanUpGradedCourse]
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
@@ -333,7 +431,7 @@ struct LeanUpDashboardPerformanceCard: View {
                     detail: "La idea no es etiquetar materias faciles o dificiles en abstracto, sino leer tu desempeno real para encontrar patrones."
                 )
 
-                if model.strongestCourses.isEmpty && model.mostDemandingCourses.isEmpty {
+                if strongestCourses.isEmpty && mostDemandingCourses.isEmpty {
                     LeanUpDashboardEmptyState(
                         icon: "graduationcap.circle",
                         text: "Cuando registres notas de materias normales, aqui apareceran tus mejores resultados y las materias mas retadoras."
@@ -359,21 +457,22 @@ struct LeanUpDashboardPerformanceCard: View {
         LeanUpDashboardPerformanceColumn(
             title: "Mejor te fue en",
             tint: .green,
-            items: model.strongestCourses
+            items: strongestCourses
         )
     }
 
     private var demandingColumn: some View {
         LeanUpDashboardPerformanceColumn(
             title: "Mas retadoras",
-            tint: model.mostDemandingCourses.contains(where: { $0.grade < 3.0 }) ? .red : .orange,
-            items: model.mostDemandingCourses
+            tint: mostDemandingCourses.contains(where: { $0.grade < 3.0 }) ? .red : .orange,
+            items: mostDemandingCourses
         )
     }
 }
 
 struct LeanUpDashboardAchievementsCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let unlockedAchievements: [LeanUpAchievement]
+    let nextLockedAchievement: LeanUpAchievement?
 
     private let columns = [
         GridItem(.flexible(), spacing: 12),
@@ -389,20 +488,20 @@ struct LeanUpDashboardAchievementsCard: View {
                     detail: unlockedDetail
                 )
 
-                if model.unlockedAchievements.isEmpty {
+                if unlockedAchievements.isEmpty {
                     LeanUpDashboardEmptyState(
                         icon: "rosette",
                         text: "Todavia no hay badges activos. A medida que cierres periodos y sostengas el promedio, apareceran aqui."
                     )
                 } else {
                     LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(model.unlockedAchievements) { achievement in
+                        ForEach(unlockedAchievements) { achievement in
                             LeanUpDashboardAchievementBadge(achievement: achievement)
                         }
                     }
                 }
 
-                if let next = model.nextLockedAchievement {
+                if let next = nextLockedAchievement {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Siguiente por desbloquear")
                             .font(.subheadline.weight(.semibold))
@@ -434,11 +533,11 @@ struct LeanUpDashboardAchievementsCard: View {
     }
 
     private var unlockedTitle: String {
-        if model.unlockedAchievements.isEmpty {
+        if unlockedAchievements.isEmpty {
             return "Tus badges apareceran a medida que avances."
         }
 
-        return "Ya desbloqueaste \(model.unlockedAchievements.count) hitos reales de tu carrera."
+        return "Ya desbloqueaste \(unlockedAchievements.count) hitos reales de tu carrera."
     }
 
     private var unlockedDetail: String {

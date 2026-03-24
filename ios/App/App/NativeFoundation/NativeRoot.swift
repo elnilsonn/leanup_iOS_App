@@ -77,8 +77,8 @@ final class NativeRootViewController: UIViewController {
             tabAppearance.backgroundEffect = nil
             tabAppearance.backgroundColor = UIColor(red: 8 / 255, green: 10 / 255, blue: 14 / 255, alpha: 0.94)
         } else {
-            tabAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialLight)
-            tabAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.72)
+            tabAppearance.backgroundEffect = nil
+            tabAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.92)
         }
 
         let selected = UIColor(red: 0 / 255, green: 70 / 255, blue: 173 / 255, alpha: 1)
@@ -109,7 +109,7 @@ final class NativeRootViewController: UIViewController {
 }
 
 struct LeanUpNativeRootView: View {
-    @ObservedObject var model: LeanUpAppModel
+    let model: LeanUpAppModel
 
     var body: some View {
         TabView {
@@ -142,7 +142,6 @@ struct LeanUpNativeRootView: View {
             }
         }
         .tint(.unadBlue)
-        .preferredColorScheme(model.preferredColorScheme)
     }
 }
 

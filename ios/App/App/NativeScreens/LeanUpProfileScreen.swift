@@ -1,18 +1,50 @@
 import SwiftUI
 
+private struct LeanUpProfileViewData {
+    let displayName: String
+    let strategicSummary: String
+    let alignmentInsight: LeanUpProfileAlignmentInsight
+    let nextMilestone: LeanUpMilestoneInsight
+    let subjectTypeMap: LeanUpSubjectTypeMap
+    let recommendedService: LeanUpServiceRecommendation
+    let minimumViablePortfolio: [LeanUpPortfolioRoadmapItem]
+    let freelancerChecklist: LeanUpFreelancerChecklist
+    let earnedCreditsText: String
+
+    init(model: LeanUpAppModel) {
+        displayName = model.preferredDisplayName ?? model.snapshot.username
+        strategicSummary = model.profileStrategicSummary
+        alignmentInsight = model.electiveAlignmentInsight
+        nextMilestone = model.profileNextMilestone
+        subjectTypeMap = model.subjectTypeMap
+        recommendedService = model.recommendedStarterService
+        minimumViablePortfolio = model.minimumViablePortfolio
+        freelancerChecklist = model.freelancerChecklist
+        earnedCreditsText = "\(model.earnedCredits)"
+    }
+}
+
 struct LeanUpProfileView: View {
     @ObservedObject var model: LeanUpAppModel
 
     var body: some View {
+        let data = LeanUpProfileViewData(model: model)
+
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                LeanUpProfileSnapshotCard(model: model)
-                LeanUpProfileAlignmentCard(model: model)
-                LeanUpProfileMilestoneCard(model: model)
-                LeanUpProfileTypeMapCard(model: model)
-                LeanUpProfileServiceCard(model: model)
-                LeanUpProfilePortfolioCard(model: model)
-                LeanUpProfileFreelancerCard(model: model)
+                LeanUpProfileSnapshotCard(
+                    displayName: data.displayName,
+                    strategicSummary: data.strategicSummary,
+                    alignmentStatusTitle: data.alignmentInsight.statusTitle,
+                    alignmentTone: data.alignmentInsight.tone,
+                    nextMilestoneBadgeText: data.nextMilestone.badgeText
+                )
+                LeanUpProfileAlignmentCard(insight: data.alignmentInsight)
+                LeanUpProfileMilestoneCard(milestone: data.nextMilestone, earnedCreditsText: data.earnedCreditsText)
+                LeanUpProfileTypeMapCard(typeMap: data.subjectTypeMap)
+                LeanUpProfileServiceCard(service: data.recommendedService)
+                LeanUpProfilePortfolioCard(items: data.minimumViablePortfolio)
+                LeanUpProfileFreelancerCard(checklist: data.freelancerChecklist)
             }
             .padding(.horizontal, 20)
             .padding(.vertical, 18)
@@ -25,17 +57,21 @@ struct LeanUpProfileView: View {
 }
 
 private struct LeanUpProfileSnapshotCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let displayName: String
+    let strategicSummary: String
+    let alignmentStatusTitle: String
+    let alignmentTone: LeanUpProfileInsightTone
+    let nextMilestoneBadgeText: String
 
     var body: some View {
         LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 14) {
                 HStack(alignment: .top, spacing: 12) {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(model.preferredDisplayName ?? model.snapshot.username)
+                        Text(displayName)
                             .font(.title2.weight(.bold))
 
-                        Text(model.profileStrategicSummary)
+                        Text(strategicSummary)
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
@@ -45,12 +81,12 @@ private struct LeanUpProfileSnapshotCard: View {
 
                     VStack(alignment: .trailing, spacing: 8) {
                         LeanUpProfileStatusPill(
-                            text: model.electiveAlignmentInsight.statusTitle,
-                            tone: model.electiveAlignmentInsight.tone
+                            text: alignmentStatusTitle,
+                            tone: alignmentTone
                         )
                         LeanUpProfileMetricBadge(
                             title: "Proximo hito",
-                            value: model.profileNextMilestone.badgeText
+                            value: nextMilestoneBadgeText
                         )
                     }
                 }
@@ -60,11 +96,9 @@ private struct LeanUpProfileSnapshotCard: View {
 }
 
 private struct LeanUpProfileAlignmentCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let insight: LeanUpProfileAlignmentInsight
 
     var body: some View {
-        let insight = model.electiveAlignmentInsight
-
         return LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 14) {
                 LeanUpSectionHeader(
@@ -99,11 +133,10 @@ private struct LeanUpProfileAlignmentCard: View {
 }
 
 private struct LeanUpProfileMilestoneCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let milestone: LeanUpMilestoneInsight
+    let earnedCreditsText: String
 
     var body: some View {
-        let milestone = model.profileNextMilestone
-
         return LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 14) {
                 LeanUpSectionHeader(
@@ -122,7 +155,7 @@ private struct LeanUpProfileMilestoneCard: View {
                 HStack(spacing: 12) {
                     LeanUpProfileMetricBadge(
                         title: "Creditos hoy",
-                        value: "\(model.earnedCredits)"
+                        value: earnedCreditsText
                     )
                     LeanUpProfileMetricBadge(
                         title: "Faltan",
@@ -135,11 +168,9 @@ private struct LeanUpProfileMilestoneCard: View {
 }
 
 private struct LeanUpProfileTypeMapCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let typeMap: LeanUpSubjectTypeMap
 
     var body: some View {
-        let typeMap = model.subjectTypeMap
-
         return LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 14) {
                 LeanUpSectionHeader(
@@ -165,11 +196,9 @@ private struct LeanUpProfileTypeMapCard: View {
 }
 
 private struct LeanUpProfileServiceCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let service: LeanUpServiceRecommendation
 
     var body: some View {
-        let service = model.recommendedStarterService
-
         return LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 14) {
                 LeanUpSectionHeader(
@@ -214,7 +243,7 @@ private struct LeanUpProfileServiceCard: View {
 }
 
 private struct LeanUpProfilePortfolioCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let items: [LeanUpPortfolioRoadmapItem]
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -226,7 +255,7 @@ private struct LeanUpProfilePortfolioCard: View {
                 )
 
                 VStack(alignment: .leading, spacing: 12) {
-                    ForEach(model.minimumViablePortfolio) { item in
+                    ForEach(items) { item in
                         LeanUpProfilePortfolioRoadmapCard(item: item)
                     }
                 }
@@ -236,11 +265,9 @@ private struct LeanUpProfilePortfolioCard: View {
 }
 
 private struct LeanUpProfileFreelancerCard: View {
-    @ObservedObject var model: LeanUpAppModel
+    let checklist: LeanUpFreelancerChecklist
 
     var body: some View {
-        let checklist = model.freelancerChecklist
-
         return LeanUpSurfaceCard {
             VStack(alignment: .leading, spacing: 14) {
                 LeanUpSectionHeader(

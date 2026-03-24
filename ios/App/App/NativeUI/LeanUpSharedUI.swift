@@ -209,7 +209,7 @@ struct LeanUpSurfaceCard<Content: View>: View {
 
     var body: some View {
         content
-            .padding(18)
+            .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: 26, style: .continuous)
@@ -220,10 +220,10 @@ struct LeanUpSurfaceCard<Content: View>: View {
                     .strokeBorder(cardStroke, lineWidth: 1)
             )
             .shadow(
-                color: Color.unadNavy.opacity(0.04),
-                radius: 6,
+                color: scheme == .dark ? Color.clear : Color.unadNavy.opacity(0.025),
+                radius: scheme == .dark ? 0 : 3,
                 x: 0,
-                y: 3
+                y: scheme == .dark ? 0 : 2
             )
     }
 
@@ -339,24 +339,24 @@ struct LeanUpPageBackground: View {
 
             RadialGradient(
                 colors: [
-                    Color.unadBlue.opacity(scheme == .dark ? 0.08 : 0.16),
+                    Color.unadBlue.opacity(scheme == .dark ? 0.035 : 0.12),
                     .clear
                 ],
                 center: .topTrailing,
                 startRadius: 24,
-                endRadius: scheme == .dark ? 180 : 220
+                endRadius: scheme == .dark ? 140 : 200
             )
             .offset(x: 70, y: -80)
 
             if scheme != .dark {
                 RadialGradient(
                     colors: [
-                        Color.unadGold.opacity(0.10),
+                        Color.unadGold.opacity(0.08),
                         .clear
                     ],
                     center: .bottomLeading,
                     startRadius: 20,
-                    endRadius: 180
+                    endRadius: 150
                 )
                 .offset(x: -50, y: 140)
             }
@@ -415,7 +415,6 @@ extension View {
         if #available(iOS 16.0, *) {
             self
                 .scrollDismissesKeyboard(.interactively)
-                .modifier(LeanUpKeyboardDismissOnTapModifier())
         } else {
             self
                 .modifier(LeanUpKeyboardDismissOnTapModifier())

@@ -1010,3 +1010,24 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - la `TabView` en oscuro deja de depender de blur y usa una base solida mas barata
   - el hero de `Dashboard` reduce sombra en dark
 - La intencion fue mantener el look premium, pero con menos costo de GPU y offscreen rendering.
+
+## Actualizacion 2026-03-24 - Menos invalidacion profunda en `Dashboard`, `Perfil` y `Configuracion`
+
+- Las subviews de `Dashboard`, `Perfil` y `Configuracion` dejaron de observar `LeanUpAppModel` directamente.
+- Cada pantalla ahora construye un `ViewData` liviano en su root y reparte valores ya resueltos a sus cards internas.
+- Esto reduce relecturas innecesarias de SwiftUI y evita que una mutacion pequena del snapshot haga reevaluar demasiadas subviews que no necesitan enterarse del modelo completo.
+
+## Actualizacion 2026-03-24 - Persistencia del snapshot mas barata
+
+- Las mutaciones del modelo ya no serializan y escriben inmediatamente en `UserDefaults` en cada cambio.
+- El guardado ahora se coalescea con una cola corta para evitar trabajo sincronico repetido cuando varias mutaciones llegan seguidas.
+- Tambien se evito normalizar dos veces el mismo snapshot cuando ya venia resuelto desde `applySnapshot`.
+
+## Actualizacion 2026-03-24 - Dashboard y chrome raiz mas ligeros
+
+- `Dashboard` ahora pasa menos dependencias a sus secciones y reduce un poco la carga visual del hero.
+- `NativeRoot` deja de tratar el `TabView` como observador directo y la tab bar clara ya no depende de blur de UIKit.
+- `LeanUpSharedUI` reduce algo mas el costo global:
+  - sombra aun mas corta en cards
+  - bloom dark mas tenue
+  - `leanUpKeyboardFriendlyScroll()` deja de meter tap gesture extra en iOS 16+

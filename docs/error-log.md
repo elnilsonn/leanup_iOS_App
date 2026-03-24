@@ -1339,3 +1339,64 @@ Como se corrige:
 Regla:
 
 - Si el dark mode ya se ve premium por contraste y jerarquia, no seguir agregando blur o sombras por decoracion.
+
+## Actualizacion 2026-03-24 - Un `ObservableObject` gigante no debe viajar hasta cada card
+
+Problema:
+
+- Varias pantallas estaban pasando `LeanUpAppModel` completo a muchas subviews internas.
+- Eso ampliaba la zona de invalidacion de SwiftUI y hacia que una mutacion pequena pudiera volver a evaluar demasiadas cards.
+
+Por que pasa:
+
+- Es muy comodo conectar cada subview al modelo global, pero a escala eso convierte un solo cambio de estado en demasiados renders potenciales.
+
+Como se corrige:
+
+- Dejar `@ObservedObject` en el root de pantalla.
+- Construir `ViewData` livianos con solo lo que cada modulo necesita.
+- Pasar valores, bindings y closures en vez del modelo entero cuando no hace falta mutar directamente desde la subview.
+
+Regla:
+
+- Si una card solo necesita datos ya resueltos, no debe observar el `AppModel` completo.
+
+## Actualizacion 2026-03-24 - Guardar en `UserDefaults` dentro del hot path hace sentir la app mas pesada
+
+Problema:
+
+- Cada mutacion del snapshot hacia reconstruccion derivada y guardado inmediato del backup.
+- Eso empujaba trabajo sincronico al main thread justo despues de acciones pequenas.
+
+Por que pasa:
+
+- Persistir siempre “ya mismo” parece seguro, pero en una app muy interactiva mete serializacion repetida donde mas se siente.
+
+Como se corrige:
+
+- Coalescer el guardado con un pequeno delay.
+- Reutilizar el snapshot ya normalizado en vez de volver a normalizarlo antes de serializar.
+
+Regla:
+
+- Persistencia frecuente si, pero no cada pulsacion o mutacion como trabajo sincronico inmediato.
+
+## Actualizacion 2026-03-24 - El polish visual compartido pesa mas que una sola pantalla
+
+Problema:
+
+- El lag no venia solo de `Malla`.
+- La sensacion de pesadez se estaba propagando desde `SharedUI`, `Dashboard` y la configuracion global del chrome.
+
+Por que pasa:
+
+- Cuando sombras, strokes, gradientes y fondos completos viven en la base compartida, el costo no se reparte: se multiplica en toda la app.
+
+Como se corrige:
+
+- Recortar primero el sistema compartido y luego afinar pantallas concretas.
+- Priorizar separacion por tono y jerarquia antes que elevacion artificial o blur.
+
+Regla:
+
+- Si el lag se siente global, mirar primero `SharedUI` y la raiz nativa antes de culpar a una sola pantalla.
