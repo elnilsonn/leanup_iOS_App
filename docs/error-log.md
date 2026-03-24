@@ -1419,3 +1419,5 @@ Como se corrige:
 Regla:
 
 - Si una closure local puede devolver `nil`, tiparla de forma explicita antes de confiar en la inferencia del compilador.
+
+- La misma regla aplica a `compactMap`: si la closure devuelve `nil` y un modelo concreto, conviene anotar `Element?` en la closure o tipar el resultado explicitamente.

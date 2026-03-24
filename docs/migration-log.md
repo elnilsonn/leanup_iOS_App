@@ -1036,3 +1036,4 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 
 - Se hizo explicito el tipo de `estimatedRemainingPeriods` como `Double?` dentro de la construccion del estado derivado.
 - Esto corrige un fallo de compilacion donde Swift no podia inferir el tipo contextual del `nil` dentro de la closure.
+- Tambien se hizo explicito el tipo del `compactMap` que construye `periodAverageSeries`, para que el `return nil` de la closure quede contextualizado como `LeanUpPeriodAveragePoint?`.

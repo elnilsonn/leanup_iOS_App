@@ -1136,7 +1136,7 @@ final class LeanUpAppModel: ObservableObject {
                 total += 1
             }
         }
-        let periodAverageSeries = sortedPeriods.compactMap { period in
+        let periodAverageSeries: [LeanUpPeriodAveragePoint] = sortedPeriods.compactMap { period -> LeanUpPeriodAveragePoint? in
             let grades = gradedItems
                 .lazy
                 .filter { $0.period == period }
