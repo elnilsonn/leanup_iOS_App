@@ -1250,3 +1250,25 @@ Como se corrige:
 Regla:
 
 - Si un dato ya tiene su pantalla natural, no usar `Configuracion` como contenedor comodin solo para llenar espacio.
+
+## Actualizacion 2026-03-24 - El copy no debe hablar como si explicara la arquitectura de la app
+
+Problema:
+
+- En `Perfil` y `Configuracion` aparecieron textos como "esta pantalla", "otra seccion" o frases similares que suenan a explicacion interna del producto en vez de ayuda real para la persona.
+
+Por que pasa:
+
+- Al diferenciar pantallas entre si, es facil que el copy termine justificando la estructura de la app en lugar de describir el beneficio directo para quien la usa.
+
+Como se corrige:
+
+- Reescribir los textos desde la experiencia humana:
+  - que hace esa informacion
+  - como ayuda
+  - por que importa
+- Evitar mencionar la existencia de otras pantallas o secciones salvo que sea estrictamente necesario para navegacion.
+
+Regla:
+
+- El copy visible no debe sonar a comentario de disenio o arquitectura; debe sonar a producto terminado.

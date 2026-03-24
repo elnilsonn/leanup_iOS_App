@@ -251,7 +251,7 @@ private struct LeanUpProfileFreelancerCard: View {
 
                 LeanUpProfileCallout(
                     title: checklist.overallTitle,
-                    detail: "Esta lectura junta perfil, habilidades, portafolio y herramientas para decirte que tan cerca estas de cobrar algo pequeno sin improvisar.",
+                    detail: "Aqui se ve cuanto sostienen hoy tu perfil, tus habilidades, tu portafolio y tus herramientas para empezar a cobrar algo pequeno con mas criterio.",
                     tone: checklistTone(for: checklist)
                 )
 

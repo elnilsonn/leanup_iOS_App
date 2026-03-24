@@ -977,3 +977,8 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - `currentDisplayName`
   - `localStorageStatusText`
 - Asi la pantalla deja de hardcodear parte de su narrativa y mantiene una salida mas coherente con el estado real del modelo.
+
+## Actualizacion 2026-03-24 - Limpieza de copy en `Perfil` y `Configuracion`
+
+- Se ajustaron textos de `Perfil` y `Configuracion` para evitar referencias meta a "esta pantalla", "otra seccion" u otras frases que recuerdan la arquitectura interna de la app.
+- El copy ahora habla mas desde la experiencia de la persona y menos desde la estructura del producto.

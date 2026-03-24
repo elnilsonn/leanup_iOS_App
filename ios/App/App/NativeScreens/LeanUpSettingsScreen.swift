@@ -124,7 +124,7 @@ private struct LeanUpSettingsIdentityCard: View {
                 LeanUpSectionHeader(
                     eyebrow: "Identidad",
                     title: "Como quieres que te vea LeanUp",
-                    detail: "Este nombre se usa dentro de la app para personalizar tu lectura, sin volver esta pantalla otra seccion de perfil profesional."
+                    detail: "Este nombre ayuda a que LeanUp te hable de una forma mas cercana, clara y personal."
                 )
 
                 VStack(alignment: .leading, spacing: 8) {
@@ -257,7 +257,7 @@ private struct LeanUpSettingsStorageCard: View {
                 LeanUpSectionHeader(
                     eyebrow: "Datos",
                     title: "Tus datos en este iPhone",
-                    detail: "LeanUp guarda tu avance localmente para que tu lectura se mantenga estable, privada y disponible aun sin depender de otra pantalla."
+                    detail: "LeanUp guarda tu avance localmente para que tu progreso se mantenga estable, privado y siempre disponible en este iPhone."
                 )
 
                 HStack(spacing: 10) {
