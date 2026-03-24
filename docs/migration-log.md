@@ -993,3 +993,10 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - `LeanUpSharedUI` ahora adapta cards, inset cards, metricas, chips, tags, pills, tracks y botones secundarios al nuevo tono oscuro.
 - `NativeRoot` ahora acompana el dark mode con una configuracion mas coherente de tab bar y navigation bar.
 - `Dashboard` y `Malla` recibieron ajustes directos en los bloques mas visibles para eliminar superficies blancas residuales en dark mode.
+
+## Actualizacion 2026-03-24 - Reduccion de recomputaciones en `LeanUpAppModel`
+
+- Se detecto que el modelo recalculaba repetidamente listas, conteos, periodos, progreso y corpus de senales cada vez que SwiftUI releia varias pantallas.
+- Se introdujo una capa derivada interna que se reconstruye una sola vez por cambio de `snapshot`.
+- `courses(in:)`, `electiveGroups(in:)`, `progress(for:)`, `careerItems`, `approvedCourses`, `selectedElectiveOptions`, `approvedSignalCorpus` y otros datos base ahora salen de cache derivada en vez de rehacerse en cascada.
+- La meta fue bajar trabajo en main thread y hacer mas baratos los updates de SwiftUI sin cambiar el comportamiento funcional.

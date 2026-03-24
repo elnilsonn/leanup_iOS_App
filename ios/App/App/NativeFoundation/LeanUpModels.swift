@@ -412,6 +412,22 @@ final class LeanUpAppModel: ObservableObject {
 
     private let store = LeanUpSnapshotStore()
     private let academicsStore = LeanUpAcademicsStore()
+    private var cachedAllGrades: [Double] = []
+    private var cachedApprovedCourses: [LeanUpCourse] = []
+    private var cachedSelectedElectiveOptions: [LeanUpElectiveOption] = []
+    private var cachedApprovedElectiveOptions: [LeanUpElectiveOption] = []
+    private var cachedPeriods: [Int] = []
+    private var cachedCoursesByPeriod: [Int: [LeanUpCourse]] = [:]
+    private var cachedElectiveGroupsByPeriod: [Int: [LeanUpElectiveGroup]] = [:]
+    private var cachedElectiveGroupsWithoutSelection = 0
+    private var cachedCareerItems: [LeanUpCareerItem] = []
+    private var cachedGradedCourses: [LeanUpGradedCourse] = []
+    private var cachedGradedItems: [LeanUpGradeEntry] = []
+    private var cachedInProgressCourseCount = 0
+    private var cachedInProgressElectiveCount = 0
+    private var cachedApprovedSignalCorpus: [String] = []
+    private var cachedAlignmentAreaScoresSnapshot: [String: Int] = [:]
+    private var cachedProgressByPeriod: [Int: LeanUpPeriodProgress] = [:]
     private static let monthYearFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.locale = Locale(identifier: "es_CO")
@@ -432,7 +448,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var allGrades: [Double] {
-        Array(snapshot.notas.values) + Array(snapshot.electivosNotas.values)
+        cachedAllGrades
     }
 
     var registeredCount: Int {
@@ -474,7 +490,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var electiveGroupsWithoutSelection: Int {
-        academics.electiveGroups.filter { selectedOption(in: $0) == nil }.count
+        cachedElectiveGroupsWithoutSelection
     }
 
     var focusPeriod: Int? {
@@ -494,21 +510,15 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var approvedCourses: [LeanUpCourse] {
-        academics.courses.filter { (snapshot.notas[String($0.id)] ?? 0) >= 3.0 }
+        cachedApprovedCourses
     }
 
     var approvedElectiveOptions: [LeanUpElectiveOption] {
-        academics.electiveGroups.compactMap { group in
-            guard let selected = selectedOption(in: group),
-                  (electiveNote(groupName: group.name, optionCode: selected.code) ?? 0) >= 3.0 else {
-                return nil
-            }
-            return selected
-        }
+        cachedApprovedElectiveOptions
     }
 
     var selectedElectiveOptions: [LeanUpElectiveOption] {
-        academics.electiveGroups.compactMap { selectedOption(in: $0) }
+        cachedSelectedElectiveOptions
     }
 
     var recommendedRoles: [String] {
@@ -533,46 +543,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var careerItems: [LeanUpCareerItem] {
-        let approvedCourseItems = approvedCourses.map {
-            LeanUpCareerItem(
-                id: "course-\($0.id)",
-                period: $0.period,
-                name: $0.name,
-                summary: $0.summary,
-                outcomes: $0.outcomes,
-                skills: $0.skills,
-                linkedinText: $0.linkedinText,
-                portfolioProject: $0.portfolioProject,
-                isElective: false
-            )
-        }
-
-        let approvedElectiveItems = academics.electiveGroups.compactMap { group -> LeanUpCareerItem? in
-            guard let option = selectedOption(in: group),
-                  (electiveNote(groupName: group.name, optionCode: option.code) ?? 0) >= 3.0 else {
-                return nil
-            }
-
-            return LeanUpCareerItem(
-                id: "elective-\(group.name)-\(option.code)",
-                period: group.period,
-                name: option.name,
-                summary: option.summary,
-                outcomes: option.outcomes,
-                skills: option.skills,
-                linkedinText: option.linkedinText,
-                portfolioProject: option.portfolioProject,
-                isElective: true
-            )
-        }
-
-        return (approvedCourseItems + approvedElectiveItems)
-            .sorted {
-                if $0.period == $1.period {
-                    return $0.name < $1.name
-                }
-                return $0.period < $1.period
-            }
+        cachedCareerItems
     }
 
     var linkedinHighlights: [LeanUpCareerItem] {
@@ -598,9 +569,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     var periods: [Int] {
-        Array(
-            Set(academics.courses.map(\.period) + academics.electiveGroups.map(\.period))
-        ).sorted()
+        cachedPeriods
     }
 
     var studiedPeriodsCount: Int {
@@ -1281,7 +1250,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     func load() {
-        snapshot = (try? store.loadSnapshot()) ?? .empty
+        applySnapshot((try? store.loadSnapshot()) ?? .empty)
     }
 
     func setUsername(_ name: String) {
@@ -1305,11 +1274,11 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     func courses(in period: Int) -> [LeanUpCourse] {
-        academics.courses.filter { $0.period == period }
+        cachedCoursesByPeriod[period] ?? []
     }
 
     func electiveGroups(in period: Int) -> [LeanUpElectiveGroup] {
-        academics.electiveGroups.filter { $0.period == period }
+        cachedElectiveGroupsByPeriod[period] ?? []
     }
 
     func note(for course: LeanUpCourse) -> Double? {
@@ -1374,33 +1343,7 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     func progress(for period: Int) -> LeanUpPeriodProgress {
-        let periodCourses = courses(in: period)
-        let periodElectives = electiveGroups(in: period)
-
-        var approved = 0
-        var failed = 0
-
-        for course in periodCourses {
-            switch courseStatus(for: course) {
-            case .approved: approved += 1
-            case .failed: failed += 1
-            case .pending, .inProgress: break
-            }
-        }
-
-        for group in periodElectives {
-            switch electiveStatus(for: group) {
-            case .approved: approved += 1
-            case .failed: failed += 1
-            case .pending, .inProgress: break
-            }
-        }
-
-        return LeanUpPeriodProgress(
-            approved: approved,
-            failed: failed,
-            total: periodCourses.count + periodElectives.count
-        )
+        cachedProgressByPeriod[period] ?? LeanUpPeriodProgress(approved: 0, failed: 0, total: 0)
     }
 
     func setCourseGrade(_ grade: Double?, for courseID: Int) {
@@ -1489,38 +1432,16 @@ final class LeanUpAppModel: ObservableObject {
     private func writeSnapshot(_ mutate: (inout LeanUpSnapshot) -> Void) {
         var updated = snapshot
         mutate(&updated)
-        snapshot = updated.normalized()
+        applySnapshot(updated)
         _ = try? store.saveSnapshot(snapshot)
     }
 
     private var gradedCourses: [LeanUpGradedCourse] {
-        academics.courses.compactMap { course in
-            guard let grade = note(for: course) else { return nil }
-            return LeanUpGradedCourse(
-                id: "course-\(course.id)",
-                name: course.name,
-                period: course.period,
-                grade: grade
-            )
-        }
+        cachedGradedCourses
     }
 
     private var gradedItems: [LeanUpGradeEntry] {
-        let courseEntries = academics.courses.compactMap { course -> LeanUpGradeEntry? in
-            guard let grade = note(for: course) else { return nil }
-            return LeanUpGradeEntry(period: course.period, grade: grade)
-        }
-
-        let electiveEntries = academics.electiveGroups.compactMap { group -> LeanUpGradeEntry? in
-            guard let selected = selectedOption(in: group),
-                  let grade = electiveNote(groupName: group.name, optionCode: selected.code) else {
-                return nil
-            }
-
-            return LeanUpGradeEntry(period: group.period, grade: grade)
-        }
-
-        return courseEntries + electiveEntries
+        cachedGradedItems
     }
 
     private func gradeEntries(in period: Int) -> [LeanUpGradeEntry] {
@@ -1528,11 +1449,11 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     private var inProgressCourseCount: Int {
-        academics.courses.filter { isCourseInProgress($0) }.count
+        cachedInProgressCourseCount
     }
 
     private var inProgressElectiveCount: Int {
-        academics.electiveGroups.filter { isElectiveInProgress($0) }.count
+        cachedInProgressElectiveCount
     }
 
     private var averageItemsPerPeriod: Double {
@@ -1556,22 +1477,181 @@ final class LeanUpAppModel: ObservableObject {
     }
 
     private var approvedSignalCorpus: [String] {
-        let courseSignals = approvedCourses.flatMap { course in
-            [course.name, course.summary, course.plainLanguage, course.outcomes, course.linkedinText, course.portfolioProject] + course.skills
-        }
-        let electiveSignals = academics.electiveGroups.compactMap { group -> [String]? in
-            guard let option = selectedOption(in: group),
-                  electiveStatus(for: group) == .approved else {
-                return nil
-            }
-            return [group.name, option.name, option.summary, option.outcomes, option.linkedinText, option.portfolioProject] + option.skills
-        }.flatMap { $0 }
-
-        return (courseSignals + electiveSignals).map(\.leanUpProfileKey)
+        cachedApprovedSignalCorpus
     }
 
     private var alignmentAreaScoresSnapshot: [String: Int] {
-        alignmentAreaScores(for: selectedElectiveOptions)
+        cachedAlignmentAreaScoresSnapshot
+    }
+
+    private func applySnapshot(_ newSnapshot: LeanUpSnapshot) {
+        let normalized = newSnapshot.normalized()
+        let derived = buildDerivedState(for: normalized)
+        cachedAllGrades = derived.allGrades
+        cachedApprovedCourses = derived.approvedCourses
+        cachedSelectedElectiveOptions = derived.selectedElectiveOptions
+        cachedApprovedElectiveOptions = derived.approvedElectiveOptions
+        cachedPeriods = derived.periods
+        cachedCoursesByPeriod = derived.coursesByPeriod
+        cachedElectiveGroupsByPeriod = derived.electiveGroupsByPeriod
+        cachedElectiveGroupsWithoutSelection = derived.electiveGroupsWithoutSelection
+        cachedCareerItems = derived.careerItems
+        cachedGradedCourses = derived.gradedCourses
+        cachedGradedItems = derived.gradedItems
+        cachedInProgressCourseCount = derived.inProgressCourseCount
+        cachedInProgressElectiveCount = derived.inProgressElectiveCount
+        cachedApprovedSignalCorpus = derived.approvedSignalCorpus
+        cachedAlignmentAreaScoresSnapshot = derived.alignmentAreaScoresSnapshot
+        cachedProgressByPeriod = derived.progressByPeriod
+        snapshot = normalized
+    }
+
+    private func buildDerivedState(for snapshot: LeanUpSnapshot) -> LeanUpDerivedState {
+        let allGrades = Array(snapshot.notas.values) + Array(snapshot.electivosNotas.values)
+        var approvedCourses: [LeanUpCourse] = []
+        var selectedElectiveOptions: [LeanUpElectiveOption] = []
+        var approvedElectiveOptions: [LeanUpElectiveOption] = []
+        var approvedElectivePairs: [(LeanUpElectiveGroup, LeanUpElectiveOption)] = []
+        var periods = Set<Int>()
+        var coursesByPeriod: [Int: [LeanUpCourse]] = [:]
+        var electiveGroupsByPeriod: [Int: [LeanUpElectiveGroup]] = [:]
+        var electiveGroupsWithoutSelection = 0
+        var gradedCourses: [LeanUpGradedCourse] = []
+        var gradedItems: [LeanUpGradeEntry] = []
+        var inProgressCourseCount = 0
+        var inProgressElectiveCount = 0
+        var progressBuilder: [Int: (approved: Int, failed: Int, total: Int)] = [:]
+
+        for course in academics.courses {
+            periods.insert(course.period)
+            coursesByPeriod[course.period, default: []].append(course)
+            progressBuilder[course.period, default: (0, 0, 0)].total += 1
+
+            let key = String(course.id)
+            if let grade = snapshot.notas[key] {
+                gradedCourses.append(
+                    LeanUpGradedCourse(
+                        id: "course-\(course.id)",
+                        name: course.name,
+                        period: course.period,
+                        grade: grade
+                    )
+                )
+                gradedItems.append(LeanUpGradeEntry(period: course.period, grade: grade))
+
+                if grade >= 3.0 {
+                    approvedCourses.append(course)
+                    progressBuilder[course.period, default: (0, 0, 0)].approved += 1
+                } else {
+                    progressBuilder[course.period, default: (0, 0, 0)].failed += 1
+                }
+            } else if snapshot.cursosEnCurso[key] == true {
+                inProgressCourseCount += 1
+            }
+        }
+
+        for group in academics.electiveGroups {
+            periods.insert(group.period)
+            electiveGroupsByPeriod[group.period, default: []].append(group)
+            progressBuilder[group.period, default: (0, 0, 0)].total += 1
+
+            guard let selectedCode = snapshot.electivosSeleccionados[group.name],
+                  let option = group.options.first(where: { $0.code == selectedCode }) else {
+                electiveGroupsWithoutSelection += 1
+                continue
+            }
+
+            selectedElectiveOptions.append(option)
+            let key = "\(group.name):::\(selectedCode)"
+
+            if let grade = snapshot.electivosNotas[key] {
+                gradedItems.append(LeanUpGradeEntry(period: group.period, grade: grade))
+
+                if grade >= 3.0 {
+                    approvedElectiveOptions.append(option)
+                    approvedElectivePairs.append((group, option))
+                    progressBuilder[group.period, default: (0, 0, 0)].approved += 1
+                } else {
+                    progressBuilder[group.period, default: (0, 0, 0)].failed += 1
+                }
+            } else if snapshot.electivosEnCurso[group.name] == true {
+                inProgressElectiveCount += 1
+            }
+        }
+
+        let careerItems = (
+            approvedCourses.map {
+                LeanUpCareerItem(
+                    id: "course-\($0.id)",
+                    period: $0.period,
+                    name: $0.name,
+                    summary: $0.summary,
+                    outcomes: $0.outcomes,
+                    skills: $0.skills,
+                    linkedinText: $0.linkedinText,
+                    portfolioProject: $0.portfolioProject,
+                    isElective: false
+                )
+            } +
+            approvedElectivePairs.map { group, option in
+                LeanUpCareerItem(
+                    id: "elective-\(group.name)-\(option.code)",
+                    period: group.period,
+                    name: option.name,
+                    summary: option.summary,
+                    outcomes: option.outcomes,
+                    skills: option.skills,
+                    linkedinText: option.linkedinText,
+                    portfolioProject: option.portfolioProject,
+                    isElective: true
+                )
+            }
+        ).sorted {
+            if $0.period == $1.period {
+                return $0.name < $1.name
+            }
+            return $0.period < $1.period
+        }
+
+        let courseSignals = approvedCourses.flatMap { course in
+            [course.name, course.summary, course.plainLanguage, course.outcomes, course.linkedinText, course.portfolioProject] + course.skills
+        }
+        let electiveSignals = approvedElectivePairs.flatMap { group, option in
+            [group.name, option.name, option.summary, option.outcomes, option.linkedinText, option.portfolioProject] + option.skills
+        }
+        let approvedSignalCorpus = (courseSignals + electiveSignals).map(\.leanUpProfileKey)
+        let alignmentAreaScoresSnapshot = alignmentAreaScores(for: selectedElectiveOptions)
+        let sortedPeriods = periods.sorted()
+        let progressByPeriod = Dictionary(uniqueKeysWithValues: sortedPeriods.map { period in
+            let progress = progressBuilder[period] ?? (0, 0, 0)
+            return (
+                period,
+                LeanUpPeriodProgress(
+                    approved: progress.approved,
+                    failed: progress.failed,
+                    total: progress.total
+                )
+            )
+        })
+
+        return LeanUpDerivedState(
+            allGrades: allGrades,
+            approvedCourses: approvedCourses,
+            selectedElectiveOptions: selectedElectiveOptions,
+            approvedElectiveOptions: approvedElectiveOptions,
+            periods: sortedPeriods,
+            coursesByPeriod: coursesByPeriod,
+            electiveGroupsByPeriod: electiveGroupsByPeriod,
+            electiveGroupsWithoutSelection: electiveGroupsWithoutSelection,
+            careerItems: careerItems,
+            gradedCourses: gradedCourses,
+            gradedItems: gradedItems,
+            inProgressCourseCount: inProgressCourseCount,
+            inProgressElectiveCount: inProgressElectiveCount,
+            approvedSignalCorpus: approvedSignalCorpus,
+            alignmentAreaScoresSnapshot: alignmentAreaScoresSnapshot,
+            progressByPeriod: progressByPeriod
+        )
     }
 
     private func alignmentAreaScores(for options: [LeanUpElectiveOption]) -> [String: Int] {
@@ -1704,6 +1784,25 @@ final class LeanUpAppModel: ObservableObject {
 
 private struct LeanUpTypeTrackable {
     let types: [String]
+}
+
+private struct LeanUpDerivedState {
+    let allGrades: [Double]
+    let approvedCourses: [LeanUpCourse]
+    let selectedElectiveOptions: [LeanUpElectiveOption]
+    let approvedElectiveOptions: [LeanUpElectiveOption]
+    let periods: [Int]
+    let coursesByPeriod: [Int: [LeanUpCourse]]
+    let electiveGroupsByPeriod: [Int: [LeanUpElectiveGroup]]
+    let electiveGroupsWithoutSelection: Int
+    let careerItems: [LeanUpCareerItem]
+    let gradedCourses: [LeanUpGradedCourse]
+    let gradedItems: [LeanUpGradeEntry]
+    let inProgressCourseCount: Int
+    let inProgressElectiveCount: Int
+    let approvedSignalCorpus: [String]
+    let alignmentAreaScoresSnapshot: [String: Int]
+    let progressByPeriod: [Int: LeanUpPeriodProgress]
 }
 
 enum LeanUpProgressStatus: Equatable {

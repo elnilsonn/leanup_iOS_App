@@ -1296,3 +1296,24 @@ Como se corrige:
 Regla:
 
 - El dark mode de LeanUp debe sentirse intencional y profundo; no como una inversion automatica del modo claro.
+
+## Actualizacion 2026-03-24 - Un modelo observable con demasiadas computadas puede sentirse lento aunque la UI sea simple
+
+Problema:
+
+- `LeanUpAppModel` acumulaba muchas propiedades computadas que volvían a recorrer cursos, electivas, notas, periodos y senales cada vez que SwiftUI releia los cuerpos de las vistas.
+
+Por que pasa:
+
+- En SwiftUI, segun Apple, el rendimiento depende mucho de las dependencias y del costo de cada update.
+- Si un `ObservableObject` grande expone demasiadas computadas caras, un cambio pequeno puede disparar bastante trabajo repetido en main thread.
+
+Como se corrige:
+
+- Precalcular una base derivada cuando cambia el `snapshot`.
+- Hacer que las propiedades mas consultadas lean de esa base en vez de repetir filtros, sorts y recorridos completos.
+- Si aun persisten hitches, el siguiente paso debe ser perfilar con Instruments y no seguir adivinando.
+
+Regla:
+
+- Para datos que muchas pantallas leen todo el tiempo, preferir cache derivada sincronizada con el estado fuente antes que recomputacion libre en cada acceso.
