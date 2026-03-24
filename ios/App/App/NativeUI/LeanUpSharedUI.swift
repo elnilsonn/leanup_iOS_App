@@ -208,6 +208,24 @@ struct LeanUpSurfaceCard<Content: View>: View {
     }
 }
 
+struct LeanUpSurfaceInsetCard<Content: View>: View {
+    let content: Content
+
+    init(@ViewBuilder content: () -> Content) {
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 20, style: .continuous)
+                    .fill(Color.primary.opacity(0.04))
+            )
+    }
+}
+
 struct LeanUpChecklistRow: View {
     let text: String
 

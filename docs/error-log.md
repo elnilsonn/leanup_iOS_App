@@ -1206,3 +1206,23 @@ Como se resolvio:
 Regla:
 
 - Si una lectura visual depende de una taxonomia concreta, confirmar primero que esa taxonomia exista realmente en los datos antes de extrapolar desde otro campo parecido.
+
+### 61. Borrar un helper compartido al rehacer una pantalla
+
+Que paso:
+
+- El build cayo con `cannot find 'LeanUpSurfaceInsetCard' in scope` dentro de `LeanUpMallaScreen.swift`.
+
+Por que paso:
+
+- `LeanUpSurfaceInsetCard` vivia dentro de la version vieja de `LeanUpProfileScreen.swift`.
+- Al rehacer `Perfil`, el helper desaparecio, pero `Malla` todavia lo usaba en varias cards internas.
+
+Como se soluciono:
+
+- El helper se restauro en `LeanUpSharedUI.swift`.
+- Asi vuelve a ser visible para todas las pantallas y deja de depender de una pantalla concreta.
+
+Regla:
+
+- Si un componente ya es usado por mas de una pantalla, moverlo a `SharedUI` antes de eliminar o reemplazar la pantalla donde nacio.

@@ -943,3 +943,9 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - `freelancerChecklist`
   - `profileStrategicSummary`
 - La pantalla ya no recicla bloques de progreso de `Dashboard`; usa una narrativa propia orientada a direccion, oferta y readiness profesional.
+
+## Actualizacion 2026-03-24 - `LeanUpSurfaceInsetCard` vuelve a `SharedUI`
+
+- Durante el rediseño de `Perfil`, `LeanUpSurfaceInsetCard` habia quedado eliminado junto con la pantalla vieja.
+- `Malla` todavia dependia de ese componente para cards internas de apoyo.
+- El helper se restauro en `LeanUpSharedUI.swift`, que es su ubicacion correcta por ser un componente compartido.
