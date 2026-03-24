@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 private struct LeanUpProfileViewData {
     let displayName: String
     let strategicSummary: String

@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 private struct LeanUpDashboardViewData {
     let username: String
     let heroMessage: String

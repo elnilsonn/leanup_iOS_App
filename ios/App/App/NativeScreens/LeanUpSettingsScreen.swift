@@ -1,5 +1,6 @@
 import SwiftUI
 
+@MainActor
 private struct LeanUpSettingsViewData {
     let currentDisplayName: String
     let themeDescription: String
