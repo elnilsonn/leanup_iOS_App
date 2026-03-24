@@ -303,21 +303,24 @@ struct LeanUpDashboardPaceCard: View {
                         title: "Ritmo",
                         value: valueText,
                         caption: "Periodos equivalentes por tramo cursado",
-                        tint: .unadBlue
+                        tint: .unadBlue,
+                        lightFill: .unadLightBlueSurface
                     )
 
                     LeanUpDashboardAccentStat(
                         title: "Restan",
                         value: remainingPeriodsText,
                         caption: "Periodos estimados",
-                        tint: .unadGold
+                        tint: .unadGold,
+                        lightFill: .unadLightGoldSurface
                     )
 
                     LeanUpDashboardAccentStat(
                         title: "En curso",
                         value: inProgressCountText,
                         caption: "Carga activa",
-                        tint: .unadCyan
+                        tint: .unadCyan,
+                        lightFill: .unadLightCyanSurface
                     )
                 }
 
@@ -357,13 +360,15 @@ struct LeanUpDashboardGpaTrackerCard: View {
                             title: "Ultimo",
                             value: latestAverageText,
                             caption: latestCaption,
-                            tint: .unadBlue
+                            tint: .unadBlue,
+                            lightFill: .unadLightBlueSurface
                         )
                         LeanUpDashboardAccentStat(
                             title: "Mejor",
                             value: bestAverageText,
                             caption: bestCaption,
-                            tint: .green
+                            tint: .green,
+                            lightFill: .unadLightGreenSurface
                         )
                     }
                 }
@@ -600,7 +605,16 @@ struct LeanUpDashboardAccentStat: View {
     let value: String
     let caption: String
     let tint: Color
+    let lightFill: Color?
     @Environment(\.colorScheme) private var scheme
+
+    init(title: String, value: String, caption: String, tint: Color, lightFill: Color? = nil) {
+        self.title = title
+        self.value = value
+        self.caption = caption
+        self.tint = tint
+        self.lightFill = lightFill
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -625,7 +639,7 @@ struct LeanUpDashboardAccentStat: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(scheme == .dark ? tint.opacity(0.16) : tint.opacity(0.10))
+                .fill(scheme == .dark ? tint.opacity(0.16) : (lightFill ?? .unadLightBlueSurface))
         )
     }
 }
@@ -634,6 +648,7 @@ struct LeanUpDashboardPerformanceColumn: View {
     let title: String
     let tint: Color
     let items: [LeanUpGradedCourse]
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -677,7 +692,7 @@ struct LeanUpDashboardPerformanceColumn: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.primary.opacity(0.05))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
         )
     }
 }
@@ -710,7 +725,7 @@ struct LeanUpDashboardAchievementBadge: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.primary.opacity(0.05))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
         )
     }
 
@@ -743,7 +758,7 @@ struct LeanUpDashboardLineChart: View {
                     VStack(spacing: proxy.size.height / 3) {
                         ForEach(0..<3, id: \.self) { _ in
                             Rectangle()
-                                .fill(Color.primary.opacity(0.05))
+                                .fill(scheme == .dark ? Color.white.opacity(0.08) : Color.unadLightSurfaceStroke.opacity(0.75))
                                 .frame(height: 1)
                         }
                     }
@@ -766,6 +781,10 @@ struct LeanUpDashboardLineChart: View {
                           Circle()
                               .fill(scheme == .dark ? Color.unadDarkSurfacePrimary : Color.white)
                               .frame(width: 12, height: 12)
+                              .background(
+                                  Circle()
+                                      .fill(scheme == .dark ? Color.clear : Color.unadLightSurfacePrimary)
+                              )
                               .overlay(
                                   Circle()
                                       .stroke(Color.unadBlue, lineWidth: 3)
@@ -825,7 +844,7 @@ struct LeanUpDashboardEmptyState: View {
                 .frame(width: 36, height: 36)
                 .background(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(Color.unadBlue.opacity(0.10))
+                        .fill(Color.unadLightBlueSurface)
                 )
 
             Text(text)
@@ -836,7 +855,7 @@ struct LeanUpDashboardEmptyState: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.primary.opacity(0.05))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightInfoSurface)
         )
     }
 }

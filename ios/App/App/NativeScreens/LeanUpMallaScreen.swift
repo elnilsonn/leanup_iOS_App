@@ -237,11 +237,11 @@ struct LeanUpMallaBannerCard<Content: View>: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(
                 RoundedRectangle(cornerRadius: compact ? 22 : 26, style: .continuous)
-                    .fill(scheme == .dark ? Color.unadDarkSurfacePrimary : Color.white)
+                    .fill(scheme == .dark ? Color.unadDarkSurfacePrimary : Color.unadLightSurfacePrimary)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: compact ? 22 : 26, style: .continuous)
-                    .stroke(scheme == .dark ? Color.unadDarkSurfaceStroke : Color.unadBlue.opacity(0.08), lineWidth: 1)
+                    .stroke(scheme == .dark ? Color.unadDarkSurfaceStroke : Color.unadLightSurfaceStroke, lineWidth: 1)
             )
     }
 }
@@ -358,6 +358,7 @@ struct LeanUpMallaCompactOverviewCard: View {
 struct LeanUpMallaCompactMetric: View {
     let title: String
     let value: String
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 2) {
@@ -373,7 +374,7 @@ struct LeanUpMallaCompactMetric: View {
         .padding(.vertical, 10)
         .background(
             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color.primary.opacity(0.05))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
         )
     }
 }
@@ -673,6 +674,7 @@ struct LeanUpReminderEditorView: View {
     let reminder: LeanUpPeriodReminder?
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var scheme
     @State private var title: String
     @State private var dueDate: Date
     @State private var reminderPeriod: Int
@@ -702,7 +704,7 @@ struct LeanUpReminderEditorView: View {
                                 .padding(.vertical, 14)
                                 .background(
                                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                        .fill(Color.primary.opacity(0.06))
+                                        .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
                                 )
                         }
                     }
@@ -746,7 +748,7 @@ struct LeanUpReminderEditorView: View {
                                 .padding(10)
                                 .background(
                                     RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                        .fill(Color.primary.opacity(0.06))
+                                        .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
                                 )
                         }
                     }
@@ -884,6 +886,7 @@ struct LeanUpMallaStickyHeader: View {
     let filterResetScrollTarget: LeanUpMallaFilter
     let onSelectPeriod: (Int) -> Void
     let onSelectFilter: (LeanUpMallaFilter) -> Void
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -900,7 +903,7 @@ struct LeanUpMallaStickyHeader: View {
                                     .padding(.vertical, 10)
                                     .background(
                                         Capsule()
-                                            .fill(period == selectedPeriod ? Color.unadBlue : Color.primary.opacity(0.06))
+                                            .fill(period == selectedPeriod ? Color.unadBlue : (scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary))
                                     )
                                     .foregroundStyle(period == selectedPeriod ? Color.white : Color.primary)
                             }
@@ -931,7 +934,7 @@ struct LeanUpMallaStickyHeader: View {
                                     .padding(.vertical, 8)
                                     .background(
                                         Capsule()
-                                            .fill(filter == selectedFilter ? Color.unadNavy.opacity(0.92) : Color.primary.opacity(0.06))
+                                            .fill(filter == selectedFilter ? Color.unadNavy.opacity(0.92) : (scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary))
                                     )
                                     .foregroundStyle(filter == selectedFilter ? Color.white : Color.secondary)
                             }
@@ -952,11 +955,11 @@ struct LeanUpMallaStickyHeader: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .fill(Color(uiColor: .systemBackground).opacity(0.94))
+                .fill(scheme == .dark ? Color.unadDarkSurfacePrimary : Color.unadLightSurfacePrimary)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 24, style: .continuous)
-                .stroke(Color.unadBlue.opacity(0.08), lineWidth: 1)
+                .stroke(scheme == .dark ? Color.unadDarkSurfaceStroke : Color.unadLightSurfaceStroke, lineWidth: 1)
         )
     }
 
@@ -1333,14 +1336,14 @@ struct LeanUpCourseRow: View {
 
     private var backgroundFill: Color {
         if isFailed {
-            return scheme == .dark ? Color.red.opacity(0.18) : Color.red.opacity(0.08)
+            return scheme == .dark ? Color.red.opacity(0.18) : Color.unadLightRedSurface
         }
 
         if isInProgress {
-            return scheme == .dark ? Color.unadCyan.opacity(0.18) : Color.unadCyan.opacity(0.08)
+            return scheme == .dark ? Color.unadCyan.opacity(0.18) : Color.unadLightCyanSurface
         }
 
-        return scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.primary.opacity(0.04)
+        return scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary
     }
 }
 
@@ -1390,11 +1393,11 @@ struct LeanUpElectiveGroupRow: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(scheme == .dark ? Color.unadGold.opacity(0.16) : Color.unadGold.opacity(0.10))
+                .fill(scheme == .dark ? Color.unadGold.opacity(0.16) : Color.unadLightGoldSurface)
         )
         .overlay(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(scheme == .dark ? Color.unadGold.opacity(0.24) : Color.unadGold.opacity(0.18), lineWidth: 1)
+                .stroke(scheme == .dark ? Color.unadGold.opacity(0.24) : Color.unadGold.opacity(0.26), lineWidth: 1)
         )
     }
 }
@@ -1413,30 +1416,30 @@ enum LeanUpCurriculumTagStyle {
         switch self {
         case .courseType(let type):
             let normalized = type.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
-            if normalized.contains("pract") { return Color.unadCyan.opacity(0.16) }
-            if normalized.contains("teor") { return Color.unadBlue.opacity(0.14) }
-            if normalized.contains("numero") { return Color.unadGold.opacity(0.20) }
-            if normalized.contains("lectura") { return Color.unadNavy.opacity(0.12) }
-            return Color.primary.opacity(0.08)
+            if normalized.contains("pract") { return Color.unadLightCyanSurface }
+            if normalized.contains("teor") { return Color.unadLightBlueSurface }
+            if normalized.contains("numero") { return Color.unadLightGoldSurface }
+            if normalized.contains("lectura") { return Color.unadLightInfoSurface }
+            return Color.unadLightSurfaceSecondary
         case .difficulty(let value):
             switch value {
-            case 1: return Color.green.opacity(0.16)
-            case 2: return Color.unadBlue.opacity(0.14)
-            case 3: return Color.unadGold.opacity(0.20)
-            default: return Color.red.opacity(0.16)
+            case 1: return Color.unadLightGreenSurface
+            case 2: return Color.unadLightBlueSurface
+            case 3: return Color.unadLightGoldSurface
+            default: return Color.unadLightRedSurface
             }
         case .pending:
-            return Color.primary.opacity(0.08)
+            return Color.unadLightSurfaceSecondary
         case .inProgress:
-            return Color.unadCyan.opacity(0.16)
+            return Color.unadLightCyanSurface
         case .approved:
-            return Color.green.opacity(0.16)
+            return Color.unadLightGreenSurface
         case .failed:
-            return Color.red.opacity(0.16)
+            return Color.unadLightRedSurface
         case .elective:
-            return Color.unadGold.opacity(0.22)
+            return Color.unadLightGoldSurface
         case .electiveSoft:
-            return Color.unadGold.opacity(0.12)
+            return Color.unadLightGoldSurface.opacity(0.96)
         }
     }
 
@@ -1473,14 +1476,50 @@ enum LeanUpCurriculumTagStyle {
 struct LeanUpCurriculumTag: View {
     let text: String
     let style: LeanUpCurriculumTagStyle
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         Text(text)
             .font(.caption.weight(.semibold))
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(Capsule().fill(style.fill))
+            .background(Capsule().fill(fillColor))
             .foregroundStyle(style.foreground)
+    }
+
+    private var fillColor: Color {
+        scheme == .dark ? darkAdjustedFill : style.fill
+    }
+
+    private var darkAdjustedFill: Color {
+        switch style {
+        case .courseType(let type):
+            let normalized = type.folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            if normalized.contains("pract") { return Color.unadCyan.opacity(0.16) }
+            if normalized.contains("teor") { return Color.unadBlue.opacity(0.14) }
+            if normalized.contains("numero") { return Color.unadGold.opacity(0.20) }
+            if normalized.contains("lectura") { return Color.unadNavy.opacity(0.12) }
+            return Color.primary.opacity(0.08)
+        case .difficulty(let value):
+            switch value {
+            case 1: return Color.green.opacity(0.16)
+            case 2: return Color.unadBlue.opacity(0.14)
+            case 3: return Color.unadGold.opacity(0.20)
+            default: return Color.red.opacity(0.16)
+            }
+        case .pending:
+            return Color.primary.opacity(0.08)
+        case .inProgress:
+            return Color.unadCyan.opacity(0.16)
+        case .approved:
+            return Color.green.opacity(0.16)
+        case .failed:
+            return Color.red.opacity(0.16)
+        case .elective:
+            return Color.unadGold.opacity(0.22)
+        case .electiveSoft:
+            return Color.unadGold.opacity(0.12)
+        }
     }
 }
 
@@ -1594,6 +1633,7 @@ struct LeanUpElectiveGroupDetailView: View {
     let initialTargetOptionCode: String?
     var onSelectRoute: (LeanUpMallaDetailRoute) -> Void = { _ in }
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.colorScheme) private var scheme
     @State private var selectedDisciplinaryTrack: LeanUpElectiveDisciplinaryTrack?
     @State private var highlightedOptionCode: String?
 
@@ -1634,7 +1674,7 @@ struct LeanUpElectiveGroupDetailView: View {
                                                             .padding(.vertical, 8)
                                                             .background(
                                                                 Capsule()
-                                                                    .fill(track == activeDisciplinaryTrack ? Color.unadCyan.opacity(0.92) : Color.primary.opacity(0.06))
+                                                                    .fill(track == activeDisciplinaryTrack ? Color.unadCyan.opacity(0.92) : (scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary))
                                                             )
                                                             .foregroundStyle(track == activeDisciplinaryTrack ? Color.white : Color.secondary)
                                                     }
@@ -2350,6 +2390,7 @@ struct LeanUpGradeEditorCard: View {
 
     @State private var draft = ""
     @State private var error: String?
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -2377,7 +2418,7 @@ struct LeanUpGradeEditorCard: View {
                         .padding(.vertical, 14)
                         .background(
                             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(Color.primary.opacity(0.06))
+                                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
                         )
 
                     Button {

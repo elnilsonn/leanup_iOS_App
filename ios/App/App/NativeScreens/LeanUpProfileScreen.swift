@@ -305,6 +305,7 @@ private struct LeanUpProfileFreelancerCard: View {
 
 private struct LeanUpProfileTypeTile: View {
     let entry: LeanUpSubjectTypeCount
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -328,13 +329,14 @@ private struct LeanUpProfileTypeTile: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
         )
     }
 }
 
 private struct LeanUpProfilePortfolioRoadmapCard: View {
     let item: LeanUpPortfolioRoadmapItem
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -366,7 +368,7 @@ private struct LeanUpProfilePortfolioRoadmapCard: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
         )
     }
 
@@ -381,6 +383,7 @@ private struct LeanUpProfilePortfolioRoadmapCard: View {
 
 private struct LeanUpProfileChecklistRow: View {
     let item: LeanUpFreelancerChecklistItem
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -407,7 +410,7 @@ private struct LeanUpProfileChecklistRow: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 22, style: .continuous)
-                .fill(Color.primary.opacity(0.04))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
         )
     }
 
@@ -440,6 +443,7 @@ private struct LeanUpProfileCallout: View {
     let title: String
     let detail: String
     let tone: LeanUpProfileInsightTone
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -454,7 +458,7 @@ private struct LeanUpProfileCallout: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(toneColor.opacity(0.08))
+                .fill(scheme == .dark ? toneColor.opacity(0.08) : lightToneFill)
         )
     }
 
@@ -465,6 +469,16 @@ private struct LeanUpProfileCallout: View {
         case .gold: return .unadGold
         case .orange: return .orange
         case .red: return .red
+        }
+    }
+
+    private var lightToneFill: Color {
+        switch tone {
+        case .blue: return .unadLightBlueSurface
+        case .green: return .unadLightGreenSurface
+        case .gold: return .unadLightGoldSurface
+        case .orange: return .unadLightGoldSurface
+        case .red: return .unadLightRedSurface
         }
     }
 }
@@ -496,6 +510,7 @@ private struct LeanUpProfileStatusPill: View {
 private struct LeanUpProfileMetricBadge: View {
     let title: String
     let value: String
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 2) {
@@ -510,7 +525,7 @@ private struct LeanUpProfileMetricBadge: View {
         .padding(.vertical, 8)
         .background(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(Color.primary.opacity(0.06))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
         )
     }
 }

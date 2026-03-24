@@ -1444,3 +1444,23 @@ Como se corrige:
 Regla:
 
 - Si una simplificacion visual ayuda en dark, revisar si el light aun esta pagando una version mas cara del mismo sistema.
+
+## Actualizacion 2026-03-24 - El verdadero costo pendiente estaba en las superficies claras translucidas
+
+Problema:
+
+- Aunque el fondo claro ya se habia simplificado, muchas pantallas seguian usando tarjetas internas con `Color.primary.opacity(...)`.
+- Eso dejaba al light mode con demasiadas capas suaves mezclandose sobre un fondo ya decorado.
+
+Por que pasa:
+
+- En SwiftUI, una app puede verse ligera pero seguir siendo cara si hay muchas superficies translucidas neutrales repetidas en listas, grids y banners.
+
+Como se corrige:
+
+- Sustituir esas superficies por colores claros semanticos mas solidos.
+- Mantener el diseno y los acentos, pero bajar la dependencia de alpha en bloques grandes o repetidos.
+
+Regla:
+
+- En `light mode`, los contenedores neutros repetidos deben usar surfaces claras solidas antes que `Color.primary.opacity(...)`.

@@ -1048,3 +1048,14 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
   - brillo de metricas internas
   - contraste artificial en pills y botones secundarios
 - `Dashboard` tambien recorto un poco la intensidad visual del hero en claro para alinearlo con la estrategia que ya habia mejorado el dark mode.
+
+## Actualizacion 2026-03-24 - Segunda pasada de optimizacion visual exclusiva para `light mode`
+
+- Se detecto que el lag restante solo aparecia en claro, no en oscuro.
+- La causa probable era la cantidad de superficies neutras translucidas (`Color.primary.opacity(...)`) todavia repartidas por `Dashboard`, `Malla`, `Perfil` y `Configuracion`.
+- Se reemplazaron muchas de esas capas por superficies claras mas solidas:
+  - `unadLightSurfacePrimary`
+  - `unadLightSurfaceSecondary`
+  - `unadLightInfoSurface`
+  - superficies claras suaves para blue, cyan, gold, green y red
+- Esto mantiene el lenguaje visual, pero reduce mezcla de alpha en tarjetas, filtros, campos y bloques internos.

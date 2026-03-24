@@ -114,6 +114,7 @@ struct LeanUpSettingsView: View {
 private struct LeanUpSettingsQuickControlCard: View {
     let currentDisplayName: String
     let themeDescription: String
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -136,7 +137,7 @@ private struct LeanUpSettingsQuickControlCard: View {
                         .frame(width: 42, height: 42)
                         .background(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color.unadBlue.opacity(0.10))
+                                .fill(scheme == .dark ? Color.unadBlue.opacity(0.10) : Color.unadLightBlueSurface)
                         )
                 }
 
@@ -155,6 +156,7 @@ private struct LeanUpSettingsIdentityCard: View {
     let isSaved: Bool
     let onSave: () -> Void
     let onReset: () -> Void
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -177,7 +179,7 @@ private struct LeanUpSettingsIdentityCard: View {
                         .padding(.vertical, 14)
                         .background(
                             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(Color.primary.opacity(0.06))
+                                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
                         )
                         .onSubmit(onSave)
 
@@ -213,6 +215,7 @@ private struct LeanUpSettingsIdentityCard: View {
 private struct LeanUpSettingsAppearanceCard: View {
     let currentThemeMode: LeanUpThemeMode
     let onSelectTheme: (LeanUpThemeMode) -> Void
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -251,7 +254,7 @@ private struct LeanUpSettingsAppearanceCard: View {
                             .padding(14)
                             .background(
                                 RoundedRectangle(cornerRadius: 20, style: .continuous)
-                                    .fill(currentThemeMode == mode ? Color.unadBlue.opacity(0.10) : Color.primary.opacity(0.05))
+                                    .fill(backgroundFill(for: mode))
                             )
                         }
                         .buttonStyle(.plain)
@@ -284,6 +287,13 @@ private struct LeanUpSettingsAppearanceCard: View {
         case .system: return "iphone"
         }
     }
+
+    private func backgroundFill(for mode: LeanUpThemeMode) -> Color {
+        if scheme == .dark {
+            return currentThemeMode == mode ? Color.unadBlue.opacity(0.10) : Color.unadDarkSurfaceSecondary
+        }
+        return currentThemeMode == mode ? Color.unadLightBlueSurface : Color.unadLightSurfaceSecondary
+    }
 }
 
 private struct LeanUpSettingsStorageCard: View {
@@ -295,6 +305,7 @@ private struct LeanUpSettingsStorageCard: View {
     let themeDescription: String
     let localStorageStatusText: String
     let onClearProgress: () -> Void
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         LeanUpSurfaceCard {
@@ -341,7 +352,7 @@ private struct LeanUpSettingsStorageCard: View {
                 .padding(14)
                 .background(
                     RoundedRectangle(cornerRadius: 20, style: .continuous)
-                        .fill(Color.red.opacity(0.05))
+                        .fill(scheme == .dark ? Color.red.opacity(0.10) : Color.unadLightRedSurface)
                 )
             }
         }
@@ -410,6 +421,7 @@ private struct LeanUpSettingsAboutCard: View {
 private struct LeanUpSettingsMetricBadge: View {
     let title: String
     let value: String
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -426,7 +438,7 @@ private struct LeanUpSettingsMetricBadge: View {
         .padding(14)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.primary.opacity(0.05))
+                .fill(scheme == .dark ? Color.unadDarkSurfaceSecondary : Color.unadLightSurfaceSecondary)
         )
     }
 }
