@@ -155,7 +155,7 @@ struct LeanUpInlineMetric: View {
             return LinearGradient(
                 colors: [
                     Color.unadDarkSurfaceSecondary,
-                    Color.unadDarkSurfacePrimary
+                    Color.unadDarkSurfaceSecondary
                 ],
                 startPoint: .topLeading,
                 endPoint: .bottomTrailing
@@ -220,10 +220,10 @@ struct LeanUpSurfaceCard<Content: View>: View {
                     .strokeBorder(cardStroke, lineWidth: 1)
             )
             .shadow(
-                color: scheme == .dark ? Color.black.opacity(0.28) : Color.unadNavy.opacity(0.04),
-                radius: scheme == .dark ? 10 : 6,
+                color: Color.unadNavy.opacity(0.04),
+                radius: 6,
                 x: 0,
-                y: scheme == .dark ? 6 : 3
+                y: 3
             )
     }
 
@@ -348,16 +348,18 @@ struct LeanUpPageBackground: View {
             )
             .offset(x: 70, y: -80)
 
-            RadialGradient(
-                colors: [
-                    Color.unadGold.opacity(scheme == .dark ? 0.05 : 0.10),
-                    .clear
-                ],
-                center: .bottomLeading,
-                startRadius: 20,
-                endRadius: scheme == .dark ? 140 : 180
-            )
-            .offset(x: -50, y: 140)
+            if scheme != .dark {
+                RadialGradient(
+                    colors: [
+                        Color.unadGold.opacity(0.10),
+                        .clear
+                    ],
+                    center: .bottomLeading,
+                    startRadius: 20,
+                    endRadius: 180
+                )
+                .offset(x: -50, y: 140)
+            }
         }
         .ignoresSafeArea()
     }

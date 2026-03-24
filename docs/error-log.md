@@ -1317,3 +1317,25 @@ Como se corrige:
 Regla:
 
 - Para datos que muchas pantallas leen todo el tiempo, preferir cache derivada sincronizada con el estado fuente antes que recomputacion libre en cada acceso.
+
+## Actualizacion 2026-03-24 - Un dark mode premium no debe apoyarse en demasiadas capas caras
+
+Problema:
+
+- Parte del lag empezaba a sentirse mas desde que se introdujo el dark mode profundo.
+- Las superficies compartidas mezclaban sombra, overlay, gradientes y blur en zonas muy repetidas de la interfaz.
+
+Por que pasa:
+
+- Apple insiste en mantener la ruta de actualizacion barata y libre de trabajo innecesario en main thread, y visualmente esto tambien aplica a composicion y render.
+- En listas largas o pantallas densas, sombras y blur repetidos suelen sentirse antes que en una maqueta corta.
+
+Como se corrige:
+
+- Preferir superficies oscuras limpias antes que muchas capas apiladas.
+- Usar blur solo si aporta de verdad y no en contenedores persistentes donde una base solida funciona igual.
+- Reducir sombras en dark mode y dejar que la separacion venga mas por tono y borde que por elevacion artificial.
+
+Regla:
+
+- Si el dark mode ya se ve premium por contraste y jerarquia, no seguir agregando blur o sombras por decoracion.

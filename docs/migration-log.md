@@ -1000,3 +1000,13 @@ Migrar LeanUp desde una base hibrida/web hacia una app nativa de iPhone con `Swi
 - Se introdujo una capa derivada interna que se reconstruye una sola vez por cambio de `snapshot`.
 - `courses(in:)`, `electiveGroups(in:)`, `progress(for:)`, `careerItems`, `approvedCourses`, `selectedElectiveOptions`, `approvedSignalCorpus` y otros datos base ahora salen de cache derivada en vez de rehacerse en cascada.
 - La meta fue bajar trabajo en main thread y hacer mas baratos los updates de SwiftUI sin cambiar el comportamiento funcional.
+
+## Actualizacion 2026-03-24 - Recorte de composicion cara en dark mode
+
+- Se simplifico el dark mode en las capas mas visibles para bajar trabajo de composicion:
+  - `LeanUpSurfaceCard` ya no proyecta sombra pesada en oscuro
+  - `LeanUpInlineMetric` usa una superficie dark mas plana
+  - el fondo dark elimino un bloom secundario innecesario
+  - la `TabView` en oscuro deja de depender de blur y usa una base solida mas barata
+  - el hero de `Dashboard` reduce sombra en dark
+- La intencion fue mantener el look premium, pero con menos costo de GPU y offscreen rendering.

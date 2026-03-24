@@ -96,7 +96,7 @@ struct LeanUpDashboardHero: View {
             }
             .padding(24)
         }
-        .shadow(color: Color.unadNavy.opacity(scheme == .dark ? 0.16 : 0.10), radius: 12, x: 0, y: 8)
+        .shadow(color: Color.unadNavy.opacity(scheme == .dark ? 0.06 : 0.10), radius: scheme == .dark ? 4 : 12, x: 0, y: scheme == .dark ? 2 : 8)
     }
 
     private var heroGradient: LinearGradient {

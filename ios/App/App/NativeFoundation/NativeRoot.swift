@@ -74,8 +74,8 @@ final class NativeRootViewController: UIViewController {
         tabAppearance.configureWithTransparentBackground()
 
         if style == .dark {
-            tabAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
-            tabAppearance.backgroundColor = UIColor.black.withAlphaComponent(0.72)
+            tabAppearance.backgroundEffect = nil
+            tabAppearance.backgroundColor = UIColor(red: 8 / 255, green: 10 / 255, blue: 14 / 255, alpha: 0.94)
         } else {
             tabAppearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialLight)
             tabAppearance.backgroundColor = UIColor.white.withAlphaComponent(0.72)
